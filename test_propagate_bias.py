@@ -1,21 +1,14 @@
 import sys
 from collections import OrderedDict
+from typing import Any
 
 import torch
 from EIDOSearch.models import LeNet5
 from EIDOSearch.pruning.simplification.fuser import fuse
 from torch import nn
 
-
-def forward_with_no_hooks(module, input):
-    # This is weird, IDK
-    tmp_hooks = module._forward_hooks
-    module._forward_hooks = OrderedDict()
-    biases = module(input)[0, :, module.padding[0], module.padding[1]] if isinstance(module, nn.Conv2d) \
-        else module(input)[0, :]
-    module._forward_hooks = tmp_hooks
-    
-    return biases
+from simplify import __propagate_bias
+from simplify import no_forward_hooks
 
 
 def check(module, biases, input):
@@ -58,11 +51,12 @@ def zero_hook(module, input, output):
     - if input is 0, `update` should be 0 and `biases` should be equal to `module.bias`
     - if input is NOT 0, `update` should be NON 0 and `biases` should be different than `module.bias`
     """
-    
     input = input[0]
-    biases = forward_with_no_hooks(module, input)  # This are the new biases for this module
+    with no_forward_hooks(module):
+        biases = module(input)[0, :, module.padding[0], module.padding[1]] if isinstance(module, nn.Conv2d) \
+            else module(input)[0, :] # This are the new biases for this module
     
-    # check(module, biases, input)
+    #check(module, biases, input)
     
     module.bias.copy_(biases)  # Update the module's biases
     
@@ -91,7 +85,7 @@ if __name__ == '__main__':
     
     base_out = model(dummy_input)  # Print of "sparse-but-with-biases" model's output
     
-    handles = []
+    """handles = []
     for n, m in model.named_modules():
         if isinstance(m, (nn.Conv2d, nn.Linear)):
             handle = m.register_forward_hook(zero_hook)
@@ -104,7 +98,9 @@ if __name__ == '__main__':
     
     with torch.no_grad():  # Remove the bias for the pruned neuron to simulate the simplification procedure
         model.conv1.bias[0] = 0.
-        model.fc1.bias[3] = 0.
+        model.fc1.bias[3] = 0."""
+
+    __propagate_bias(model, torch.zeros(input_shape))
     
     prop_out = model(dummy_input)  # Print of "updated" model's output, should be equal to the previous output
     
