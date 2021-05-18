@@ -20,7 +20,7 @@ class no_forward_hooks():
         self.module._forward_hooks = OrderedDict()
     
     def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
-        self.module.__forward_hooks = self.hooks
+        self.module._forward_hooks = self.hooks
 
 @torch.no_grad()
 def propagate_biases_hook(module, input, output):
