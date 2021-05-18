@@ -41,7 +41,9 @@ def propagate_biases_hook(module, input, output):
     with no_forward_hooks(module):
         biases = module(input)[0, :, module.padding[0], module.padding[1]] if isinstance(module, nn.Conv2d) \
             else module(input)[0, :] # This are the new biases for this module
-    module.bias.copy_(biases)
+            
+    if hasattr(module, 'bias') and module.bias is not None:
+        module.bias.copy_(biases)
 
     # Step 2. Propagate output to next module
     # Zero-out everything except for biases
