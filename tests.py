@@ -10,7 +10,7 @@ from torchvision.models.vgg import *
 from torchvision.models.resnet import *
 
 from EIDOSearch.pruning.simplification.fuser import fuse
-from simplify import __propagate_bias
+from simplify import __propagate_bias, no_forward_hooks
 
 @torch.no_grad()
 def test_arch(arch, x):
@@ -32,19 +32,34 @@ def test_arch(arch, x):
     print("Max abs diff: ", (y_src - y_prop).abs().max().item())
     print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
 
-    assert torch.allclose(y_src, y_prop)
+    return torch.allclose(y_src, y_prop)
+
+class HooksCtxTest(unittest.TestCase):
+    def test_hook_ctx(self):
+        def hook(*args):
+            pass
+        
+        model = resnet18(pretrained=False)
+        for module in model.modules():
+            module.register_forward_hook(hook)
+        
+        model_hooks = model._forward_hooks
+
+        with no_forward_hooks(model):
+            self.assertEqual(len(model._forward_hooks), 0)
+        
+        self.assertEqual(model._forward_hooks, model_hooks)
 
 class BiasPropagationTest(unittest.TestCase):
     def test_bias_propagation(self):
         x = torch.randn((1, 3, 224, 224))
 
-        #test_arch(LeNet5, torch.randn(1, 1, 28, 28))
         #test_arch(vgg16, x)
         #test_arch(vgg16_bn, x)
-        test_arch(resnet18, x)
-        test_arch(resnet34, x)
-        test_arch(resnet50, x)
-        test_arch(resnet101, x)
+        self.assertTrue(test_arch(resnet18, x))
+        #test_arch(resnet34, x)
+        #test_arch(resnet50, x)
+        #test_arch(resnet101, x)
 
 if __name__ == '__main__':
     unittest.main()
