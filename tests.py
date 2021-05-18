@@ -1,3 +1,4 @@
+from conv import ConvB
 import unittest
 from EIDOSearch.models.architectures import LeNet5
 
@@ -73,6 +74,7 @@ class HooksCtxTest(unittest.TestCase):
         
         self.assertEqual(model._forward_hooks, model_hooks)
 
+@unittest.skip
 class BiasPropagationTest(unittest.TestCase):
     def test_bias_propagation(self):
         x = torch.randn((1, 3, 224, 224))
@@ -107,21 +109,18 @@ class PaddingTest(unittest.TestCase):
                 self.assertTrue(torch.equal(y_reflect, y_zeros))
 
 class BiasTest(unittest.TestCase):
-    def test_disable_padding(self):
+    def test_conv_b(self):
         conv = nn.Conv2d(3, 64, 3, 1, padding=2, padding_mode='zeros', bias=True)
-
-        x = torch.randn((1, 3, 128, 128))
-        y1 = conv(x)
-
-        print('y1.shape', y1.shape)
-        print('bias.shape', conv.bias.shape)
-        print('expanded bias.shape', conv.bias.data[:, None, None].shape, conv.bias.data[:, None, None].expand_as(y1[0]).shape)
-        conv.bias.data = conv.bias.data[:, None, None].expand_as(y1[0])
-        y2 = conv(x) 
+        out1 = conv(torch.zeros((1, 3, 128, 128)))
         
-        self.assertTrue(torch.equal(y1, y2))
+        bias = conv.bias.data.clone()
+        conv.bias.data.mul_(0)
 
+        convb = ConvB(conv, bias[:, None, None].expand_as(out1[0]))
+        out2 = convb(torch.zeros((1, 3, 128, 128)))
 
+        self.assertTrue(torch.equal(out1, out2))
+       
 
 if __name__ == '__main__':
     unittest.main()
