@@ -39,10 +39,20 @@ def propagate_biases_hook(module, input, output):
     
     # Step 1. Fuse biases of pruned channels in the previous module into the current module
     with no_forward_hooks(module):
-        biases = module(input)[0, :, module.padding[0], module.padding[1]] if isinstance(module, nn.Conv2d) \
-            else module(input)[0, :] # This are the new biases for this module
-            
-    if hasattr(module, 'bias') and module.bias is not None:
+        padding_mode = getattr(module, 'padding_mode', None)
+        if hasattr(module, 'padding_mode'):
+            module.padding_mode = 'reflect'
+        
+        biases = module(input)
+        for output_channel in biases[0]:
+            assert torch.unique(output_channel).shape[0] == 1
+
+        if hasattr(module, 'padding_mode'):
+            module.padding_mode = padding_mode
+
+    biases = biases[0, :, 0, 0] if isinstance(module, nn.Conv2d) else biases[0, :] # This are the new biases for this module
+
+    if getattr(module, 'bias', None) is not None:      
         module.bias.copy_(biases)
 
     # Step 2. Propagate output to next module
@@ -60,6 +70,11 @@ def propagate_biases_hook(module, input, output):
 
         # Remove biases of pruned channels
         module.bias.data.mul_(~zero_mask)
+    
+    for output_channel in output[0]:
+        assert torch.unique(output_channel).shape[0] == 1
+
+    pass
 
 @torch.no_grad()
 def __propagate_bias(model: nn.Module, x) -> nn.Module:
