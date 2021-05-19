@@ -97,7 +97,7 @@ class BiasPropagationTest(unittest.TestCase):
                 prune.remove(module, 'weight')
         
         model = model
-        x = torch.randn(1, 128)
+        x = torch.randn(512, 128)
         zeros = torch.zeros(1, 128)
         
         y_src = model(x)
@@ -119,7 +119,7 @@ class BiasPropagationTest(unittest.TestCase):
                 prune.random_structured(module, 'weight', amount=0.9, dim=0)
                 prune.remove(module, 'weight')
 
-        x = torch.randn(1, 3, 128, 128)
+        x = torch.randn(128, 3, 128, 128)
         zeros = torch.zeros(1, 3, 128, 128)
 
         y_src = model(x)
