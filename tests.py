@@ -1,17 +1,15 @@
 from conv import ConvB
 import unittest
-from EIDOSearch.models.architectures import LeNet5
-
 
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 
+from fuser import fuse
 from torchvision.models.alexnet import *
 from torchvision.models.vgg import *
 from torchvision.models.resnet import *
 
-from EIDOSearch.pruning.simplification.fuser import fuse
 from simplify import __propagate_bias, no_forward_hooks
 
 @torch.no_grad()
@@ -78,7 +76,6 @@ class BiasPropagationTest(unittest.TestCase):
     def test_bias_propagation(self):
         x = torch.randn((1, 3, 224, 224))
 
-        self.assertTrue(test_arch(LeNet5, torch.randn((1, 1, 28, 28))))
         self.assertTrue(test_arch(alexnet, x, False))
         self.assertTrue(test_arch(alexnet, x, True))
         self.assertTrue(test_arch(vgg16, x, True))
