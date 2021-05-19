@@ -129,7 +129,7 @@ class BiasPropagationTest(unittest.TestCase):
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
 
     def test_bias_propagation(self):
-        x = torch.randn((128, 3, 224, 224))
+        x = torch.randn((32, 3, 224, 224))
 
         test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
