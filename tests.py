@@ -74,7 +74,6 @@ class HooksCtxTest(unittest.TestCase):
         
         self.assertEqual(model._forward_hooks, model_hooks)
 
-@unittest.skip
 class BiasPropagationTest(unittest.TestCase):
     def test_bias_propagation(self):
         x = torch.randn((1, 3, 224, 224))
@@ -89,26 +88,7 @@ class BiasPropagationTest(unittest.TestCase):
         self.assertTrue(test_arch(resnet50, x, True))
         self.assertTrue(test_arch(resnet101, x, True))
 
-class PaddingTest(unittest.TestCase):
-    def test_disable_padding(self):
-        for stride in [1,2,3,4]:
-            for padding in [1,2,3,4,5]:
-                conv_zeros = nn.Conv2d(3, 64, 3, stride, padding=padding, padding_mode='zeros', bias=True)
-                conv_reflect = nn.Conv2d(3, 64, 3, stride, padding=padding, padding_mode='reflect', bias=True)
-
-                conv_reflect.weight.data.copy_(conv_zeros.weight.data)
-                conv_reflect.bias.data.copy_(conv_zeros.bias.data)
-
-                x = torch.randn((1, 3, 128, 128))
-
-                y_reflect = conv_reflect(x)
-
-                conv_zeros.padding_mode = 'reflect'
-                y_zeros = conv_zeros(x)
-                
-                self.assertTrue(torch.equal(y_reflect, y_zeros))
-
-class BiasTest(unittest.TestCase):
+class ConvBTest(unittest.TestCase):
     def test_conv_b(self):
         conv = nn.Conv2d(3, 64, 3, 1, padding=2, padding_mode='zeros', bias=True)
         out1 = conv(torch.zeros((1, 3, 128, 128)))
@@ -121,6 +101,5 @@ class BiasTest(unittest.TestCase):
 
         self.assertTrue(torch.equal(out1, out2))
        
-
 if __name__ == '__main__':
     unittest.main()
