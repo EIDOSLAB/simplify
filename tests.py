@@ -72,6 +72,7 @@ class HooksCtxTest(unittest.TestCase):
         
         self.assertEqual(model._forward_hooks, model_hooks)
 
+@unittest.skip
 class BiasPropagationTest(unittest.TestCase):
     def test_bias_propagation(self):
         x = torch.randn((1, 3, 224, 224))
