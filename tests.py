@@ -5,11 +5,11 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 
-from fuser import fuse
 from torchvision.models.alexnet import *
 from torchvision.models.vgg import *
 from torchvision.models.resnet import *
 
+from fuser import fuse
 from simplify import __propagate_bias, no_forward_hooks
 
 @torch.no_grad()
