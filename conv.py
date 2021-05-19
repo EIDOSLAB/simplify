@@ -1,11 +1,8 @@
 import torch
 import torch.nn as nn
+from torch.nn.modules.conv import Conv2d
 
-class ConvB(nn.Module):
-    def __init__(self, conv, bf):
-        super().__init__()
-        self.conv = conv
-        self.bf = bf
-
+class ConvB(Conv2d):
     def forward(self, x):
-        return self.conv(x) + self.bf
+        x = super().forward(x)
+        return x + self.bf

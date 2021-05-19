@@ -1,3 +1,4 @@
+from conv import ConvB
 import sys
 import torch
 import torch.nn as nn
@@ -31,33 +32,25 @@ def propagate_biases_hook(module, input, output):
                  and thus should be used to update the current biases
         - output: torch.Tensor
     """
-    if sys.gettrace() is not None:  # PyCharm debugger for hooks
-        import pydevd
-        pydevd.settrace(suspend=False, trace_only_current_thread=True)
-
     input = input[0]
     
     # Step 1. Fuse biases of pruned channels in the previous module into the current module
     with no_forward_hooks(module):
-        padding_mode = getattr(module, 'padding_mode', None)
-        if hasattr(module, 'padding_mode'):
-            module.padding_mode = 'reflect'
-        
-        biases = module(input)
-        for output_channel in biases[0]:
-            assert torch.unique(output_channel).shape[0] == 1
+        bias_feature_maps = module(input)[0] # [out_channels x W x H]; or [out_features] 
 
-        if hasattr(module, 'padding_mode'):
-            module.padding_mode = padding_mode
-
-    biases = biases[0, :, 0, 0] if isinstance(module, nn.Conv2d) else biases[0, :] # This are the new biases for this module
-
-    if getattr(module, 'bias', None) is not None:      
-        module.bias.copy_(biases)
+    if isinstance(module, nn.Conv2d):
+        if getattr(module, 'bias', None) is not None:
+            bias_feature_maps -= module.bias[:, None, None]
+        module.__class__ = ConvB
+        setattr(module, 'bf', bias_feature_maps)
+    
+    elif isinstance(module, nn.Linear):
+        if getattr(module, 'bias', None) is not None:      
+            module.bias.copy_(bias_feature_maps)
 
     # Step 2. Propagate output to next module
     # Zero-out everything except for biases
-    output.mul_(0.)
+    output.mul_(0.).abs()
 
     if hasattr(module, 'bias') and module.bias is not None:
         # Compute mask of zeroed (pruned) channels
