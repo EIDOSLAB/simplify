@@ -41,8 +41,7 @@ def propagate_biases_hook(module, input, output):
     if isinstance(module, nn.Conv2d):
         if getattr(module, 'bias', None) is not None:
             bias_feature_maps -= module.bias[:, None, None]
-        module.__class__ = ConvB
-        setattr(module, 'bf', bias_feature_maps)
+        module = ConvB.from_conv(module, bias_feature_maps)
     
     elif isinstance(module, nn.Linear):
         if getattr(module, 'bias', None) is not None:      

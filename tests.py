@@ -181,8 +181,8 @@ class ConvBTest(unittest.TestCase):
         bias = conv.bias.data.clone()
         conv.bias.data.mul_(0)
 
-        convb = ConvB(conv, bias[:, None, None].expand_as(out1[0]))
-        out2 = convb(torch.zeros((1, 3, 128, 128)))
+        conv = ConvB.from_conv(conv, bias[:, None, None].expand_as(out1[0]))
+        out2 = conv(torch.zeros((1, 3, 128, 128)))
 
         self.assertTrue(torch.equal(out1, out2))
        
