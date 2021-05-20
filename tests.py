@@ -164,7 +164,7 @@ class BiasPropagationTest(unittest.TestCase):
 
     def test_bias_propagation(self):
         #x = torch.randn((32, 3, 224, 224))
-        x = torch.randint(0, 256, ((32, 3, 224, 224)))
+        x = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = x.float()/255.
 
         test_idx = 0
