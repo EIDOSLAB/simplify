@@ -50,7 +50,7 @@ def test_arch(arch, x, pretrained=False):
     print()
     
     
-    return torch.allclose(y_src, y_prop)
+    return torch.allclose(y_src, y_prop, atol=1e-6)
     return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
 class ZeroHooksTest(unittest.TestCase):
