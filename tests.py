@@ -164,7 +164,6 @@ class BiasPropagationTest(unittest.TestCase):
 
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
 
-    @unittest.skip
     def test_bias_propagation(self):
         x = torch.randn((32, 3, 224, 224))
 
@@ -174,7 +173,6 @@ class BiasPropagationTest(unittest.TestCase):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
 
-@unittest.skip
 class ConvBTest(unittest.TestCase):
     def test_conv_b(self):
         conv = nn.Conv2d(3, 64, 3, 1, padding=2, padding_mode='zeros', bias=True)
