@@ -35,7 +35,6 @@ def test_arch(arch, x, pretrained=False):
         if isinstance(module, nn.Conv2d):
             prune.random_structured(module, 'weight', amount=0.8, dim=0)
             prune.remove(module, 'weight')
-            break
 
     model = fuse(model)
     y_src = model(x)
@@ -47,6 +46,7 @@ def test_arch(arch, x, pretrained=False):
     print(f'------ {arch} ------')
     print("Max abs diff: ", (y_src - y_prop).abs().max().item())
     print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
     print()
         
     return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
