@@ -13,7 +13,10 @@ from torchvision.models.alexnet import *
 from torchvision.models.vgg import *
 from torchvision.models.resnet import *
 
-from simplify import __propagate_bias as propagate, no_forward_hooks
+from simplify import __propagate_bias as propagate_bias
+from simplify import __remove_zeroed as remove_zeored
+
+from simplify import no_forward_hooks
 from fuser import fuse
 
 def set_seed(seed):
@@ -26,31 +29,7 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.manual_seed(seed)
 
-@torch.no_grad()
-def test_arch(arch, x, pretrained=False):
-    model = arch(pretrained, progress=False)
-    model.eval()
-
-    for module in model.modules():
-        if isinstance(module, nn.Conv2d):
-            prune.random_structured(module, 'weight', amount=0.8, dim=0)
-            prune.remove(module, 'weight')
-
-    model = fuse(model)
-    y_src = model(x)
-
-    zeros = torch.zeros(1, *x.shape[1:])
-    propagate(model, zeros)
-    y_prop = model(x)
-
-    print(f'------ {arch} ------')
-    print("Max abs diff: ", (y_src - y_prop).abs().max().item())
-    print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
-    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
-    print()
-        
-    return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
-
+@unittest.skip
 class ZeroHooksTest(unittest.TestCase):
     def test_overwrite_output(self):
         def hook(m, i, output):
@@ -73,6 +52,7 @@ class ZeroHooksTest(unittest.TestCase):
         self.assertEqual(w_hook_conv.sum(), 0)
         self.assertFalse(torch.equal(no_hook, w_hook))
    
+@unittest.skip
 class HooksCtxTest(unittest.TestCase):
     def test_hook_ctx(self):
         def hook(*args):
@@ -89,8 +69,22 @@ class HooksCtxTest(unittest.TestCase):
         
         self.assertEqual(model._forward_hooks, model_hooks)
 
-class BiasPropagationTest(unittest.TestCase):
-    
+@unittest.skip
+class ConvBTest(unittest.TestCase):
+    def test_conv_b(self):
+        conv = nn.Conv2d(3, 64, 3, 1, padding=2, padding_mode='zeros', bias=True)
+        out1 = conv(torch.zeros((1, 3, 128, 128)))
+        
+        bias = conv.bias.data.clone()
+        conv.bias.data.mul_(0)
+
+        conv = ConvB.from_conv(conv, bias[:, None, None].expand_as(out1[0]))
+        out2 = conv(torch.zeros((1, 3, 128, 128)))
+
+        self.assertTrue(torch.equal(out1, out2))
+
+@unittest.skip
+class BiasPropagationTest(unittest.TestCase): 
     @torch.no_grad()
     def test_conv_manual_bias_float32(self):
         module = nn.Conv2d(3, 64, 3, padding=1)
@@ -135,7 +129,7 @@ class BiasPropagationTest(unittest.TestCase):
         zeros = torch.zeros(1, 128)
         
         y_src = model(x)
-        propagate(model, zeros)
+        propagate_bias(model, zeros)
         y_prop = model(x)
 
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -157,10 +151,36 @@ class BiasPropagationTest(unittest.TestCase):
         zeros = torch.zeros(1, 3, 128, 128)
 
         y_src = model(x)
-        model = propagate(model, zeros)
+        model = propagate_bias(model, zeros)
         y_prop = model(x)
 
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
+
+    @torch.no_grad()
+    @unittest.skip
+    def test_arch(arch, x, pretrained=False):
+        model = arch(pretrained, progress=False)
+        model.eval()
+
+        for module in model.modules():
+            if isinstance(module, nn.Conv2d):
+                prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                prune.remove(module, 'weight')
+
+        model = fuse(model)
+        y_src = model(x)
+
+        zeros = torch.zeros(1, *x.shape[1:])
+        propagate_bias(model, zeros)
+        y_prop = model(x)
+
+        print(f'------ {arch} ------')
+        print("Max abs diff: ", (y_src - y_prop).abs().max().item())
+        print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+        print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
+        print()
+            
+        return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
     def test_bias_propagation(self):
         #x = torch.randn((32, 3, 224, 224))
@@ -170,23 +190,50 @@ class BiasPropagationTest(unittest.TestCase):
         test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
             with self.subTest(i=test_idx, arch=architecture, pretrained=True):
+                self.assertTrue(self.test_arch(architecture, x, True))
+            test_idx += 1
+
+class ZeroedRemoveTest(unittest.TestCase):
+    def test_zeroed_removal(self):
+        def test_arch(arch, x, pretrained=False):
+            model = arch(pretrained, progress=False)
+            model.eval()
+
+            for module in model.modules():
+                if isinstance(module, nn.Conv2d):
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.remove(module, 'weight')
+
+            model = fuse(model)
+            zeros = torch.zeros(1, *x.shape[1:])
+            propagate_bias(model, zeros)
+            y_src = model(x)
+
+            #print('Src model:', model)
+            model = remove_zeored(model, [])
+            #print('Simplified model:', model)
+
+            y_prop = model(x)
+
+            print(f'------ {arch} ------')
+            print("Max abs diff: ", (y_src - y_prop).abs().max().item())
+            print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+            print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
+            print()
+                
+            return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
+
+        im = torch.randint(0, 256, ((32, 3, 224, 224)))
+        x = im/255.
+
+        test_idx = 0
+        for architecture in [alexnet, vgg16, vgg16_bn]:
+            with self.subTest(i=test_idx, arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
 
-class ConvBTest(unittest.TestCase):
-    def test_conv_b(self):
-        conv = nn.Conv2d(3, 64, 3, 1, padding=2, padding_mode='zeros', bias=True)
-        out1 = conv(torch.zeros((1, 3, 128, 128)))
-        
-        bias = conv.bias.data.clone()
-        conv.bias.data.mul_(0)
-
-        conv = ConvB.from_conv(conv, bias[:, None, None].expand_as(out1[0]))
-        out2 = conv(torch.zeros((1, 3, 128, 128)))
-
-        self.assertTrue(torch.equal(out1, out2))
-       
 if __name__ == '__main__':
     torch.set_printoptions(precision=10)
+    #torch.set_default_dtype(torch.float64)
     set_seed(0)
     unittest.main()

@@ -86,29 +86,79 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
 
     return model
 
-def __remove_zeroed(model: nn.Module, pinned_in: List, pinned_out: List) -> nn.Module:
+def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
     """
     TODO: doc
     """
+    def __remove_zeroed_channels_hook(module, input, output, pinned):
+        """
+            input: idx of previously remaining channels
+        """
+        input = input[0][0] #get first item of batch
+
+        # Remove input channels
+        nonzero_idx = ~(input.view(input.shape[0], -1).sum(dim=1) == 0)
+        module.weight.data = module.weight.data[:, nonzero_idx]
+
+        if isinstance(module, nn.Conv2d):
+            module.in_channels = module.weight.shape[1]
+        elif isinstance(module, nn.Linear):
+            module.in_features = module.weight.shape[1]
+
+        # Compute remaining channels indices
+        output.data = torch.ones_like(output)
+        if pinned:
+            return
+
+        # If not pinned: remove zeroed output channels
+        shape = module.weight.shape
+        nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
+        module.weight.data = module.weight.data[nonzero_idx]
+
+        if getattr(module, 'bias', None) is not None:
+            module.bias.data = module.bias.data[nonzero_idx]
+
+        if getattr(module, 'bf', None) is not None:
+            module.bf.data = module.bf.data[nonzero_idx]
+
+        output.data.mul_(0)
+        output.data[:, nonzero_idx] = 1
+        
+        if isinstance(module, nn.Conv2d):
+            module.out_channels = module.weight.shape[0]
+        elif isinstance(module, nn.Linear):
+            module.out_features = module.weight.shape[0]
     
+    def __skip_activation_hook(module, input, output):
+        output.data = input[0].data
+
+    handles = []
     for name, module in model.named_modules():
-        if hasattr(module, 'weight'):
-            # If not pinned_in: remove input channels corresponding to previous removed output channels
-            # If not pinned_in: remove zeroed input channels
-            # If not pinned_out: remove zeroed output channels
-            pass
+        if not isinstance(module, (nn.ReLU, nn.Linear, nn.Conv2d)):
+            continue
+    
+        if len(list(module.parameters())) == 0:
+            # Skip activation/identity etc layers
+            handle = module.register_forward_hook(__skip_activation_hook)
+        else:
+            pinned = name in pinned_out
+            handle = module.register_forward_hook(lambda m, i, o, p=pinned: __remove_zeroed_channels_hook(m, i, o, p))
+        handles.append(handle)
+
+    x = torch.ones((1, 3, 224, 224))
+    model(x)
+
+    for h in handles:
+        h.remove()
     
     return model
 
 
-def simplify(model: nn.Module, x: torch.Tensor, pinned_in=None, pinned_out=None) -> nn.Module:
-    if pinned_in is None:
-        pinned_in = []
-    
+def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
     if pinned_out is None:
         pinned_out = []
     
     model = __propagate_bias(model, x)
-    model = __remove_zeroed(model, pinned_in, pinned_out)
+    model = __remove_zeroed(model, pinned_out)
     
     return model
