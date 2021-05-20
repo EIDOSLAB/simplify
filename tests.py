@@ -48,9 +48,7 @@ def test_arch(arch, x, pretrained=False):
     print("Max abs diff: ", (y_src - y_prop).abs().max().item())
     print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
     print()
-    
-    
-    return torch.allclose(y_src, y_prop, atol=1e-6)
+        
     return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
 class ZeroHooksTest(unittest.TestCase):
