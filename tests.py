@@ -50,7 +50,7 @@ def test_arch(arch, x, pretrained=False):
     print()
     
     
-    #return torch.allclose(y_src, y_prop)
+    return torch.allclose(y_src, y_prop)
     return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
 class ZeroHooksTest(unittest.TestCase):
@@ -165,7 +165,9 @@ class BiasPropagationTest(unittest.TestCase):
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
 
     def test_bias_propagation(self):
-        x = torch.randn((32, 3, 224, 224))
+        #x = torch.randn((32, 3, 224, 224))
+        x = torch.randint(0, 256, ((32, 3, 224, 224)))
+        x /= 255
 
         test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
@@ -188,6 +190,5 @@ class ConvBTest(unittest.TestCase):
        
 if __name__ == '__main__':
     torch.set_printoptions(precision=10)
-    #torch.set_default_dtype(torch.float64)
     set_seed(0)
     unittest.main()
