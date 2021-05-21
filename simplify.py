@@ -128,6 +128,8 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
             module.out_channels = module.weight.shape[0]
         elif isinstance(module, nn.Linear):
             module.out_features = module.weight.shape[0]
+        
+        pass
     
     def __skip_activation_hook(module, input, output):
         output.data = input[0].data

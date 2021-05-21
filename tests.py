@@ -9,9 +9,11 @@ import numpy as np
 import os
 import copy
 
+import torchvision
 from torchvision.models.alexnet import *
 from torchvision.models.vgg import *
-from torchvision.models.resnet import *
+from torchvision.models.resnet import *   
+from torchvision.models.resnet import BasicBlock, Bottleneck
 
 from simplify import __propagate_bias as propagate_bias
 from simplify import __remove_zeroed as remove_zeored
@@ -83,7 +85,7 @@ class ConvBTest(unittest.TestCase):
 
         self.assertTrue(torch.equal(out1, out2))
 
-@unittest.skip
+#@unittest.skip
 class BiasPropagationTest(unittest.TestCase): 
     @torch.no_grad()
     def test_conv_manual_bias_float32(self):
@@ -156,41 +158,39 @@ class BiasPropagationTest(unittest.TestCase):
 
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
 
-    @torch.no_grad()
-    @unittest.skip
-    def test_arch(arch, x, pretrained=False):
-        model = arch(pretrained, progress=False)
-        model.eval()
-
-        for module in model.modules():
-            if isinstance(module, nn.Conv2d):
-                prune.random_structured(module, 'weight', amount=0.8, dim=0)
-                prune.remove(module, 'weight')
-
-        model = fuse(model)
-        y_src = model(x)
-
-        zeros = torch.zeros(1, *x.shape[1:])
-        propagate_bias(model, zeros)
-        y_prop = model(x)
-
-        print(f'------ {arch} ------')
-        print("Max abs diff: ", (y_src - y_prop).abs().max().item())
-        print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
-        print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
-        print()
-            
-        return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
-
     def test_bias_propagation(self):
-        #x = torch.randn((32, 3, 224, 224))
+        @torch.no_grad()
+        def test_arch(arch, x, pretrained=False):
+            model = arch(pretrained, progress=False)
+            model.eval()
+
+            for module in model.modules():
+                if isinstance(module, nn.Conv2d):
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.remove(module, 'weight')
+
+            model = fuse(model)
+            y_src = model(x)
+
+            zeros = torch.zeros(1, *x.shape[1:])
+            propagate_bias(model, zeros)
+            y_prop = model(x)
+
+            print(f'------ {arch} ------')
+            print("Max abs diff: ", (y_src - y_prop).abs().max().item())
+            print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+            print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
+            print()
+                
+            return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
+
         x = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = x.float()/255.
 
         test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
             with self.subTest(i=test_idx, arch=architecture, pretrained=True):
-                self.assertTrue(self.test_arch(architecture, x, True))
+                self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
 
 class ZeroedRemoveTest(unittest.TestCase):
@@ -209,8 +209,22 @@ class ZeroedRemoveTest(unittest.TestCase):
             propagate_bias(model, zeros)
             y_src = model(x)
 
-            #print('Src model:', model)
-            model = remove_zeored(model, [])
+            #print('Source model:', model)
+            if isinstance(model, ResNet):
+                pinned_out = ['conv1']
+
+                for name, module in model.named_modules():
+                    if isinstance(module, BasicBlock):
+                        pinned_out.append(f'{name}.conv2')
+                        if module.downsample is not None:
+                            pinned_out.append(f'{name}.downsample.0')
+                    
+                    if isinstance(module, Bottleneck):
+                        pinned_out.append(f'{name}.conv3')
+                        if module.downsample is not None:
+                            pinned_out.append(f'{name}.downsample.0')
+
+            model = remove_zeored(model, pinned_out)
             #print('Simplified model:', model)
 
             y_prop = model(x)
@@ -223,11 +237,11 @@ class ZeroedRemoveTest(unittest.TestCase):
                 
             return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
-        im = torch.randint(0, 256, ((32, 3, 224, 224)))
+        im = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = im/255.
 
         test_idx = 0
-        for architecture in [alexnet, vgg16, vgg16_bn]:
+        for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
             with self.subTest(i=test_idx, arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
