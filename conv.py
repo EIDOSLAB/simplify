@@ -8,6 +8,10 @@ class ConvB(nn.Conv2d):
         setattr(module, 'bf', bias)
         module.bf = module.bf.to(module.weight.device)
         return module
+
+    def to(self, device):
+        self.bf = self.bf.to(device)
+        return super().to(device)
         
     def forward(self, x):
         x = super().forward(x)
