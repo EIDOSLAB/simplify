@@ -45,6 +45,7 @@ if isinstance(model, ResNet):
                 
 model = fuser.fuse(model)
 model = simplify.simplify(model, torch.randn((1, 3, 224, 224)), pinned_out=pinned_out)
+model = model.to(device)
 
 start = time.perf_counter()
 with torch.no_grad():
