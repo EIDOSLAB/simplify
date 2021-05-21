@@ -9,7 +9,9 @@ from torchvision.models.resnet import BasicBlock, Bottleneck, ResNet
 import fuser
 import simplify
 
-model = torchvision.models.vgg16_bn(pretrained=True)
+device = 'cuda'
+
+model = torchvision.models.vgg16_bn(pretrained=True).to(device)
 model.eval()
 
 for module in model.modules():
@@ -17,7 +19,7 @@ for module in model.modules():
         prune.random_structured(module, 'weight', amount=0.5, dim=0)
         prune.remove(module, 'weight')
 
-x = torch.randn((32, 3, 224, 224))
+x = torch.randn((32, 3, 224, 224)).to(device)
 
 start = time.perf_counter()
 with torch.no_grad():
