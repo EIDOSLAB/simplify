@@ -11,7 +11,7 @@ import simplify
 
 device = 'cuda'
 
-model = torchvision.models.vgg16_bn(pretrained=True).to(device)
+model = torchvision.models.resnet101(pretrained=True).to(device)
 model.eval()
 
 for module in model.modules():
