@@ -42,7 +42,8 @@ if isinstance(model, ResNet):
             pinned_out.append(f'{name}.conv3')
             if module.downsample is not None:
                 pinned_out.append(f'{name}.downsample.0')
-                
+
+model = model.to('cpu')       
 model = fuser.fuse(model)
 model = simplify.simplify(model, torch.randn((1, 3, 224, 224)), pinned_out=pinned_out)
 model = model.to(device)
