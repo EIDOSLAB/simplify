@@ -5,13 +5,8 @@ class ConvB(nn.Conv2d):
     @staticmethod
     def from_conv(module: nn.Conv2d, bias):
         module.__class__ = ConvB
-        setattr(module, 'bf', bias)
-        module.bf = module.bf.to(module.weight.device)
+        module.register_parameter('bf', torch.nn.Parameter(bias))
         return module
-
-    def to(self, device):
-        self.bf = self.bf.to(device)
-        return super().to(device)
         
     def forward(self, x):
         x = super().forward(x)
