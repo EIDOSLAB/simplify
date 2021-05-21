@@ -210,6 +210,7 @@ class ZeroedRemoveTest(unittest.TestCase):
             y_src = model(x)
 
             #print('Source model:', model)
+            pinned_out = []
             if isinstance(model, ResNet):
                 pinned_out = ['conv1']
 
