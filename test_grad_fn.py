@@ -3,7 +3,6 @@ from collections import defaultdict
 import torch
 from EIDOSearch.models import LeNet300
 from EIDOSearch.pruning.simplification.fuser import fuse
-from torchvision.models import resnet18
 
 
 def dfs(grad_fn, modules, ops):
@@ -37,7 +36,7 @@ if __name__ == '__main__':
     model = LeNet300()
     model = fuse(model)
     dummy_input = torch.randn(1, 1, 28, 28)
-
+    
     torch.onnx.export(model, dummy_input, "net.onnx", export_params=True, keep_initializers_as_inputs=True)
     
     for i, (n, m) in enumerate(model.named_modules()):

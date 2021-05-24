@@ -1,6 +1,8 @@
+from copy import deepcopy
+
 import torch
 import torch.nn as nn
-from copy import deepcopy
+
 
 @torch.no_grad()
 def substitute_module(model, new_module, sub_module_names):
@@ -18,6 +20,7 @@ def substitute_module(model, new_module, sub_module_names):
                 attr = getattr(attr, sub)
             else:
                 setattr(attr, sub, new_module)
+
 
 @torch.no_grad()
 def fuse(model, device="cpu"):
@@ -82,7 +85,7 @@ def fuse_conv_and_bn(conv, bn, device):
                           groups=conv.groups,
                           bias=True,
                           padding_mode=conv.padding_mode).to(device)
-
+    
     bn_weight = bn.weight.to(torch.double)
     bn_bias = bn.bias.to(torch.double)
     bn_mean = bn.running_mean.to(torch.double)
@@ -91,23 +94,23 @@ def fuse_conv_and_bn(conv, bn, device):
     conv_weight = conv.weight.view(conv.out_channels, -1).to(torch.double)
     conv_bias = conv.bias.to(torch.double) if conv.bias is not None \
         else torch.zeros(conv.weight.size(0), dtype=torch.double, device=device)
-
+    
     # prepare filters
     bn_diag = torch.diag(bn_weight.div(torch.sqrt(bn_eps + bn_var.to(torch.double))))
     fusedconv_weight = torch.mm(bn_diag, conv_weight).view(fusedconv.weight.size()).to(torch.float)
     fusedconv.weight.copy_(fusedconv_weight)
-
+    
     # prepare spatial bias
     b_bn = bn_bias - bn_weight.mul(bn_mean).div(torch.sqrt(bn_var + bn_eps))
     fusedconv.bias.copy_((torch.mm(bn_diag, conv_bias.reshape(-1, 1)).reshape(-1) + b_bn).to(torch.float))
-
+    
     return fusedconv
 
 
 @torch.no_grad()
 def fuse_fc_and_bn(fc, bn, device):
     fusedlinear = nn.Linear(in_features=fc.in_features, out_features=fc.out_features, bias=True)
-
+    
     bn_weight = bn.weight.to(torch.double)
     bn_bias = bn.bias.to(torch.double)
     bn_mean = bn.running_mean.to(torch.double)
@@ -116,14 +119,14 @@ def fuse_fc_and_bn(fc, bn, device):
     fc_weight = fc.weight.to(torch.double)
     fc_bias = fc.bias.to(torch.double) if fc.bias is not None \
         else torch.zeros(fc.weight.size(0), dtype=torch.double, device=device)
-
+    
     # prepare filters
     bn_diag = torch.diag(bn_weight.div(torch.sqrt(bn_eps + bn_var.to(torch.double))))
     fusedlinear_weight = torch.mm(bn_diag, fc_weight).view(fusedlinear.weight.size()).to(torch.float)
     fusedlinear.weight.copy_(fusedlinear_weight)
-
+    
     # prepare spatial bias
     b_bn = bn_bias - bn_weight.mul(bn_mean).div(torch.sqrt(bn_var + bn_eps))
     fusedlinear.bias.copy_((torch.mm(bn_diag, fc_bias.reshape(-1, 1)).reshape(-1) + b_bn).to(torch.float))
-
+    
     return fusedlinear

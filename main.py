@@ -2,9 +2,7 @@ import time
 
 import torch
 import torch.nn.utils.prune as prune
-from EIDOSearch.models import LeNet5
 from EIDOSearch.pruning.simplification import simplify
-
 # import simplify
 from torchvision.models import resnet18
 

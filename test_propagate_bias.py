@@ -1,6 +1,4 @@
 import sys
-from collections import OrderedDict
-from typing import Any
 
 import torch
 from EIDOSearch.models import LeNet5
@@ -54,9 +52,9 @@ def zero_hook(module, input, output):
     input = input[0]
     with no_forward_hooks(module):
         biases = module(input)[0, :, module.padding[0], module.padding[1]] if isinstance(module, nn.Conv2d) \
-            else module(input)[0, :] # This are the new biases for this module
+            else module(input)[0, :]  # This are the new biases for this module
     
-    #check(module, biases, input)
+    # check(module, biases, input)
     
     module.bias.copy_(biases)  # Update the module's biases
     
@@ -99,7 +97,7 @@ if __name__ == '__main__':
     with torch.no_grad():  # Remove the bias for the pruned neuron to simulate the simplification procedure
         model.conv1.bias[0] = 0.
         model.fc1.bias[3] = 0."""
-
+    
     __propagate_bias(model, torch.zeros(input_shape))
     
     prop_out = model(dummy_input)  # Print of "updated" model's output, should be equal to the previous output
