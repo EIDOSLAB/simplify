@@ -107,7 +107,7 @@ if __name__ == '__main__':
     torch.manual_seed(3)
 
     table = []
-    for architecture in [alexnet, resnet18]: #, resnet34, resnet50, resnet101, resnet152, vgg16, vgg16_bn, vgg19, vgg19_bn]:
+    for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, vgg16, vgg16_bn, vgg19, vgg19_bn]:
         full_time, s_time = run_pruning(architecture)
         table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}', f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
     table = tabulate(table, headers=['Architecture', 'Pruned time', 'Simplified time (p=50%)'], tablefmt='github')
