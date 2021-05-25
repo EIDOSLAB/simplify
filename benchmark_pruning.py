@@ -70,7 +70,7 @@ def run_pruning(architecture):
         pinned_out = ["conv_a_2", "conv_b_1"]
     
     model = model.to('cpu')
-    model = simplify.simplify(model, torch.randn((1, 3, 224, 224)), pinned_out=pinned_out)
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out)
     model = model.to(device)
     
     for i in range(10):

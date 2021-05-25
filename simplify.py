@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from os import error
 from typing import Any, List
 
 import torch
@@ -46,7 +47,7 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
         
         if isinstance(module, nn.Conv2d):
             if getattr(module, 'bias', None) is not None:
-                module.bias.data.mul_(0)
+                module.bias.data.mul_(0).abs_()
                 #bias_feature_maps -= module.bias[:, None, None]
             module = ConvB.from_conv(module, bias_feature_maps)
         
@@ -73,6 +74,9 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
             elif isinstance(module, ConvB):
                 output.add_((module.bf * zero_mask[:, None, None])[None, :])
                 module.bf.data.mul_(~zero_mask[:, None, None])
+            
+            else:
+                error(module)
         
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
