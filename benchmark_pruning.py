@@ -46,7 +46,7 @@ def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
     
     full_time, simplified_time = [], []
-    model = architecture(pretrained=True).to(device)
+    model = architecture(pretrained=False).to(device)
     model.eval()
     
     for module in model.modules():
