@@ -17,7 +17,7 @@ class ConvB(nn.Conv2d):
 class ConvExpand(ConvB):
     
     @staticmethod
-    def from_conv(module: nn.Conv2d, idxs):
+    def from_conv(module: ConvB, idxs):
         module.__class__ = ConvExpand
         setattr(module, 'idxs', idxs)
         return module
