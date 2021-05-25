@@ -46,8 +46,8 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
             bias_feature_maps = module(input)[0]  # [out_channels x W x H]; or [out_features]
         
         if isinstance(module, nn.Conv2d):
-            print('Dilation:', module.dilation)
-            
+            assert module.dilation[0] == 1
+
             if getattr(module, 'bias', None) is not None:
                 module.bias.data.mul_(0).abs_()
                 #bias_feature_maps -= module.bias[:, None, None]
