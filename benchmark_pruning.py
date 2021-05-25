@@ -81,7 +81,7 @@ def run_pruning(architecture):
     
     print('=> Simplified model inference time:', np.mean(simplified_time), np.std(simplified_time))
     print(torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
-    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_src.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
+    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
 
     return full_time, simplified_time
 
