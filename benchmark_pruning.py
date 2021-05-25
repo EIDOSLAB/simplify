@@ -41,7 +41,7 @@ class MockResidual(torch.nn.Module):
         out_lin = self.linear(out_c.view(out_c.shape[0], -1))
         return out_lin
 
-device = 'cpu'
+device = 'cuda'
 
 def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
