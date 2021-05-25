@@ -62,7 +62,7 @@ def run_pruning(architecture):
             y_src = model(x)
         full_time.append(time.perf_counter() - start)
     
-    print('----', architecture.__name__, '----')
+    print('\n----', architecture.__name__, '----')
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
     pinned_out = utils.get_pinned_out(model)
@@ -81,7 +81,8 @@ def run_pruning(architecture):
         simplified_time.append(time.perf_counter() - start)
     
     print('=> Simplified model inference time:', np.mean(simplified_time), np.std(simplified_time))
-    print(torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
+    print('Allclose logits:', torch.allclose(y_src, y_simplified))
+    print('Equal predictions:', torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
     print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
 
     return full_time, simplified_time
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     torch.backends.cudnn.benchmark = False
     torch.manual_seed(3)
     torch.set_default_dtype(torch.float64)
-    
+
     table = []
     for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, vgg16, vgg16_bn, vgg19, vgg19_bn]:
         full_time, s_time = run_pruning(architecture)
