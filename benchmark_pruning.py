@@ -46,7 +46,7 @@ def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
     
     full_time, simplified_time = [], []
-    model = architecture(pretrained=True).to(device)
+    model = architecture(pretrained=True)#.to(device)
     model.eval()
     
     for module in model.modules():
@@ -69,9 +69,9 @@ def run_pruning(architecture):
     if isinstance(model, MockResidual):
         pinned_out = ["conv_a_2", "conv_b_1"]
     
-    model = model.to('cpu')
+    #model = model.to('cpu')
     model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out)
-    model = model.to(device)
+    #model = model.to(device)
     
     for i in range(10):
         start = time.perf_counter()
