@@ -27,58 +27,55 @@ class no_forward_hooks():
 
 
 @torch.no_grad()
-def propagate_biases_hook(module, input, output):
-    """
-    Parameters:
-        - module: nn.module
-        - input: torch.Tensor; non-zero channels correspond to remaining biases pruned channels in the previos module,
-                 and thus should be used to update the current biases
-        - output: torch.Tensor
-    """
-    input = input[0]
-    
-    # Step 1. Fuse biases of pruned channels in the previous module into the current module
-    with no_forward_hooks(module):
-        bias_feature_maps = module(input)[0]  # [out_channels x W x H]; or [out_features]
-    
-    if isinstance(module, nn.Conv2d):
-        if getattr(module, 'bias', None) is not None:
-            bias_feature_maps -= module.bias[:, None, None]
-        module = ConvB.from_conv(module, bias_feature_maps)
-    
-    elif isinstance(module, nn.Linear):
-        if getattr(module, 'bias', None) is not None:
-            module.bias.copy_(bias_feature_maps)
-    
-    # Step 2. Propagate output to next module
-    # Zero-out everything except for biases
-    output.mul_(0.).abs()
-    
-    if hasattr(module, 'bias') and module.bias is not None:
-        # Compute mask of zeroed (pruned) channels
-        shape = module.weight.shape
-        zero_mask = module.weight.view(shape[0], -1).sum(dim=1) == 0
-        
-        # Propagate only the bias values corresponding to pruned channels
-        shape = output.shape
-        output.view(shape[0], shape[1], -1).add_((module.bias * zero_mask)[None, :, None])
-        
-        # Remove biases of pruned channels
-        module.bias.data.mul_(~zero_mask)
-    
-    for output_channel in output[0]:
-        assert torch.unique(output_channel).shape[0] == 1
-    
-    pass
-
-
-@torch.no_grad()
 def __propagate_bias(model: nn.Module, x) -> nn.Module:
+    @torch.no_grad()
+    def __propagate_biases_hook(module, input, output):
+        """
+        Parameters:
+            - module: nn.module
+            - input: torch.Tensor; non-zero channels correspond to remaining biases pruned channels in the previos module,
+                    and thus should be used to update the current biases
+            - output: torch.Tensor
+        """
+        input = input[0]
+        
+        # Step 1. Fuse biases of pruned channels in the previous module into the current module
+        with no_forward_hooks(module):
+            bias_feature_maps = module(input)[0]  # [out_channels x W x H]; or [out_features]
+        
+        if isinstance(module, nn.Conv2d):
+            if getattr(module, 'bias', None) is not None:
+                bias_feature_maps -= module.bias[:, None, None]
+            module = ConvB.from_conv(module, bias_feature_maps)
+        
+        elif isinstance(module, nn.Linear):
+            if getattr(module, 'bias', None) is not None:
+                module.bias.copy_(bias_feature_maps)
+        
+        # Step 2. Propagate output to next module
+        # Zero-out everything except for biases
+        output.mul_(0.).abs()
+        
+        if hasattr(module, 'bias') and module.bias is not None:
+            # Compute mask of zeroed (pruned) channels
+            shape = module.weight.shape
+            zero_mask = module.weight.view(shape[0], -1).sum(dim=1) == 0
+            
+            # Propagate only the bias values corresponding to pruned channels
+            shape = output.shape
+            output.view(shape[0], shape[1], -1).add_((module.bias * zero_mask)[None, :, None])
+            
+            # Remove biases of pruned channels
+            module.bias.data.mul_(~zero_mask)
+        
+        for output_channel in output[0]:
+            assert torch.unique(output_channel).shape[0] == 1
+
     handles = []
     
     for module in model.modules():
         if isinstance(module, (nn.Conv2d, nn.Linear)):
-            handle = module.register_forward_hook(propagate_biases_hook)
+            handle = module.register_forward_hook(__propagate_biases_hook)
             handles.append(handle)
     
     # Propagate biases
