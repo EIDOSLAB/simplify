@@ -64,7 +64,7 @@ def run_pruning(architecture):
     
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
-    pinned_out = utils.get_pinned(model)
+    pinned_out = utils.get_pinned_out(model)
     if isinstance(model, MockResidual):
         pinned_out = ["conv_a_2", "conv_b_1"]
     
