@@ -13,6 +13,7 @@ from torchvision.models.vgg import *
 
 from conv import ConvB
 from fuser import fuse
+import simplify
 from simplify import __propagate_bias as propagate_bias
 from simplify import __remove_zeroed as remove_zeored
 from simplify import no_forward_hooks
@@ -115,11 +116,9 @@ class BatchNormFusionTest(unittest.TestCase):
         im = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = im / 255.
         
-        test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101, resnet152]:
-            with self.subTest(i=test_idx, arch=architecture, pretrained=True):
+            with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
-            test_idx += 1
 
 class BiasPropagationTest(unittest.TestCase):
     def setUp(self):
@@ -225,11 +224,9 @@ class BiasPropagationTest(unittest.TestCase):
         x = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = x.float() / 255.
         
-        test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101, resnet152]:
-            with self.subTest(i=test_idx, arch=architecture, pretrained=True):
+            with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
-            test_idx += 1
 
 class SimplificationTest(unittest.TestCase):
     def setUp(self):
@@ -282,11 +279,60 @@ class SimplificationTest(unittest.TestCase):
         im = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = im / 255.
         
-        test_idx = 0
         for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101, resnet152]:
-            with self.subTest(i=test_idx, arch=architecture, pretrained=True):
+            with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
-            test_idx += 1
+
+class IntegrationTest(unittest.TestCase):
+    def setUp(self):
+        set_seed(3)
+
+    def test_zeroed_removal(self):
+        def test_arch(arch, x, pretrained=False):
+            model = arch(pretrained, progress=False)
+            model.eval()
+            
+            for module in model.modules():
+                if isinstance(module, nn.Conv2d):
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.remove(module, 'weight')
+            
+            y_src = model(x)
+
+            zeros = torch.zeros(1, *x.shape[1:])
+            
+            pinned_out = []
+            if isinstance(model, ResNet):
+                pinned_out = ['conv1']
+                
+                for name, module in model.named_modules():
+                    if isinstance(module, BasicBlock):
+                        pinned_out.append(f'{name}.conv2')
+                        if module.downsample is not None:
+                            pinned_out.append(f'{name}.downsample.0')
+                    
+                    if isinstance(module, Bottleneck):
+                        pinned_out.append(f'{name}.conv3')
+                        if module.downsample is not None:
+                            pinned_out.append(f'{name}.downsample.0')
+            
+            simplify.simplify(model, zeros, pinned_out)
+            y_prop = model(x)
+            
+            print(f'------ {arch} ------')
+            print("Max abs diff: ", (y_src - y_prop).abs().max().item())
+            print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+            print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
+            print()
+            
+            return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
+        
+        im = torch.randint(0, 256, ((256, 3, 224, 224)))
+        x = im / 255.
+        
+        for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101, resnet152]:
+            with self.subTest(arch=architecture, pretrained=True):
+                self.assertTrue(test_arch(architecture, x, True))
 
 if __name__ == '__main__':
     torch.set_printoptions(precision=10)
