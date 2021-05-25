@@ -62,6 +62,7 @@ def run_pruning(architecture):
             y_src = model(x)
         full_time.append(time.perf_counter() - start)
     
+    print('----', architecture.__name__, '----')
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
     pinned_out = utils.get_pinned_out(model)
