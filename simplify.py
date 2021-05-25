@@ -188,7 +188,7 @@ def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
         pinned_out = []
 
     model = fuser.fuse(model)
-    model = __propagate_bias(model, x)
-    model = __remove_zeroed(model, pinned_out)
+    __propagate_bias(model, x)
+    __remove_zeroed(model, pinned_out)
     
     return model
