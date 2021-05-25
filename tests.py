@@ -298,7 +298,6 @@ class IntegrationTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             y_src = model(x)
-
             zeros = torch.zeros(1, *x.shape[1:])
             
             pinned_out = []
