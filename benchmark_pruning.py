@@ -81,8 +81,7 @@ def run_pruning(architecture):
     print('=> Simplified model inference time:', np.mean(simplified_time), np.std(simplified_time))
     print('Allclose logits:', torch.allclose(y_src, y_simplified))
     print('Equal predictions:', torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
-    print(
-        f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
+    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
     
     return full_time, simplified_time
 

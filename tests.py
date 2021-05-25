@@ -86,7 +86,7 @@ class ConvBTest(unittest.TestCase):
         self.assertTrue(torch.equal(out1, out2))
 
 
-# @unittest.skip
+@unittest.skip
 class BiasPropagationTest(unittest.TestCase):
     @torch.no_grad()
     def test_conv_manual_bias_float32(self):
@@ -139,6 +139,7 @@ class BiasPropagationTest(unittest.TestCase):
     
     @torch.no_grad()
     def test_conv(self):
+        print('test_conv')
         model = nn.Sequential(nn.Conv2d(3, 64, 3, padding=2),
                               nn.ReLU(),
                               nn.Conv2d(64, 128, 3, padding=5),
@@ -150,7 +151,7 @@ class BiasPropagationTest(unittest.TestCase):
                 prune.random_structured(module, 'weight', amount=0.9, dim=0)
                 prune.remove(module, 'weight')
         
-        x = torch.randn(128, 3, 128, 128)
+        x = torch.randn(10, 3, 128, 128)
         zeros = torch.zeros(1, 3, 128, 128)
         
         y_src = model(x)
@@ -193,7 +194,6 @@ class BiasPropagationTest(unittest.TestCase):
             with self.subTest(i=test_idx, arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
-
 
 class ZeroedRemoveTest(unittest.TestCase):
     def test_zeroed_removal(self):
@@ -244,7 +244,7 @@ class ZeroedRemoveTest(unittest.TestCase):
         x = im / 255.
         
         test_idx = 0
-        for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
+        for architecture in [alexnet]: #, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
             with self.subTest(i=test_idx, arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1

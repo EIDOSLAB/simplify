@@ -46,7 +46,8 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
         
         if isinstance(module, nn.Conv2d):
             if getattr(module, 'bias', None) is not None:
-                bias_feature_maps -= module.bias[:, None, None]
+                module.bias.data.mul_(0)
+                #bias_feature_maps -= module.bias[:, None, None]
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
@@ -55,7 +56,7 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
         
         # Step 2. Propagate output to next module
         # Zero-out everything except for biases
-        output.mul_(0.).abs()
+        output.mul_(0.).abs_()
         
         if hasattr(module, 'bias') and module.bias is not None:
             # Compute mask of zeroed (pruned) channels
@@ -63,11 +64,15 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
             zero_mask = module.weight.view(shape[0], -1).sum(dim=1) == 0
             
             # Propagate only the bias values corresponding to pruned channels
-            shape = output.shape
-            output.view(shape[0], shape[1], -1).add_((module.bias * zero_mask)[None, :, None])
-            
-            # Remove biases of pruned channels
-            module.bias.data.mul_(~zero_mask)
+            if isinstance(module, nn.Linear):
+                shape = output.shape
+                output.view(shape[0], shape[1], -1).add_((module.bias * zero_mask)[None, :, None])
+                # Remove biases of pruned channels
+                module.bias.data.mul_(~zero_mask)
+
+            elif isinstance(module, ConvB):
+                output.add_((module.bf * zero_mask[:, None, None])[None, :])
+                module.bf.data.mul_(~zero_mask[:, None, None])
         
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
