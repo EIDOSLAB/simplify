@@ -195,6 +195,7 @@ class BiasPropagationTest(unittest.TestCase):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
 
+@unittest.skip
 class ZeroedRemoveTest(unittest.TestCase):
     def test_zeroed_removal(self):
         def test_arch(arch, x, pretrained=False):
@@ -230,6 +231,38 @@ class ZeroedRemoveTest(unittest.TestCase):
             model = remove_zeored(model, pinned_out)
             # print('Simplified model:', model)
             
+            y_prop = model(x)
+            
+            print(f'------ {arch} ------')
+            print("Max abs diff: ", (y_src - y_prop).abs().max().item())
+            print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+            print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
+            print()
+            
+            return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
+        
+        im = torch.randint(0, 256, ((256, 3, 224, 224)))
+        x = im / 255.
+        
+        test_idx = 0
+        for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
+            with self.subTest(i=test_idx, arch=architecture, pretrained=True):
+                self.assertTrue(test_arch(architecture, x, True))
+            test_idx += 1
+
+class BatchNormFusionTest(unittest.TestCase):
+    def test_batchnorm_fusion(self):
+        def test_arch(arch, x, pretrained=False):
+            model = arch(pretrained, progress=False)
+            model.eval()
+            
+            for module in model.modules():
+                if isinstance(module, nn.Conv2d):
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.remove(module, 'weight')
+            
+            y_src = model(x)
+            model = fuse(model)            
             y_prop = model(x)
             
             print(f'------ {arch} ------')
