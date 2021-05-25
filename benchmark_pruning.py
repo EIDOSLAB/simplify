@@ -14,6 +14,8 @@ from torchvision.models.vgg import *
 
 import fuser
 import simplify
+import utils
+
 from tabulate import tabulate
 
 class MockResidual(torch.nn.Module):
@@ -62,21 +64,7 @@ def run_pruning(architecture):
     
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
-    pinned_out = []
-    if isinstance(model, ResNet):
-        pinned_out = ['conv1']
-        
-        for name, module in model.named_modules():
-            if isinstance(module, BasicBlock):
-                pinned_out.append(f'{name}.conv2')
-                if module.downsample is not None:
-                    pinned_out.append(f'{name}.downsample.0')
-            
-            if isinstance(module, Bottleneck):
-                pinned_out.append(f'{name}.conv3')
-                if module.downsample is not None:
-                    pinned_out.append(f'{name}.downsample.0')
-    
+    pinned_out = utils.get_pinned(model)
     if isinstance(model, MockResidual):
         pinned_out = ["conv_a_2", "conv_b_1"]
     
