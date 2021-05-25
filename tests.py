@@ -244,7 +244,7 @@ class ZeroedRemoveTest(unittest.TestCase):
         x = im / 255.
         
         test_idx = 0
-        for architecture in [alexnet]: #, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
+        for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101]:
             with self.subTest(i=test_idx, arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
