@@ -31,7 +31,6 @@ def fuse(model, device="cpu"):
     :return: PyTorch model with fused nn.Conv2d and nn.BatchNorm2d in place of the previous nn.Conv2d
     and nn.Identity in place of previous nn.BatchNorm2d
     """
-    fm = deepcopy(model).to(device)
     skip = False
     modules = list(model.named_modules())
     for i, (module_name, module) in enumerate(modules):
@@ -45,8 +44,8 @@ def fuse(model, device="cpu"):
                 if isinstance(next_module[1], nn.BatchNorm2d):
                     batch_name, batch_module = next_module
                     fused = fuse_conv_and_bn(conv, batch_module, device)
-                    substitute_module(fm, fused, module_name.split("."))
-                    substitute_module(fm, nn.Identity(), batch_name.split("."))
+                    substitute_module(model, fused, module_name.split("."))
+                    substitute_module(model, nn.Identity(), batch_name.split("."))
                     skip = True
             else:
                 continue
@@ -57,12 +56,12 @@ def fuse(model, device="cpu"):
                 if isinstance(next_module[1], nn.BatchNorm1d):
                     batch_name, batch_module = next_module
                     fused = fuse_fc_and_bn(fc, batch_module, device)
-                    substitute_module(fm, fused, module_name.split("."))
-                    substitute_module(fm, nn.Identity(), batch_name.split("."))
+                    substitute_module(model, fused, module_name.split("."))
+                    substitute_module(model, nn.Identity(), batch_name.split("."))
                     skip = True
             else:
                 continue
-    return fm
+    return model
 
 
 @torch.no_grad()
