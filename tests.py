@@ -86,7 +86,7 @@ class ConvBTest(unittest.TestCase):
         self.assertTrue(torch.equal(out1, out2))
 
 
-@unittest.skip
+#@unittest.skip
 class BiasPropagationTest(unittest.TestCase):
     @torch.no_grad()
     def test_conv_manual_bias_float32(self):
@@ -195,7 +195,7 @@ class BiasPropagationTest(unittest.TestCase):
                 self.assertTrue(test_arch(architecture, x, True))
             test_idx += 1
 
-@unittest.skip
+#@unittest.skip
 class ZeroedRemoveTest(unittest.TestCase):
     def test_zeroed_removal(self):
         def test_arch(arch, x, pretrained=False):
