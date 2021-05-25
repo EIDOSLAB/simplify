@@ -286,5 +286,5 @@ class BatchNormFusionTest(unittest.TestCase):
 if __name__ == '__main__':
     torch.set_printoptions(precision=10)
     # torch.set_default_dtype(torch.float64)
-    set_seed(0)
+    set_seed(3)
     unittest.main()
