@@ -54,7 +54,8 @@ def run_pruning(architecture):
             prune.random_structured(module, 'weight', amount=0.5, dim=0)
             prune.remove(module, 'weight')
     
-    x = torch.randn((100, 3, 224, 224)).to(device)
+    im = torch.randint(0, 256, ((100, 3, 224, 224)))
+    x = (im / 255.).to(device)
     
     for i in range(10):
         start = time.perf_counter()
