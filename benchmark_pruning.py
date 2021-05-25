@@ -44,8 +44,9 @@ class MockResidual(torch.nn.Module):
 device = 'cpu'
 
 def run_pruning(architecture):
-    full_time, simplified_time = [], []
+    print('\n----', architecture.__name__, '----')
 
+    full_time, simplified_time = [], []
     model = architecture(pretrained=True).to(device)
     model.eval()
     
@@ -62,7 +63,6 @@ def run_pruning(architecture):
             y_src = model(x)
         full_time.append(time.perf_counter() - start)
     
-    print('\n----', architecture.__name__, '----')
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
     pinned_out = utils.get_pinned_out(model)
