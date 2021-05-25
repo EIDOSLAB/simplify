@@ -6,17 +6,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
-import torchvision
+from tabulate import tabulate
 from torchvision.models import alexnet
-from torchvision.models.resnet import BasicBlock, Bottleneck, ResNet
 from torchvision.models.resnet import *
 from torchvision.models.vgg import *
 
-import fuser
 import simplify
 import utils
 
-from tabulate import tabulate
 
 class MockResidual(torch.nn.Module):
     def __init__(self):
@@ -41,11 +38,13 @@ class MockResidual(torch.nn.Module):
         out_lin = self.linear(out_c.view(out_c.shape[0], -1))
         return out_lin
 
+
 device = 'cpu'
+
 
 def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
-
+    
     full_time, simplified_time = [], []
     model = architecture(pretrained=True).to(device)
     model.eval()
@@ -70,7 +69,6 @@ def run_pruning(architecture):
         pinned_out = ["conv_a_2", "conv_b_1"]
     
     model = model.to('cpu')
-    model = fuser.fuse(model)
     model = simplify.simplify(model, torch.randn((1, 3, 224, 224)), pinned_out=pinned_out)
     model = model.to(device)
     
@@ -83,9 +81,11 @@ def run_pruning(architecture):
     print('=> Simplified model inference time:', np.mean(simplified_time), np.std(simplified_time))
     print('Allclose logits:', torch.allclose(y_src, y_simplified))
     print('Equal predictions:', torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
-    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
-
+    print(
+        f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
+    
     return full_time, simplified_time
+
 
 if __name__ == '__main__':
     random.seed(3)
@@ -96,14 +96,12 @@ if __name__ == '__main__':
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     torch.manual_seed(3)
-    #torch.set_default_dtype(torch.float64)
-
+    # torch.set_default_dtype(torch.float64)
+    
     table = []
     for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, vgg16, vgg16_bn, vgg19, vgg19_bn]:
         full_time, s_time = run_pruning(architecture)
-        table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}', f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
+        table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}',
+                      f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
     table = tabulate(table, headers=['Architecture', 'Pruned time', 'Simplified time (p=50%)'], tablefmt='github')
     print(table)
-
-
-

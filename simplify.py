@@ -4,6 +4,7 @@ from typing import Any, List
 import torch
 import torch.nn as nn
 
+import fuser
 from conv import ConvB, ConvExpand
 
 
@@ -174,7 +175,8 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
 def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
     if pinned_out is None:
         pinned_out = []
-    
+
+    model = fuser.fuse(model)
     model = __propagate_bias(model, x)
     model = __remove_zeroed(model, pinned_out)
     
