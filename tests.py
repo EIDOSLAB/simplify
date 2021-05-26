@@ -93,6 +93,8 @@ class BatchNormFusionTest(unittest.TestCase):
         set_seed(3)
 
     def test_batchnorm_fusion(self):
+
+        @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
