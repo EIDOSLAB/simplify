@@ -201,7 +201,8 @@ class BiasPropagationTest(unittest.TestCase):
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
-            
+            pinned_out = utils.get_pinned_out(model)
+
             for module in model.modules():
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
@@ -211,7 +212,7 @@ class BiasPropagationTest(unittest.TestCase):
             y_src = model(x)
             
             zeros = torch.zeros(1, *x.shape[1:])
-            propagate_bias(model, zeros)
+            propagate_bias(model, zeros, pinned_out)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
@@ -243,14 +244,14 @@ class SimplificationTest(unittest.TestCase):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
+            pinned_out = utils.get_pinned_out(model)
+
             model = fuse(model)
             zeros = torch.zeros(1, *x.shape[1:])
-            propagate_bias(model, zeros)
+            propagate_bias(model, zeros, pinned_out)
             y_src = model(x)
             
-            pinned_out = utils.get_pinned_out(model)
-            model = remove_zeored(model, pinned_out)
-            
+            model = remove_zeored(model, pinned_out)    
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
@@ -276,7 +277,8 @@ class IntegrationTest(unittest.TestCase):
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
-            
+            pinned_out = utils.get_pinned_out(model)
+
             for module in model.modules():
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.5, dim=0)
@@ -285,7 +287,6 @@ class IntegrationTest(unittest.TestCase):
             y_src = model(x)
             zeros = torch.zeros(1, *x.shape[1:])
             
-            pinned_out = utils.get_pinned_out(model)
             simplify.simplify(model, zeros, pinned_out)
             y_prop = model(x)
             

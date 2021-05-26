@@ -29,9 +29,10 @@ class no_forward_hooks():
 
 
 @torch.no_grad()
-def __propagate_bias(model: nn.Module, x) -> nn.Module:
+def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
+
     @torch.no_grad()
-    def __propagate_biases_hook(module, input, output):
+    def __propagate_biases_hook(module, input, output, pinned=False):
         """
         Parameters:
             - module: nn.module
@@ -60,6 +61,8 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
         # Step 2. Propagate output to next module
         # Zero-out everything except for biases
         output.mul_(0.).abs_()
+        if pinned:
+            return
         
         if hasattr(module, 'bias') and module.bias is not None:
             # Compute mask of zeroed (pruned) channels
@@ -85,9 +88,10 @@ def __propagate_bias(model: nn.Module, x) -> nn.Module:
 
     handles = []
     
-    for module in model.modules():
+    for name, module in model.named_modules():
         if isinstance(module, (nn.Conv2d, nn.Linear)):
-            handle = module.register_forward_hook(__propagate_biases_hook)
+            pinned = name in pinned_out
+            handle = module.register_forward_hook(lambda m, i, o, p=pinned: __propagate_biases_hook(m, i, o, p))
             handles.append(handle)
     
     # Propagate biases
@@ -188,7 +192,7 @@ def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
         pinned_out = []
 
     model = fuser.fuse(model)
-    __propagate_bias(model, x)
+    __propagate_bias(model, x, pinned_out)
     __remove_zeroed(model, pinned_out)
     
     return model
