@@ -199,6 +199,7 @@ class BiasPropagationTest(unittest.TestCase):
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
     
     def test_bias_propagation(self):
+        
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
@@ -237,6 +238,8 @@ class SimplificationTest(unittest.TestCase):
         set_seed(3)
 
     def test_zeroed_removal(self):
+
+        @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
@@ -276,6 +279,8 @@ class IntegrationTest(unittest.TestCase):
         set_seed(3)
 
     def test_simplification(self):
+
+        @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
