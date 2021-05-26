@@ -11,9 +11,10 @@ from torchvision.models.resnet import *
 from torchvision.models.resnet import BasicBlock, Bottleneck
 from torchvision.models.vgg import *
 
+import utils
+import simplify
 from conv import ConvB
 from fuser import fuse
-import simplify
 from simplify import __propagate_bias as propagate_bias
 from simplify import __remove_zeroed as remove_zeored
 from simplify import no_forward_hooks
@@ -247,24 +248,8 @@ class SimplificationTest(unittest.TestCase):
             propagate_bias(model, zeros)
             y_src = model(x)
             
-            # print('Source model:', model)
-            pinned_out = []
-            if isinstance(model, ResNet):
-                pinned_out = ['conv1']
-                
-                for name, module in model.named_modules():
-                    if isinstance(module, BasicBlock):
-                        pinned_out.append(f'{name}.conv2')
-                        if module.downsample is not None:
-                            pinned_out.append(f'{name}.downsample.0')
-                    
-                    if isinstance(module, Bottleneck):
-                        pinned_out.append(f'{name}.conv3')
-                        if module.downsample is not None:
-                            pinned_out.append(f'{name}.downsample.0')
-            
+            pinned_out = utils.get_pinned_out(model)
             model = remove_zeored(model, pinned_out)
-            # print('Simplified model:', model)
             
             y_prop = model(x)
             
@@ -287,7 +272,7 @@ class IntegrationTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
 
-    def test_zeroed_removal(self):
+    def test_simplification(self):
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
@@ -300,21 +285,7 @@ class IntegrationTest(unittest.TestCase):
             y_src = model(x)
             zeros = torch.zeros(1, *x.shape[1:])
             
-            pinned_out = []
-            if isinstance(model, ResNet):
-                pinned_out = ['conv1']
-                
-                for name, module in model.named_modules():
-                    if isinstance(module, BasicBlock):
-                        pinned_out.append(f'{name}.conv2')
-                        if module.downsample is not None:
-                            pinned_out.append(f'{name}.downsample.0')
-                    
-                    if isinstance(module, Bottleneck):
-                        pinned_out.append(f'{name}.conv3')
-                        if module.downsample is not None:
-                            pinned_out.append(f'{name}.downsample.0')
-            
+            pinned_out = utils.get_pinned_out(model)
             simplify.simplify(model, zeros, pinned_out)
             y_prop = model(x)
             
