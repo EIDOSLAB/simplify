@@ -171,7 +171,7 @@ class BiasPropagationTest(unittest.TestCase):
         zeros = torch.zeros(1, 128)
         
         y_src = model(x)
-        propagate_bias(model, zeros)
+        propagate_bias(model, zeros, [])
         y_prop = model(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -193,13 +193,13 @@ class BiasPropagationTest(unittest.TestCase):
         zeros = torch.zeros(1, 3, 128, 128)
         
         y_src = model(x)
-        model = propagate_bias(model, zeros)
+        model = propagate_bias(model, zeros, [])
         y_prop = model(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
     
     def test_bias_propagation(self):
-        
+
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
