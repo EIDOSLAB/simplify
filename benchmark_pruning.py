@@ -42,6 +42,7 @@ class MockResidual(torch.nn.Module):
 device = 'cpu'
 
 
+@torch.no_grad()
 def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
     
