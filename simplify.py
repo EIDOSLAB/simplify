@@ -126,8 +126,8 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
         
         # Compute remaining channels indices
         output.data = torch.ones_like(output)
-        if pinned:
-            return
+        # if pinned:
+        #     return
         
         # If not pinned: remove zeroed output channels
         shape = module.weight.shape
@@ -190,6 +190,10 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
 def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
     if pinned_out is None:
         pinned_out = []
+        
+    for module in model.modules():
+        if hasattr(module, "inplace"):
+            module.inplace = False
 
     model = fuser.fuse(model)
     __propagate_bias(model, x, pinned_out)
