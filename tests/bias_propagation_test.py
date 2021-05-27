@@ -109,7 +109,7 @@ class BiasPropagationTest(unittest.TestCase):
 
             def forward(self, x):
                 self.a = self.module1(x)
-                self.b = self.module1(x)
+                self.b = self.module2(x)
                 self.c = self.a + self.b
                 return self.module3(self.relu(self.c))
 
