@@ -191,9 +191,9 @@ def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
     if pinned_out is None:
         pinned_out = []
         
-    for module in model.modules():
-        if hasattr(module, "inplace"):
-            module.inplace = False
+    #for module in model.modules():
+    #    if hasattr(module, "inplace"):
+    #        module.inplace = False
 
     model = fuser.fuse(model)
     __propagate_bias(model, x, pinned_out)
