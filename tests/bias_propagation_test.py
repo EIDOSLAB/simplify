@@ -87,8 +87,46 @@ class BiasPropagationTest(unittest.TestCase):
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
     
-    def test_bias_propagation(self):
+    @torch.no_grad()
+    def test_residual(self):
+        class Residual(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.module1 = nn.Conv2d(3, 64, 3, stride=1, padding=1, bias=True)
+                self.module2 = nn.Conv2d(3, 64, 3, stride=1, padding=1, bias=True)
+                self.module3 = nn.Conv2d(64, 64, 3, stride=1, padding=1, bias=True)
+                self.relu = nn.ReLU()
+                
+                prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
+                prune.remove(self.module1, 'weight')
 
+                prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
+                prune.remove(self.module2, 'weight')
+            
+                self.a = None
+                self.b = None
+                self.c = None
+
+            def forward(self, x):
+                self.a = self.module1(x)
+                self.b = self.module1(x)
+                self.c = self.a + self.b
+                return self.module3(self.relu(self.c))
+
+        residual = Residual()
+        x = torch.randn((10, 3, 128, 128))
+
+        y_src = residual(x)
+        c_src = residual.c.clone()
+
+        propagate_bias(residual, torch.zeros((1, 3, 128, 128)), [])
+        y_prop = residual(x)
+        c_prop = residual.c.clone()
+
+        self.assertTrue(torch.allclose(y_src, y_prop))
+
+
+    def test_bias_propagation(self):
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
