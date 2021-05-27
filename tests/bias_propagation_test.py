@@ -102,11 +102,13 @@ class BiasPropagationTest(unittest.TestCase):
                 prune.random_structured(self.module0, 'weight', amount=0.5, dim=0)
                 prune.remove(self.module0, 'weight')
                 
-                prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
-                prune.remove(self.module1, 'weight')
+                #prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
+                #prune.remove(self.module1, 'weight')
                 
-                prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
-                prune.remove(self.module2, 'weight')
+                #prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
+                #prune.remove(self.module2, 'weight')
+                self.module1.weight.data[0:32].mul_(0)
+                self.module2.weight.data[0:32].mul_(0)
                 
                 self.a = None
                 self.b = None
@@ -166,11 +168,13 @@ class BiasPropagationTest(unittest.TestCase):
                 prune.random_structured(self.module0, 'weight', amount=0.5, dim=0)
                 prune.remove(self.module0, 'weight')
                 
-                prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
-                prune.remove(self.module1, 'weight')
+                #prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
+                #prune.remove(self.module1, 'weight')
                 
-                prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
-                prune.remove(self.module2, 'weight')
+                #prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
+                #prune.remove(self.module2, 'weight')
+                self.module1.weight.data[2:3].mul_(0)
+                self.module2.weight.data[2:3].mul_(0)
                 
                 self.a = None
                 self.b = None
@@ -193,7 +197,7 @@ class BiasPropagationTest(unittest.TestCase):
         propagate_bias(residual, torch.zeros((1, 10)), [])
         y_prop = residual(x)
         
-        print((y_src - y_prop).abs().max())
+        print('abs max:', (y_src - y_prop).abs().max())
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
     
