@@ -61,8 +61,8 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
         # Step 2. Propagate output to next module
         # Zero-out everything except for biases
         output.mul_(0.).abs_()
-        # if pinned:
-        #     return
+        if pinned:
+            return
         
         if hasattr(module, 'bias') and module.bias is not None:
             # Compute mask of zeroed (pruned) channels
