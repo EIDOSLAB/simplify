@@ -40,7 +40,7 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
                     and thus should be used to update the current biases
             - output: torch.Tensor
         """
-        print("--"+name.upper()+"--")
+        print("\n--"+name.upper()+"--")
         print("input")
         print(input[0].tolist())
         print("weights")
@@ -61,14 +61,17 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
+            # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
                 module.bias.copy_(bias_feature_maps)
         
+        print("updated bias")
+        print(module.bias.tolist())
+
         # Step 2. Propagate output to next module
         if pinned:
             # Zero-out everything means no bias is propagated
-            output.mul_(0.).abs_()
-            return
+            return output*0.
         
         if hasattr(module, 'bias') and module.bias is not None:
             # Compute mask of zeroed (pruned) channels
@@ -80,13 +83,13 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
             
             if isinstance(module, nn.Linear):
                 # Propagate only the bias values corresponding to pruned channels
-                output.mul_(pruned_channels)
+                output *= pruned_channels
                 # Zero out biases of pruned channels in current layer
                 module.bias.data.mul_(~pruned_channels)
 
             elif isinstance(module, ConvB):
                 # Propagate only the bias values corresponding to pruned channels
-                output.mul_(pruned_channels[None, :, None, None])
+                output *= (pruned_channels[None, :, None, None])
                 # Zero out biases of pruned channels in current layer
                 module.bf.data.mul_(~pruned_channels[:, None, None])
             
@@ -98,6 +101,8 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
         
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
+
+        return output
 
     handles = []
     
