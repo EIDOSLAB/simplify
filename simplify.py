@@ -126,8 +126,8 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
         
         # Compute remaining channels indices
         output.data = torch.ones_like(output)
-        #if pinned:
-        #    return
+        if pinned:
+            return
         
         # If not pinned: remove zeroed output channels
         shape = module.weight.shape
