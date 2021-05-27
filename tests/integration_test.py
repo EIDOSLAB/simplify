@@ -8,8 +8,8 @@ from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 
 import utils
+import simplify
 from utils import set_seed
-from simplify import simplify
 
 class IntegrationTest(unittest.TestCase):
     def setUp(self):
