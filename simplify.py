@@ -43,15 +43,13 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
         input = input[0]
         
         # Step 1. Fuse biases of pruned channels in the previous module into the current module
-        with no_forward_hooks(module):
-            bias_feature_maps = module(input)[0]  # [out_channels x W x H]; or [out_features]
+        bias_feature_maps = output[0].clone()
         
         if isinstance(module, nn.Conv2d):
             assert module.dilation[0] == 1
 
             if getattr(module, 'bias', None) is not None:
                 module.bias.data.mul_(0).abs_()
-                #bias_feature_maps -= module.bias[:, None, None]
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
@@ -59,26 +57,27 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
                 module.bias.copy_(bias_feature_maps)
         
         # Step 2. Propagate output to next module
-        # Zero-out everything except for biases
-        output.mul_(0.).abs_()
         if pinned:
+            # Zero-out everything means no bias is propagated
+            output.mul_(0.).abs_()
             return
         
         if hasattr(module, 'bias') and module.bias is not None:
             # Compute mask of zeroed (pruned) channels
             shape = module.weight.shape
-            zero_mask = module.weight.view(shape[0], -1).sum(dim=1) == 0
+            pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
             
-            # Propagate only the bias values corresponding to pruned channels
             if isinstance(module, nn.Linear):
-                shape = output.shape
-                output.view(shape[0], shape[1], -1).add_((module.bias * zero_mask)[None, :, None])
-                # Remove biases of pruned channels
-                module.bias.data.mul_(~zero_mask)
+                # Propagate only the bias values corresponding to pruned channels
+                output.mul_(pruned_channels)
+                # Zero out biases of pruned channels in current layer
+                module.bias.data.mul_(~pruned_channels)
 
             elif isinstance(module, ConvB):
-                output.add_((module.bf * zero_mask[:, None, None])[None, :])
-                module.bf.data.mul_(~zero_mask[:, None, None])
+                # Propagate only the bias values corresponding to pruned channels
+                output.mul_(pruned_channels[None, :, None, None])
+                # Zero out biases of pruned channels in current layer
+                module.bf.data.mul_(~pruned_channels[:, None, None])
             
             else:
                 error(module)
