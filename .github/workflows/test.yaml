@@ -17,7 +17,7 @@ jobs:
         run: pip3 install -r requirements.txt
 
       - name: run tests
-        run: python3 tests.py
+        run: python3 -m unittest tests/*.py
   
   #run-benchmark:
   #  runs-on: self-hosted
