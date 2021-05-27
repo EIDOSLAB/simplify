@@ -50,7 +50,7 @@ class ConvExpandTest(unittest.TestCase):
 
         idxs = []
         current = 0
-        zero_idx = torch.where(~nonzero_idx)[0].tolist()
+        zero_idx = torch.where(~nonzero_idx)[0]
         for i in range(module.weight.data.shape[0] + len(zero_idx)):
             if i in zero_idx:
                 idxs.append(module.weight.data.shape[0])
