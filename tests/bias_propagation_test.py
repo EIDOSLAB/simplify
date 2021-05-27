@@ -1,21 +1,22 @@
 import unittest
+
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
-
 from torchvision.models.alexnet import alexnet
-from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from torchvision.models.vgg import vgg16, vgg16_bn
 
 import utils
-from utils import set_seed
 from fuser import fuse
 from simplify import __propagate_bias as propagate_bias
+from utils import set_seed
+
 
 class BiasPropagationTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
-
+    
     @torch.no_grad()
     def test_conv_manual_bias_float32(self):
         module = nn.Conv2d(3, 64, 3, padding=1)
@@ -100,126 +101,109 @@ class BiasPropagationTest(unittest.TestCase):
                 
                 prune.random_structured(self.module0, 'weight', amount=0.5, dim=0)
                 prune.remove(self.module0, 'weight')
-
+                
                 prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
                 prune.remove(self.module1, 'weight')
-
+                
                 prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
                 prune.remove(self.module2, 'weight')
-            
+                
                 self.a = None
                 self.b = None
                 self.c = None
-
+            
             def forward(self, x):
                 x = self.relu(self.module0(x))
                 self.a = self.module1(x)
                 self.b = self.module2(x)
                 self.c = self.a + self.b
                 return self.module3(self.relu(self.c))
-
+        
         residual = Residual()
         residual.eval()
         x = torch.randn((10, 3, 128, 128))
         
         values_in = {}
         values_out = {}
+        
         def save_input(m, i, o, k):
             values_in[k] = i[0].data.clone()
             values_out[k] = o.data.clone()
-
-        residual.module1.register_forward_hook(lambda m,i,o,k='1': save_input(m,i,o,k))
-        residual.module2.register_forward_hook(lambda m,i,o,k='2': save_input(m,i,o,k))
-    
+        
+        residual.module1.register_forward_hook(lambda m, i, o, k='1': save_input(m, i, o, k))
+        residual.module2.register_forward_hook(lambda m, i, o, k='2': save_input(m, i, o, k))
+        
         y_src = residual(x)
         self.assertTrue(torch.equal(values_in['1'], values_in['2']))
-
-        self.assertFalse(torch.equal(values_out['1'], values_out['2']))        
+        
+        self.assertFalse(torch.equal(values_out['1'], values_out['2']))
         
         self.assertTrue(torch.equal(values_out['1'], residual.a))
         self.assertFalse(torch.equal(values_out['1'], residual.c))
-
+        
         self.assertTrue(torch.equal(values_out['2'], residual.b))
         self.assertFalse(torch.equal(values_out['2'], residual.c))
-
+        
         c_src = residual.c.clone()
-
+        
         propagate_bias(residual, torch.zeros((10, 3, 128, 128)), [])
         y_prop = residual(x)
         c_prop = residual.c.clone()
-
+        
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
-
+    
     @torch.no_grad()
     def test_residual_linear(self):
         class Residual(nn.Module):
             def __init__(self):
                 super().__init__()
-                self.module0 = nn.Linear(64, 128, bias=True)
-                self.module1 = nn.Linear(128, 256, bias=True)
-                self.module2 = nn.Linear(128, 256, bias=True)
-                self.module3 = nn.Linear(256, 10, bias=True)
+                self.module0 = nn.Linear(10, 5, bias=True)
+                self.module1 = nn.Linear(5, 3, bias=True)
+                self.module2 = nn.Linear(5, 3, bias=True)
+                self.module3 = nn.Linear(3, 2, bias=True)
                 self.relu = nn.ReLU()
                 
                 prune.random_structured(self.module0, 'weight', amount=0.5, dim=0)
                 prune.remove(self.module0, 'weight')
-
+                
                 prune.random_structured(self.module1, 'weight', amount=0.5, dim=0)
                 prune.remove(self.module1, 'weight')
-
+                
                 prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
                 prune.remove(self.module2, 'weight')
-            
+                
                 self.a = None
                 self.b = None
                 self.c = None
-
+            
             def forward(self, x):
                 x = self.relu(self.module0(x))
                 self.a = self.module1(x)
                 self.b = self.module2(x)
                 self.c = self.a + self.b
                 return self.module3(self.relu(self.c))
-
+                # return self.module3(self.c)
+        
         residual = Residual()
         residual.eval()
-        x = torch.randn((10, 64))
+        x = torch.randn((7, 10))
         
-        values_in = {}
-        values_out = {}
-        def save_input(m, i, o, k):
-            values_in[k] = i[0].data.clone()
-            values_out[k] = o.data.clone()
-
-        residual.module1.register_forward_hook(lambda m,i,o,k='1': save_input(m,i,o,k))
-        residual.module2.register_forward_hook(lambda m,i,o,k='2': save_input(m,i,o,k))
-    
         y_src = residual(x)
-        self.assertTrue(torch.equal(values_in['1'], values_in['2']))
-
-        self.assertFalse(torch.equal(values_out['1'], values_out['2']))        
         
-        self.assertTrue(torch.equal(values_out['1'], residual.a))
-        self.assertFalse(torch.equal(values_out['1'], residual.c))
-
-        self.assertTrue(torch.equal(values_out['2'], residual.b))
-        self.assertFalse(torch.equal(values_out['2'], residual.c))
-
-        c_src = residual.c.clone()
-
-        propagate_bias(residual, torch.zeros((10, 64)), [])
+        propagate_bias(residual, torch.zeros((1, 10)), [])
         y_prop = residual(x)
-        c_prop = residual.c.clone()
-
+        
+        print((y_src - y_prop).abs().max())
+        
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
-
+    
     def test_bias_propagation(self):
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
             pinned_out = utils.get_pinned_out(model)
-
+            
             for module in model.modules():
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)

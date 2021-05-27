@@ -32,7 +32,7 @@ class no_forward_hooks():
 def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
 
     @torch.no_grad()
-    def __propagate_biases_hook(module, input, output, pinned=False):
+    def __propagate_biases_hook(module, input, output, pinned=False, name=None):
         """
         Parameters:
             - module: nn.module
@@ -40,7 +40,15 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
                     and thus should be used to update the current biases
             - output: torch.Tensor
         """
-        input = input[0]
+        print("--"+name.upper()+"--")
+        print("input")
+        print(input[0].tolist())
+        print("weights")
+        print(module.weight.tolist())
+        print("bias")
+        print(module.bias.tolist())
+        print("output")
+        print(output.tolist())
         
         # Step 1. Fuse biases of pruned channels in the previous module into the current module
         bias_feature_maps = output[0].clone()
@@ -67,6 +75,9 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
             shape = module.weight.shape
             pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
             
+            print("pruned")
+            print(pruned_channels.tolist())
+            
             if isinstance(module, nn.Linear):
                 # Propagate only the bias values corresponding to pruned channels
                 output.mul_(pruned_channels)
@@ -81,6 +92,9 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
             
             else:
                 error(module)
+                
+            print("propagated bias")
+            print(output.tolist())
         
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
@@ -90,7 +104,7 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
     for name, module in model.named_modules():
         if isinstance(module, (nn.Conv2d, nn.Linear)):
             pinned = name in pinned_out
-            handle = module.register_forward_hook(lambda m, i, o, p=pinned: __propagate_biases_hook(m, i, o, p))
+            handle = module.register_forward_hook(lambda m, i, o, p=pinned, n=name: __propagate_biases_hook(m, i, o, p, n))
             handles.append(handle)
     
     # Propagate biases
