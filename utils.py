@@ -19,6 +19,8 @@ def get_pinned_out(model):
     pinned_out = {}
 
     if isinstance(model, ResNet):
+        pinned_out = {'conv1': None}
+        
         for name, module in model.named_modules():
             if not isinstance(module, (BasicBlock, Bottleneck)):
                 continue
