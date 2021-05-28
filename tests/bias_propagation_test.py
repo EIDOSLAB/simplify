@@ -257,6 +257,6 @@ class BiasPropagationTest(unittest.TestCase):
         x = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = x.float() / 255.
         
-        for architecture in [alexnet, vgg16, vgg16_bn, resnet18, resnet34, resnet50, resnet101, resnet152]:
+        for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152]:
             with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
