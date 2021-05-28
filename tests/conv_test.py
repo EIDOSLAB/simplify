@@ -30,7 +30,7 @@ class ConvExpandTest(unittest.TestCase):
     @torch.no_grad()
     def test_expansion(self):
         module = nn.Conv2d(3, 64, 3, 1, padding=1, bias=False)
-        x = torch.randn((64, 3, 128, 128))
+        x = torch.randn((57, 3, 128, 128))
 
         prune.random_structured(module, 'weight', amount=0.5, dim=0)
         prune.remove(module, 'weight')
@@ -57,7 +57,7 @@ class ConvExpandTest(unittest.TestCase):
             else:
                 idxs.append(current)
                 current += 1
-        module = ConvExpand.from_conv(module, idxs)
+        module = ConvExpand.from_conv(module, idxs, torch.zeros_like(y_post)[0])
 
         y_post = module(x)
         self.assertTrue(torch.equal(y_src, y_post))
