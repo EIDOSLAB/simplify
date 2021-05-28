@@ -142,12 +142,6 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
         nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
         module.weight.data = module.weight.data[nonzero_idx]
         
-        if getattr(module, 'bias', None) is not None:
-            module.bias.data = module.bias.data[nonzero_idx]
-        
-        if getattr(module, 'bf', None) is not None:
-            module.bf.data = module.bf.data[nonzero_idx]
-        
         if name in pinned_out:
             idxs = []
             current = 0
@@ -160,6 +154,12 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
                     current += 1
             module = ConvExpand.from_conv(module, idxs, module.bf)
         else:
+            if getattr(module, 'bias', None) is not None:
+                module.bias.data = module.bias.data[nonzero_idx]
+            
+            if getattr(module, 'bf', None) is not None:
+                module.bf.data = module.bf.data[nonzero_idx]
+
             output.data.mul_(0)
             output.data[:, nonzero_idx] = 1
         
