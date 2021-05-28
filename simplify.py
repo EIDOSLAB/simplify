@@ -64,13 +64,16 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
 
         if name in pinned_out:
-            # Zero-out everything means no bias is propagated
-            pinned_modules = pinned_out[name]
-            for pinned_module in pinned_modules:
-                pinned_shape = pinned_module.weight.shape
-                pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
-                pruned_channels = pruned_channels * pinned_pruned_channels
-            #return output*0.
+            pinned_module = pinned_out[name]
+
+            if pinned_module is None:
+                # Do not propagate biases in skip connections (no downsample)
+                return output*0.
+
+            # Propagate only matching pruned channels in (conv2|conv3) + downsample
+            pinned_shape = pinned_module.weight.shape
+            pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
+            pruned_channels = pruned_channels * pinned_pruned_channels
         
         if hasattr(module, 'bias') and module.bias is not None:
             # Compute mask of zeroed (pruned) channels
