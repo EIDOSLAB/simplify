@@ -48,7 +48,8 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
             assert module.dilation[0] == 1
 
             if getattr(module, 'bias', None) is not None:
-                module.bias.data.mul_(0).abs_()
+                module.register_parameter('bias', None)
+
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
@@ -77,7 +78,7 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
             pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
             pruned_channels = pruned_channels * pinned_pruned_channels
         
-        if hasattr(module, 'bias') and module.bias is not None:
+        if getattr(module, 'bias', None) is not None or getattr(module, 'bf', None) is not None:
             # Compute mask of zeroed (pruned) channels
             
             # Propagate only the bias values corresponding to pruned channels
