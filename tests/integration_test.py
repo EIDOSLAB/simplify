@@ -84,6 +84,6 @@ class IntegrationTest(unittest.TestCase):
         im = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = im / 255.
         
-        for architecture in [resnet18, resnet34, resnet50, resnet101, resnet152]:
+        for architecture in [resnet18, resnet34]: #, resnet50, resnet101, resnet152]:
             with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
