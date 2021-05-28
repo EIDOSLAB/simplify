@@ -28,7 +28,7 @@ def get_pinned_out(model):
                     pinned_out[f'{name}.conv2'] = module.downsample[0]
                     pinned_out[f'{name}.downsample.0'] = module.conv2
                 else:
-                    pinned_out[name] = last_module[1]
+                    pinned_out[f'{name}.conv2'] = last_module[1]
                 last_module = (f'{name}.conv2', module.conv2)
             
             if isinstance(module, Bottleneck):
@@ -36,7 +36,7 @@ def get_pinned_out(model):
                     pinned_out[f'{name}.conv3'] = module.downsample[0]
                     pinned_out[f'{name}.downsample.0'] = module.conv3
                 else:
-                    pinned_out[name] = last_module[1]
+                    pinned_out[f'{name}.conv3'] = last_module[1]
                 last_module = (f'{name}.conv3', module.conv3)
 
     return pinned_out
