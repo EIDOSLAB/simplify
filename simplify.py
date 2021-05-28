@@ -117,7 +117,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
     TODO: doc
     """
     
-    def __remove_zeroed_channels_hook(module, input, output, pinned):
+    def __remove_zeroed_channels_hook(module, input, output, name):
         """
             input: idx of previously remaining channels
         """
@@ -148,7 +148,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
         if getattr(module, 'bf', None) is not None:
             module.bf.data = module.bf.data[nonzero_idx]
         
-        if pinned:
+        if name in pinned_out:
             idxs = []
             current = 0
             zero_idx = torch.where(~nonzero_idx)[0]
@@ -182,8 +182,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
             # Skip activation/identity etc layers
             handle = module.register_forward_hook(__skip_activation_hook)
         else:
-            pinned = name in pinned_out
-            handle = module.register_forward_hook(lambda m, i, o, p=pinned: __remove_zeroed_channels_hook(m, i, o, p))
+            handle = module.register_forward_hook(lambda m, i, o, n=name: __remove_zeroed_channels_hook(m, i, o, n))
         handles.append(handle)
     
     x = torch.ones((1, 3, 224, 224))
