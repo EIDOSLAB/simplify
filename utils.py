@@ -19,17 +19,24 @@ def get_pinned_out(model):
     pinned_out = []
 
     if isinstance(model, ResNet):
-        pinned_out = ['conv1']
-        
+        pinned_out = {}
+        last_module = ('conv1', model.conv1)
+
         for name, module in model.named_modules():
             if isinstance(module, BasicBlock):
-                pinned_out.append(f'{name}.conv2')
                 if module.downsample is not None:
-                    pinned_out.append(f'{name}.downsample.0')
+                    pinned_out[name] = module.downsample[0]
+                    pinned_out[f'{name}.downsample.0'] = module.conv2
+                else:
+                    pinned_out[name] = last_module[1]
+                last_module = (f'{name}.conv2', module.conv2)
             
             if isinstance(module, Bottleneck):
-                pinned_out.append(f'{name}.conv3')
                 if module.downsample is not None:
-                    pinned_out.append(f'{name}.downsample.0')
+                    pinned_out[name] = module.downsample[0]
+                    pinned_out[f'{name}.downsample.0'] = module.conv3
+                else:
+                    pinned_out[name] = last_module[1]
+                last_module = (f'{name}.conv3', module.conv3)
 
     return pinned_out
