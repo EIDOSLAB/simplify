@@ -32,7 +32,7 @@ def get_pinned_out(model):
             
             if module.downsample is not None:
                 pinned_out[block_last[0]] = [module.downsample[0]]
-                pinned_out[f'{name}.downsample.0'] = block_last[1]
+                pinned_out[f'{name}.downsample.0'] = [block_last[1]]
                 last_module = [block_last, (f'{name}.downsample.0', module.downsample[0])]
 
             else:
