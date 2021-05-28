@@ -40,15 +40,6 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
                     and thus should be used to update the current biases
             - output: torch.Tensor
         """
-        """print("\n--"+name.upper()+"--")
-        print("input")
-        print(input[0].tolist())
-        print("weights")
-        print(module.weight.tolist())
-        print("bias")
-        print(module.bias.tolist())
-        print("output")
-        print(output.tolist())"""
         
         # Step 1. Fuse biases of pruned channels in the previous module into the current module
         bias_feature_maps = output[0].clone()
@@ -67,9 +58,6 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
 
         else:
             error('Unsupported module type:', module)
-        
-        #print("updated bias")
-        #print(module.bias.tolist())
 
         # Step 2. Propagate output to next module
         if pinned:
@@ -81,9 +69,6 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
             shape = module.weight.shape
             pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
             
-            #print("pruned")
-            #print(pruned_channels.tolist())
-            
             # Propagate only the bias values corresponding to pruned channels
             # Zero out biases of pruned channels in current layer
             if isinstance(module, nn.Linear):
@@ -93,9 +78,6 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
             elif isinstance(module, ConvB):
                 output *= (pruned_channels[None, :, None, None])
                 module.bf.data.mul_(~pruned_channels[:, None, None])
-                
-            #print("propagated bias")
-            #print(output.tolist())
         
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
