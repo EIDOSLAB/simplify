@@ -107,7 +107,7 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
     return model
 
 
-def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
+def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
     """
     TODO: doc
     """
@@ -192,7 +192,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
 
 def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
     if pinned_out is None:
-        pinned_out = []
+        pinned_out = {}
         
     #for module in model.modules():
     #    if hasattr(module, "inplace"):
