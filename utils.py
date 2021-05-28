@@ -23,26 +23,22 @@ def get_pinned_out(model):
         last_module = [('conv1', model.conv1)]
 
         for name, module in model.named_modules():
-            if isinstance(module, BasicBlock):
-                if module.downsample is not None:
-                    pinned_out[f'{name}.conv2'] = [module.downsample[0]]
-                    pinned_out[f'{name}.downsample.0'] = [module.conv2]
-                    last_module = [(f'{name}.conv2', module.conv2), (f'{name}.downsample.0', module.downsample[0])]
-                else:
-                    pinned_out[f'{name}.conv2'] = [m[1] for m in last_module]
-                    for (last_n, _) in last_module:
-                        pinned_out[last_n].append(module.conv2)
-                    last_module = [(f'{name}.conv2', module.conv2)]
-            
-            if isinstance(module, Bottleneck):
-                if module.downsample is not None:
-                    pinned_out[f'{name}.conv3'] = [module.downsample[0]]
-                    pinned_out[f'{name}.downsample.0'] = [module.conv3]
-                    last_module = [(f'{name}.conv3', module.conv3), (f'{name}.downsample.0', module.downsample[0])]
-                else:
-                    pinned_out[f'{name}.conv3'] = [m[1] for m in last_module]
-                    for (last_n, _) in last_module:
-                        pinned_out[last_n].append(module.conv3)
-                    last_module = [(f'{name}.conv3', module.conv3)]
+            if not isinstance(module, (BasicBlock, Bottleneck)):
+                continue
 
+            block_last = (f'{name}.conv2', module.conv2)
+            if isinstance(Bottleneck):
+                block_last = (f'{name}.conv3', module.conv3)
+            
+            if module.downsample is not None:
+                pinned_out[block_last[0]] = [module.downsample[0]]
+                pinned_out[f'{name}.downsample.0'] = block_last[1]
+                last_module = [block_last, (f'{name}.downsample.0', module.downsample[0])]
+
+            else:
+                pinned_out[block_last[0]] = [last[1] for last in last_module]
+                for (last_name, _) in last_module:
+                    pinned_out[last_name].append(block_last[1])
+                last_module = [block_last]
+                
     return pinned_out
