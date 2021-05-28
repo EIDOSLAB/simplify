@@ -65,7 +65,7 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
 
         if name in pinned_out:
             return output*0.
-            
+
             pinned_module = pinned_out[name]
 
             if pinned_module is None:
@@ -134,8 +134,8 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
         
         # Compute remaining channels indices
         output.data = torch.ones_like(output)
-        if pinned:
-            return
+        #if pinned:
+        #    return
         
         # If not pinned: remove zeroed output channels
         shape = module.weight.shape
