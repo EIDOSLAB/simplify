@@ -14,17 +14,21 @@ class ConvB(nn.Conv2d):
         return x + self.bf
 
 
-class ConvExpand(ConvB):
+class ConvExpand(nn.Conv2d):
     
     @staticmethod
-    def from_conv(module: ConvB, idxs):
+    def from_conv(module: ConvB, idxs, bias):
         module.__class__ = ConvExpand
         setattr(module, 'idxs', idxs)
+        module.register_parameter('bf', torch.nn.Parameter(bias))
+        # module.register_parameter('zeros', torch.nn.Parameter(torch.zeros(shape[0], 1, *shape[2:])))
         return module
     
     def forward(self, x):
         x = super().forward(x)
-        # TODO move the torch.zeros to __init__
-        x = torch.cat([x, torch.zeros(x.shape[0], 1, *x.shape[2:]).to(x)], dim=1)
+        # TODO mode zeros to from_conv
+        zeros = torch.zeros(x.shape[0], 1, *x.shape[2:]).to(x)
+        x = torch.cat([x, zeros], dim=1)
+        self.bf.data = torch.cat([self.bf.data, zeros[0]], dim=0)
         
-        return x[:, self.idxs]
+        return x[:, self.idxs] + self.bf[self.idxs]

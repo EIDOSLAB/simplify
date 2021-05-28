@@ -156,7 +156,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
                 else:
                     idxs.append(current)
                     current += 1
-            module = ConvExpand.from_conv(module, idxs)
+            module = ConvExpand.from_conv(module, idxs, module.bf)
         else:
             output.data.mul_(0)
             output.data[:, nonzero_idx] = 1
