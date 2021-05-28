@@ -128,8 +128,8 @@ class BiasPropagationTest(unittest.TestCase):
         y_src = residual(x)
         
         pinned = {
-            'module1': residual.module2,
-            'module2': residual.module1
+            'module1': [residual.module2],
+            'module2': [residual.module1]
         }
         propagate_bias(residual, torch.zeros((10, 3, 128, 128)), pinned)
         y_prop = residual(x)
@@ -177,8 +177,8 @@ class BiasPropagationTest(unittest.TestCase):
         y_src = residual(x)
         
         pinned = {
-            'module1': residual.module2,
-            'module2': residual.module1
+            'module1': [residual.module2],
+            'module2': [residual.module1]
         }
         propagate_bias(residual, torch.zeros((1, 10)), pinned)
         y_prop = residual(x)

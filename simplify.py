@@ -65,10 +65,11 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
 
         if name in pinned_out:
             # Zero-out everything means no bias is propagated
-            pinned_module = pinned_out[name]
-            pinned_shape = pinned_module.weight.shape
-            pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
-            pruned_channels = pruned_channels * pinned_pruned_channels
+            pinned_modules = pinned_out[name]
+            for pinned_module in pinned_modules:
+                pinned_shape = pinned_module.weight.shape
+                pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
+                pruned_channels = pruned_channels * pinned_pruned_channels
             #return output*0.
         
         if hasattr(module, 'bias') and module.bias is not None:
