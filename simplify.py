@@ -64,6 +64,8 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
 
         if name in pinned_out:
+            return output*0.
+            
             pinned_module = pinned_out[name]
 
             if pinned_module is None:
