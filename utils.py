@@ -25,7 +25,7 @@ def get_pinned_out(model):
         for name, module in model.named_modules():
             if isinstance(module, BasicBlock):
                 if module.downsample is not None:
-                    pinned_out[name] = module.downsample[0]
+                    pinned_out[f'{name}.conv2'] = module.downsample[0]
                     pinned_out[f'{name}.downsample.0'] = module.conv2
                 else:
                     pinned_out[name] = last_module[1]
@@ -33,7 +33,7 @@ def get_pinned_out(model):
             
             if isinstance(module, Bottleneck):
                 if module.downsample is not None:
-                    pinned_out[name] = module.downsample[0]
+                    pinned_out[f'{name}.conv3'] = module.downsample[0]
                     pinned_out[f'{name}.downsample.0'] = module.conv3
                 else:
                     pinned_out[name] = last_module[1]
