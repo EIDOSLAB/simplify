@@ -1,22 +1,23 @@
 import unittest
+
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
-
 from torchvision.models.alexnet import alexnet
-from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from torchvision.models.vgg import vgg16, vgg16_bn
 
 import utils
-from utils import set_seed
 from fuser import fuse
 from simplify import __propagate_bias as propagate_bias
 from simplify import __remove_zeroed as remove_zeroed
+from utils import set_seed
+
 
 class ChannelsRemovalTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
-
+    
     @torch.no_grad()
     def test_cat_residual_conv(self):
         class Residual(nn.Module):
@@ -25,7 +26,7 @@ class ChannelsRemovalTest(unittest.TestCase):
                 self.module0 = nn.Conv2d(3, 32, 3, stride=1, padding=1, bias=True)
                 self.module1 = nn.Conv2d(32, 64, 3, stride=1, padding=1, bias=True)
                 self.module2 = nn.Conv2d(32, 64, 3, stride=1, padding=1, bias=True)
-                self.module3 = nn.Conv2d(64*2, 64, 3, stride=1, padding=1, bias=True)
+                self.module3 = nn.Conv2d(64 * 2, 64, 3, stride=1, padding=1, bias=True)
                 self.relu = nn.ReLU()
                 
                 prune.random_structured(self.module0, 'weight', amount=0.5, dim=0)
@@ -36,7 +37,7 @@ class ChannelsRemovalTest(unittest.TestCase):
                 
                 prune.random_structured(self.module2, 'weight', amount=0.8, dim=0)
                 prune.remove(self.module2, 'weight')
-            
+                
                 self.a = None
                 self.b = None
                 self.c = None
@@ -57,7 +58,7 @@ class ChannelsRemovalTest(unittest.TestCase):
         y_prop = residual(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
-
+    
     def test_zeroed_removal(self):
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
@@ -70,13 +71,13 @@ class ChannelsRemovalTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             pinned_out = utils.get_pinned_out(model)
-
+            
             model = fuse(model)
             zeros = torch.zeros(1, *x.shape[1:])
             propagate_bias(model, zeros, pinned_out)
             y_src = model(x)
             
-            model = remove_zeroed(model, pinned_out)    
+            model = remove_zeroed(model, pinned_out)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

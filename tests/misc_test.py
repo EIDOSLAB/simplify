@@ -1,4 +1,5 @@
 import unittest
+
 import torch
 import torch.nn as nn
 from torchvision.models.resnet import resnet18
@@ -6,11 +7,12 @@ from torchvision.models.resnet import resnet18
 from simplify import no_forward_hooks
 from utils import set_seed
 
+
 @unittest.skip
 class ZeroHooksTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
-
+    
     def test_overwrite_output(self):
         def hook(m, i, output):
             output.data.mul_(0)
@@ -37,7 +39,7 @@ class ZeroHooksTest(unittest.TestCase):
 class HooksCtxTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
-        
+    
     def test_hook_ctx(self):
         def hook(*args):
             pass

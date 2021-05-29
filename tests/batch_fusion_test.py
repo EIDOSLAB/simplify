@@ -1,19 +1,20 @@
 import unittest
+
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
-
 from torchvision.models.alexnet import alexnet
-from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
+from torchvision.models.vgg import vgg16, vgg16_bn
 
-from utils import set_seed
 from fuser import fuse
+from utils import set_seed
+
 
 class BatchNormFusionTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
-
+    
     def test_batchnorm_fusion(self):
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
@@ -26,7 +27,7 @@ class BatchNormFusionTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             y_src = model(x)
-            model = fuse(model)            
+            model = fuse(model)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

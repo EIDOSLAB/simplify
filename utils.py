@@ -1,9 +1,10 @@
-import random
 import os
-import torch
-import numpy as np
+import random
 
+import numpy as np
+import torch
 from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
+
 
 def set_seed(seed):
     random.seed(seed)
@@ -15,16 +16,17 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.manual_seed(seed)
 
+
 def get_pinned_out(model):
     pinned_out = {}
-
+    
     if isinstance(model, ResNet):
         pinned_out = {'conv1': None}
         
         for name, module in model.named_modules():
             if not isinstance(module, (BasicBlock, Bottleneck)):
                 continue
-
+            
             block_last = (f'{name}.conv2', module.conv2)
             if isinstance(module, Bottleneck):
                 block_last = (f'{name}.conv3', module.conv3)
@@ -35,5 +37,5 @@ def get_pinned_out(model):
             
             else:
                 pinned_out[block_last[0]] = None
-
+    
     return pinned_out

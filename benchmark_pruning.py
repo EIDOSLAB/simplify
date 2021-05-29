@@ -11,9 +11,10 @@ from torchvision.models import alexnet
 from torchvision.models.resnet import *
 from torchvision.models.vgg import *
 
+import profile
 import simplify
 import utils
-import profile
+
 
 class MockResidual(torch.nn.Module):
     def __init__(self):
@@ -47,7 +48,7 @@ def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
     
     full_time, simplified_time = [], []
-    model = architecture(pretrained=True)#.to(device)
+    model = architecture(pretrained=True)  # .to(device)
     model.eval()
     
     for module in model.modules():
@@ -63,7 +64,7 @@ def run_pruning(architecture):
         with torch.no_grad():
             y_src = model(x)
         full_time.append(time.perf_counter() - start)
-
+    
     profiled = profile.profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     with open(f'profile/{architecture.__name__}.txt', 'w') as f:
         f.write('-- THRESHOLDED --\n')
@@ -75,16 +76,16 @@ def run_pruning(architecture):
     if isinstance(model, MockResidual):
         pinned_out = ["conv_a_2", "conv_b_1"]
     
-    #model = model.to('cpu')
+    # model = model.to('cpu')
     model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out)
-    #model = model.to(device)
+    # model = model.to(device)
     
     for i in range(10):
         start = time.perf_counter()
         with torch.no_grad():
             y_simplified = model(x)
         simplified_time.append(time.perf_counter() - start)
-
+    
     profiled = profile.profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     with open(f'profile/{architecture.__name__}.txt', 'a') as f:
         f.write('\n\n -- SIMPLIFIED --\n')
@@ -93,7 +94,8 @@ def run_pruning(architecture):
     print('=> Simplified model inference time:', np.mean(simplified_time), np.std(simplified_time))
     print('Allclose logits:', torch.allclose(y_src, y_simplified))
     print('Equal predictions:', torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
-    print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
+    print(
+        f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
     
     return full_time, simplified_time
 

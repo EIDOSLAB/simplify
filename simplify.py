@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from os import error
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import torch
 import torch.nn as nn
@@ -30,7 +30,6 @@ class no_forward_hooks():
 
 @torch.no_grad()
 def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
-
     @torch.no_grad()
     def __propagate_biases_hook(module, input, output, name=None):
         """
@@ -46,33 +45,33 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
         
         if isinstance(module, nn.Conv2d):
             assert module.dilation[0] == 1
-
+            
             if getattr(module, 'bias', None) is not None:
                 module.register_parameter('bias', None)
-
+            
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
             # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
                 module.bias.copy_(bias_feature_maps)
-
+        
         else:
             error('Unsupported module type:', module)
-
+        
         # Step 2. Propagate output to next module
         shape = module.weight.shape
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
-
+        
         if name in pinned_out:
-            return output*0.
-
+            return output * 0.
+            
             pinned_module = pinned_out[name]
-
+            
             if pinned_module is None:
                 # Do not propagate biases in skip connections (no downsample)
-                return output*0.
-
+                return output * 0.
+            
             # Propagate only matching pruned channels in (conv2|conv3) + downsample
             pinned_shape = pinned_module.weight.shape
             pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
@@ -86,20 +85,20 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
             if isinstance(module, nn.Linear):
                 output *= pruned_channels
                 module.bias.data.mul_(~pruned_channels)
-
+            
             elif isinstance(module, ConvB):
                 output *= (pruned_channels[None, :, None, None])
                 module.bf.data.mul_(~pruned_channels[:, None, None])
         
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
-
+        
         return output
-
+    
     handles = []
     for name, module in model.named_modules():
         if isinstance(module, (nn.Conv2d, nn.Linear)):
-            #pinned = name in pinned_out
+            # pinned = name in pinned_out
             handle = module.register_forward_hook(lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
             handles.append(handle)
     
@@ -135,7 +134,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
         
         # Compute remaining channels indices
         output.data = torch.ones_like(output)
-        #if pinned:
+        # if pinned:
         #    return
         
         # If not pinned: remove zeroed output channels
@@ -160,7 +159,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
             
             if getattr(module, 'bf', None) is not None:
                 module.bf.data = module.bf.data[nonzero_idx]
-
+            
             output.data.mul_(0)
             output.data[:, nonzero_idx] = 1
         
@@ -198,11 +197,11 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
 def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
     if pinned_out is None:
         pinned_out = {}
-        
-    #for module in model.modules():
+    
+    # for module in model.modules():
     #    if hasattr(module, "inplace"):
     #        module.inplace = False
-
+    
     model = fuser.fuse(model)
     __propagate_bias(model, x, pinned_out)
     __remove_zeroed(model, pinned_out)

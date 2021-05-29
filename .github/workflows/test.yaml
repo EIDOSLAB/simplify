@@ -18,7 +18,7 @@ jobs:
 
       - name: run tests
         run: python3 -m unittest tests/*.py
-  
+
   #run-benchmark:
   #  runs-on: self-hosted
   #  steps:
