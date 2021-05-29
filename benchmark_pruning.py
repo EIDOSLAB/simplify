@@ -68,11 +68,6 @@ def run_pruning(architecture):
     with open(f'profile/{architecture.__name__}.txt', 'w') as f:
         f.write('-- THRESHOLDED --\n')
         f.write(profiled)
-
-    profiled = profile.profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
-    with open(f'profile/{architecture.__name__}.txt', 'a') as f:
-        f.write('-- THRESHOLDED --\n')
-        f.write(profiled)
     
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
@@ -89,11 +84,6 @@ def run_pruning(architecture):
         with torch.no_grad():
             y_simplified = model(x)
         simplified_time.append(time.perf_counter() - start)
-
-    profiled = profile.profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
-    with open(f'profile/{architecture.__name__}.txt', 'a') as f:
-        f.write('\n\n -- SIMPLIFIED --\n')
-        f.write(profiled)
 
     profiled = profile.profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     with open(f'profile/{architecture.__name__}.txt', 'a') as f:

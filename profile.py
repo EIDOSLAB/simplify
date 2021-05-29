@@ -1,8 +1,9 @@
 import torch
 from torch.autograd import profiler
 
-def profile_model(model, input, rows=10):
-    with profiler.profile(profile_memory=True) as prof:
+
+def profile_model(model, input, rows=10, cuda=False):
+    with profiler.profile(profile_memory=True, record_shapes=True, use_cuda=cuda) as prof:
         with profiler.record_function("model_inference"):
             model(input)
     
