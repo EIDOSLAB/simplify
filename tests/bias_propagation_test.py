@@ -5,11 +5,6 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 
-from torchvision.models.alexnet import alexnet
-from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
-from torchvision.models.squeezenet import SqueezeNet, squeezenet1_0, squeezenet1_1
-
 import utils
 from fuser import fuse
 from simplify import __propagate_bias as propagate_bias
@@ -327,6 +322,7 @@ class BiasPropagationTest(unittest.TestCase):
         x = torch.randint(0, 256, ((256, 3, 224, 224)))
         x = x.float() / 255.
         
-        for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, squeezenet1_0, squeezenet1_1, vgg16, vgg16_bn, vgg19, vgg19_bn]:
+        for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, squeezenet1_0, squeezenet1_1,
+                             vgg16, vgg16_bn, vgg19, vgg19_bn]:
             with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
