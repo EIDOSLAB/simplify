@@ -33,7 +33,7 @@ def run_pruning(architecture):
             continue
         
         if isinstance(module, nn.Conv2d):
-            prune.random_structured(module, 'weight', amount=0.8, dim=0)
+            prune.random_structured(module, 'weight', amount=0.5, dim=0)
             prune.remove(module, 'weight')
     
     im = torch.randint(0, 256, ((100, 3, 224, 224)))
