@@ -1,1 +1,1 @@
-from benchmark_models import models
+from .benchmark_models import models
