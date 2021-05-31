@@ -10,8 +10,7 @@ from conv import ConvB, ConvExpand
 
 
 @torch.no_grad()
-def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
-    
+def __propagate_bias(model: nn.Module, x: nn.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
     def __propagate_biases_hook(module, input, output, name=None):
         """
@@ -81,13 +80,12 @@ def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
     return model
 
 @torch.no_grad()
-def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
-
+def __remove_zeroed(model: nn.Module, x: nn.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
     def __remove_zeroed_channels_hook(module, input, output, name):
         """
         Parameters:
-            input: idx of previously remaining channels (1 if channel is pruned, 0 if channel is not pruned)
+            input: idx of previously remaining channels (0 if channel is pruned, 1 if channel is not pruned)
             output: same for current layer
         """
         input = input[0][0]  # get first item of batch
@@ -102,9 +100,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
             module.in_features = module.weight.shape[1]
         
         # Compute remaining channels indices
-        output.data = torch.ones_like(output)
-        # if pinned:
-        #    return
+        output = torch.ones_like(output)
         
         # If not pinned: remove zeroed output channels
         shape = module.weight.shape
@@ -129,18 +125,18 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
             if getattr(module, 'bf', None) is not None:
                 module.bf.data = module.bf.data[nonzero_idx]
             
-            output.data.mul_(0)
-            output.data[:, nonzero_idx] = 1
+            output *= 0.
+            output[:, nonzero_idx] = 1
         
         if isinstance(module, nn.Conv2d):
             module.out_channels = module.weight.shape[0]
         elif isinstance(module, nn.Linear):
             module.out_features = module.weight.shape[0]
         
-        pass
+        return output
     
     def __skip_activation_hook(module, input, output):
-        output.data = input[0].data
+        return input[0]
     
     handles = []
     for name, module in model.named_modules():
@@ -154,7 +150,7 @@ def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
             handle = module.register_forward_hook(lambda m, i, o, n=name: __remove_zeroed_channels_hook(m, i, o, n))
         handles.append(handle)
     
-    x = torch.ones((1, 3, 224, 224))
+    x = torch.ones_like(x)
     model(x)
     
     for h in handles:
@@ -169,6 +165,6 @@ def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List=None) -> nn.Mod
     
     model = fuser.fuse(model)
     __propagate_bias(model, x, pinned_out)
-    __remove_zeroed(model, pinned_out)
+    __remove_zeroed(model, x, pinned_out)
     
     return model
