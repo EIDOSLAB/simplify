@@ -18,32 +18,7 @@ import simplify
 import utils
 
 
-class MockResidual(torch.nn.Module):
-    def __init__(self):
-        super(MockResidual, self).__init__()
-        self.conv_a_1 = torch.nn.Conv2d(3, 10, 5)
-        self.conv_a_2 = torch.nn.Conv2d(10, 10, 5)
-        self.conv_b_1 = torch.nn.Conv2d(3, 10, 9)
-        self.conv_c_1 = torch.nn.Conv2d(10, 1, 5)
-        
-        self.linear = torch.nn.Linear(44944, 10)
-    
-    def forward(self, x):
-        out_a = self.conv_a_1(x)
-        out_a = self.conv_a_2(out_a)
-        
-        out_b = self.conv_b_1(x)
-        
-        out_a_b = out_a + out_b
-        
-        out_c = self.conv_c_1(out_a_b)
-        
-        out_lin = self.linear(out_c.view(out_c.shape[0], -1))
-        return out_lin
-
-
 device = 'cpu'
-
 
 @torch.no_grad()
 def run_pruning(architecture):
@@ -75,8 +50,6 @@ def run_pruning(architecture):
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
     pinned_out = utils.get_pinned_out(model)
-    if isinstance(model, MockResidual):
-        pinned_out = ["conv_a_2", "conv_b_1"]
     
     model = model.to('cpu')
     model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out)
