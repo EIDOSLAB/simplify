@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from os import error
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import torch
 import torch.nn as nn
@@ -9,27 +9,9 @@ import fuser
 from conv import ConvB, ConvExpand
 
 
-# This is weird, IDK
-class no_forward_hooks():
-    """
-    Context manager to temporarily disable forward hooks
-    when execting a forward() inside a hook (i.e. avoid
-    recursion)
-    """
-    
-    def __init__(self, module: nn.Module):
-        self.module = module
-        self.hooks = module._forward_hooks
-    
-    def __enter__(self) -> None:
-        self.module._forward_hooks = OrderedDict()
-    
-    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
-        self.module._forward_hooks = self.hooks
-
-
 @torch.no_grad()
-def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
+def __propagate_bias(model: nn.Module, x, pinned_out: List) -> nn.Module:
+    
     @torch.no_grad()
     def __propagate_biases_hook(module, input, output, name=None):
         """
@@ -60,26 +42,14 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
             error('Unsupported module type:', module)
         
         # Step 2. Propagate output to next module
-        shape = module.weight.shape
+        shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
         
         if name in pinned_out:
+            # No bias is propagated for pinned layers
             return output * 0.
-            
-            pinned_module = pinned_out[name]
-            
-            if pinned_module is None:
-                # Do not propagate biases in skip connections (no downsample)
-                return output * 0.
-            
-            # Propagate only matching pruned channels in (conv2|conv3) + downsample
-            pinned_shape = pinned_module.weight.shape
-            pinned_pruned_channels = pinned_module.weight.view(pinned_shape[0], -1).sum(dim=1) == 0
-            pruned_channels = pruned_channels * pinned_pruned_channels
         
         if getattr(module, 'bias', None) is not None or getattr(module, 'bf', None) is not None:
-            # Compute mask of zeroed (pruned) channels
-            
             # Propagate only the bias values corresponding to pruned channels
             # Zero out biases of pruned channels in current layer
             if isinstance(module, nn.Linear):
@@ -98,7 +68,6 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
     handles = []
     for name, module in model.named_modules():
         if isinstance(module, (nn.Conv2d, nn.Linear)):
-            # pinned = name in pinned_out
             handle = module.register_forward_hook(lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
             handles.append(handle)
     
@@ -111,15 +80,15 @@ def __propagate_bias(model: nn.Module, x, pinned_out: Dict) -> nn.Module:
     
     return model
 
+@torch.no_grad()
+def __remove_zeroed(model: nn.Module, pinned_out: List) -> nn.Module:
 
-def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
-    """
-    TODO: doc
-    """
-    
+    @torch.no_grad()
     def __remove_zeroed_channels_hook(module, input, output, name):
         """
-            input: idx of previously remaining channels
+        Parameters:
+            input: idx of previously remaining channels (1 if channel is pruned, 0 if channel is not pruned)
+            output: same for current layer
         """
         input = input[0][0]  # get first item of batch
         
@@ -194,13 +163,9 @@ def __remove_zeroed(model: nn.Module, pinned_out: Dict) -> nn.Module:
     return model
 
 
-def simplify(model: nn.Module, x: torch.Tensor, pinned_out=None) -> nn.Module:
+def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List=None) -> nn.Module:
     if pinned_out is None:
-        pinned_out = {}
-    
-    # for module in model.modules():
-    #    if hasattr(module, "inplace"):
-    #        module.inplace = False
+        pinned_out = []
     
     model = fuser.fuse(model)
     __propagate_bias(model, x, pinned_out)

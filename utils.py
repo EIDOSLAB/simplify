@@ -18,24 +18,21 @@ def set_seed(seed):
 
 
 def get_pinned_out(model):
-    pinned_out = {}
+    pinned_out = []
     
     if isinstance(model, ResNet):
-        pinned_out = {'conv1': None}
+        pinned_out = ['conv1']
         
         for name, module in model.named_modules():
             if not isinstance(module, (BasicBlock, Bottleneck)):
                 continue
             
-            block_last = (f'{name}.conv2', module.conv2)
+            block_last = f'{name}.conv2'
             if isinstance(module, Bottleneck):
-                block_last = (f'{name}.conv3', module.conv3)
-            
+                block_last = f'{name}.conv3'
+            pinned_out.append(block_last)
+
             if module.downsample is not None:
-                pinned_out[block_last[0]] = module.downsample[0]
-                pinned_out[f'{name}.downsample.0'] = block_last[1]
-            
-            else:
-                pinned_out[block_last[0]] = None
+                pinned_out.append(f'{name}.downsample.0')
     
     return pinned_out
