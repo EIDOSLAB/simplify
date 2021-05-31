@@ -78,15 +78,7 @@ def run_pruning(architecture):
 
 
 if __name__ == '__main__':
-    random.seed(3)
-    os.environ["PYTHONHASHSEED"] = str(3)
-    np.random.seed(3)
-    torch.cuda.manual_seed(3)
-    torch.cuda.manual_seed_all(3)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    torch.manual_seed(3)
-    # torch.set_default_dtype(torch.float64)
+    utils.set_seed(3)
     
     table = []
     for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, squeezenet1_0, squeezenet1_1,
