@@ -7,18 +7,17 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 from tabulate import tabulate
-
 from torchvision.models.alexnet import alexnet
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 from torchvision.models.squeezenet import SqueezeNet, squeezenet1_0, squeezenet1_1
+from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 
 import profile
 import simplify
 import utils
 
-
 device = 'cpu'
+
 
 @torch.no_grad()
 def run_pruning(architecture):
@@ -36,7 +35,7 @@ def run_pruning(architecture):
             prune.random_structured(module, 'weight', amount=0.5, dim=0)
             prune.remove(module, 'weight')
     
-    im = torch.randint(0, 256, ((100, 3, 224, 224)))
+    im = torch.randint(0, 256, (100, 3, 224, 224))
     x = (im / 255.).to(device)
     
     for i in range(10):
@@ -90,7 +89,8 @@ if __name__ == '__main__':
     # torch.set_default_dtype(torch.float64)
     
     table = []
-    for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, squeezenet1_0, squeezenet1_1, vgg16, vgg16_bn, vgg19, vgg19_bn]:
+    for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, squeezenet1_0, squeezenet1_1,
+                         vgg16, vgg16_bn, vgg19, vgg19_bn]:
         full_time, s_time = run_pruning(architecture)
         table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}',
                       f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
