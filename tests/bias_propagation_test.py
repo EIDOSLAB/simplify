@@ -4,6 +4,7 @@ import unittest
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
+
 from torchvision.models.alexnet import alexnet
 from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
 from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
