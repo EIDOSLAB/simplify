@@ -20,8 +20,11 @@
 
 ### Status of torchvision.models
 :heavy_check_mark:: all good
+
 :x:: gives different results
+
 exception: an exception occurred
+
 skipepd: test skipped due to failing of the previous one
 
 |Architecture        | BatchNorm Folding   | Bias Propagation   | Simplification     |
