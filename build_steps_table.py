@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import torch
 from tabulate import tabulate
 from torch import nn
@@ -101,8 +103,10 @@ if __name__ == '__main__':
     root = pathlib.Path(__file__).parent.resolve()
 
     index_re = re.compile(r"<!\-\- table starts \-\->.*<!\-\- table ends \-\->", re.DOTALL)
-
-    index = ["<!-- table starts -->", table, "<!-- table ends -->"]
+    
+    updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"
+    
+    index = ["<!-- table starts -->", updated, table, "<!-- table ends -->"]
     readme = root / "README.md"
     index_txt = "\n".join(index).strip()
     readme_contents = readme.open().read()
