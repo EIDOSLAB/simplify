@@ -28,43 +28,7 @@ exception: an exception occurred
 skipped: test skipped due to failing of the previous one
 
 <!-- table starts -->
-| Architecture       | BatchNorm Folding   | Bias Propagation   | Simplification     |
-|--------------------|---------------------|--------------------|--------------------|
-| alexnet            | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg11              | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg11_bn           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg13              | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg13_bn           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg16              | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg16_bn           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg19              | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| vgg19_bn           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| resnet18           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| resnet34           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| resnet50           | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| resnet101          | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| resnet152          | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| squeezenet1_0      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| squeezenet1_1      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| densenet121        | exception           | skipped            | skipped            |
-| densenet161        | exception           | skipped            | skipped            |
-| densenet169        | exception           | skipped            | skipped            |
-| densenet201        | exception           | skipped            | skipped            |
-| inception_v3       | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| googlenet          | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| mobilenet_v2       | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| mobilenet_v3_small | :heavy_check_mark:  | :x:                | skipped            |
-| mobilenet_v3_large | :heavy_check_mark:  | :x:                | skipped            |
-| resnext50_32x4d    | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| resnext101_32x8d   | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| wide_resnet50_2    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| wide_resnet101_2   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| mnasnet0_5         | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| mnasnet0_75        | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| mnasnet1_0         | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| mnasnet1_3         | :heavy_check_mark:  | :heavy_check_mark: | exception          |
+| Architecture   | BatchNorm Folding   | Bias Propagation   | Simplification   |
+|----------------|---------------------|--------------------|------------------|
+| alexnet        | :heavy_check_mark:  | :heavy_check_mark: | exception        |
 <!-- table ends -->
