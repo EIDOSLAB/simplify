@@ -10,7 +10,7 @@ from conv import ConvB, ConvExpand
 
 
 @torch.no_grad()
-def __propagate_bias(model: nn.Module, x: nn.Tensor, pinned_out: List) -> nn.Module:
+def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
     def __propagate_biases_hook(module, input, output, name=None):
         """
@@ -80,7 +80,7 @@ def __propagate_bias(model: nn.Module, x: nn.Tensor, pinned_out: List) -> nn.Mod
     return model
 
 @torch.no_grad()
-def __remove_zeroed(model: nn.Module, x: nn.Tensor, pinned_out: List) -> nn.Module:
+def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
     def __remove_zeroed_channels_hook(module, input, output, name):
         """
