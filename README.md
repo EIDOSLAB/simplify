@@ -26,8 +26,7 @@
 exception: an exception occurred
 
 skipepd: test skipped due to failing of the previous one
-
-|Architecture        | BatchNorm Folding   | Bias Propagation   | Simplification     |
+| Architecture       | BatchNorm Folding   | Bias Propagation   | Simplification     |
 |--------------------|---------------------|--------------------|--------------------|
 | alexnet            | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 | vgg11              | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
@@ -56,7 +55,7 @@ skipepd: test skipped due to failing of the previous one
 | shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: | exception          |
 | shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | exception          |
 | mobilenet_v2       | :heavy_check_mark:  | :heavy_check_mark: | exception          |
-| mobilenet_v3_small | :heavy_check_mark:  | :heavy_check_mark: | exception          |
+| mobilenet_v3_small | :heavy_check_mark:  | :x:                | skipped            |
 | mobilenet_v3_large | :heavy_check_mark:  | :x:                | skipped            |
 | resnext50_32x4d    | :heavy_check_mark:  | :heavy_check_mark: | exception          |
 | resnext101_32x8d   | :heavy_check_mark:  | :heavy_check_mark: | exception          |
