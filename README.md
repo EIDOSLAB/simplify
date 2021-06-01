@@ -19,6 +19,10 @@
 | vgg19_bn       | 7.6872s±0.0080 | 2.3907s±0.0009            |
 
 ### Status of torchvision.models
+:heavy_check_mark:: all good
+:x:: gives different results
+exception: an exception occurred
+skipepd: test skipped due to failing of the previous one
 
 |Architecture        | BatchNorm Folding   | Bias Propagation   | Simplification     |
 |--------------------|---------------------|--------------------|--------------------|
