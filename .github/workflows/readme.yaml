@@ -1,4 +1,4 @@
-name: Build README and deploy Datasette
+name: Build README
 
 on:
   push:
@@ -26,10 +26,10 @@ jobs:
     - name: run tests
       run: python3 build_steps_table.py
 
-    - name: Update README
-      run: |-
-        python update_readme.py --rewrite
-        cat README.md
+#    - name: Update README
+#      run: |-
+#        python update_readme.py --rewrite
+#        cat README.md
 
     - name: Commit and push if README changed
       run: |-
