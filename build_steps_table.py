@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import torch
 from tabulate import tabulate
 from torch import nn
@@ -14,7 +16,7 @@ def get_mark(passed):
     if isinstance(passed, bool):
         return ":heavy_check_mark:" if passed else ":x:"
     else:
-        return str(passed)
+        return ":cursing_face:" if str(passed) == "exception" else ":man_shrugging:"
 
 
 if __name__ == '__main__':
@@ -78,7 +80,7 @@ if __name__ == '__main__':
                     
                     print("Simplification")
                     try:
-                        __remove_zeroed(model, pinned_out)
+                        __remove_zeroed(model, x, pinned_out)
                         model.eval()
                         exception = None
                         y_dest = model(input)
@@ -94,5 +96,18 @@ if __name__ == '__main__':
             
             table.append([architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp)])
     table = tabulate(table, headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification'],
-                     tablefmt='github')
-    print(table)
+                     tablefmt='github', stralign="center")
+    import pathlib
+    import re
+
+    root = pathlib.Path(__file__).parent.resolve()
+
+    index_re = re.compile(r"<!\-\- table starts \-\->.*<!\-\- table ends \-\->", re.DOTALL)
+    
+    updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"
+    
+    index = ["<!-- table starts -->", updated, table, "<!-- table ends -->"]
+    readme = root / "README.md"
+    index_txt = "\n".join(index).strip()
+    readme_contents = readme.open().read()
+    readme.open("w").write(index_re.sub(index_txt, readme_contents))
