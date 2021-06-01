@@ -30,6 +30,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         table = []
         for architecture in models:
+            grouping = False
             print(architecture.__name__)
             if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
@@ -43,6 +44,8 @@ if __name__ == '__main__':
                     continue
                 
                 if isinstance(module, nn.Conv2d):
+                    if module.groups != 1:
+                        grouping = True
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
@@ -94,8 +97,8 @@ if __name__ == '__main__':
             else:
                 passed_bp, passed_simp = "skipped", "skipped"
             
-            table.append([architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp)])
-    table = tabulate(table, headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification'],
+            table.append([architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp), str(grouping)])
+    table = tabulate(table, headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification', 'Grouping'],
                      tablefmt='github', stralign="center")
     import pathlib
     import re
