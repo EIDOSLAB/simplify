@@ -78,7 +78,7 @@ if __name__ == '__main__':
                     
                     print("Simplification")
                     try:
-                        __remove_zeroed(model, pinned_out)
+                        __remove_zeroed(model, x, pinned_out)
                         model.eval()
                         exception = None
                         y_dest = model(input)
