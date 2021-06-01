@@ -23,7 +23,7 @@ jobs:
     - name: install dependencies
       run: pip3 install -r requirements.txt
 
-    - name: run tests
+    - name: update README
       run: python3 build_steps_table.py
 
 #    - name: Update README

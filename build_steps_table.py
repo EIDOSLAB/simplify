@@ -97,11 +97,11 @@ if __name__ == '__main__':
                      tablefmt='github')
     import pathlib
     import re
-    
+
     root = pathlib.Path(__file__).parent.resolve()
-    
+
     index_re = re.compile(r"<!\-\- table starts \-\->.*<!\-\- table ends \-\->", re.DOTALL)
-    
+
     index = ["<!-- table starts -->", table, "<!-- table ends -->"]
     readme = root / "README.md"
     index_txt = "\n".join(index).strip()

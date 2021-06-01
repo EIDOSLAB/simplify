@@ -2,7 +2,6 @@
 
 [![tests](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml/badge.svg)](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml)
 
-
 | Architecture   | Pruned time    | Simplified time (p=50%)   |
 |----------------|----------------|---------------------------|
 | alexnet        | 0.2457s±0.0066 | 0.1077s±0.0020            |
@@ -19,13 +18,16 @@
 | vgg19_bn       | 7.6872s±0.0080 | 2.3907s±0.0009            |
 
 ### Status of torchvision.models
+
 :heavy_check_mark:: all good
 
 :x:: gives different results
 
 exception: an exception occurred
 
-skipepd: test skipped due to failing of the previous one
+skipped: test skipped due to failing of the previous one
+
+<!-- table starts -->
 | Architecture       | BatchNorm Folding   | Bias Propagation   | Simplification     |
 |--------------------|---------------------|--------------------|--------------------|
 | alexnet            | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
@@ -65,3 +67,4 @@ skipepd: test skipped due to failing of the previous one
 | mnasnet0_75        | :heavy_check_mark:  | :heavy_check_mark: | exception          |
 | mnasnet1_0         | :heavy_check_mark:  | :heavy_check_mark: | exception          |
 | mnasnet1_3         | :heavy_check_mark:  | :heavy_check_mark: | exception          |
+<!-- table ends -->
