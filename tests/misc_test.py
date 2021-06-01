@@ -9,6 +9,7 @@ import torch.nn.utils.prune as prune
 import utils
 from fuser import fuse
 from simplify import __propagate_bias as propagate_bias
+from simplify import __remove_zeroed as remove_zeroed
 from utils import set_seed
 
 
@@ -292,11 +293,11 @@ class MiscTest(unittest.TestCase):
 
     @torch.no_grad()
     def test_conv_grouping(self):
-        model = nn.Sequential(nn.Conv2d(3, 64, 3, 1, 1, bias=True),
+        model = nn.Sequential(nn.Conv2d(3, 128, 3, 1, 1, bias=True),
                               nn.ReLU(),
-                              nn.Conv2d(64, 64, 3, 1, 1, groups=64, bias=True),
+                              nn.Conv2d(128, 64, 3, 1, 1, groups=64, bias=True),
                               nn.ReLU(),
-                              nn.Conv2d(64, 32, 5, 1, 1, bias=True))
+                              nn.Conv2d(64, 32, 5, 1, 1, groups=2, bias=True))
 
         for module in list(model.modules())[:-1]:
             if isinstance(module, nn.Conv2d):
@@ -309,5 +310,33 @@ class MiscTest(unittest.TestCase):
         propagate_bias(model, torch.zeros((1, 3, 224, 224)), [])
         y_prop = model(x)
 
-        print(torch.max(y_src.abs() - y_prop.abs()))
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
+
+    @torch.no_grad()
+    def test_conv_dilation(self):
+        model = nn.Sequential(nn.Conv2d(3, 128, 3, 1, 1, bias=True),
+                              nn.ReLU(),
+                              nn.Conv2d(128, 64, 3, 1, 1, dilation=2, bias=True),
+                              nn.ReLU(),
+                              nn.Conv2d(64, 32, 5, 1, 1, dilation=1, bias=True))
+
+        for module in list(model.modules())[:-1]:
+            if isinstance(module, nn.Conv2d):
+                prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                prune.remove(module, 'weight')
+
+        x = torch.randn((100, 3, 224, 224))
+        y_src = model(x)
+
+        propagate_bias(model, torch.zeros((1, 3, 224, 224)), [])
+        y_prop = model(x)
+
+        with self.subTest(test='propagate_bias'):
+            self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
+
+        remove_zeroed(model, torch.zeros((1, 3, 224, 224)), [])
+        y_prop = model(x)
+
+        with self.subTest(test='remove_zeroed'):
+            self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
+    
