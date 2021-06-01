@@ -23,9 +23,9 @@
 
 :x:: gives different results
 
-exception: an exception occurred
+:cursing_face:: an exception occurred
 
-skipped: test skipped due to failing of the previous one
+:man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
 | Architecture   | BatchNorm Folding   | Bias Propagation   | Simplification   |
