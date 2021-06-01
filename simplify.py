@@ -27,7 +27,7 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         bias_feature_maps = output[0].clone()
         
         if isinstance(module, nn.Conv2d):
-            assert module.dilation[0] == 1
+            #assert module.dilation[0] == 1
             
             if getattr(module, 'bias', None) is not None:
                 module.register_parameter('bias', None)
