@@ -14,7 +14,7 @@ def get_mark(passed):
     if isinstance(passed, bool):
         return ":heavy_check_mark:" if passed else ":x:"
     else:
-        return str(passed)
+        return ":cursing_face:" if str(passed) == "exception" else ":man_shrugging:"
 
 
 if __name__ == '__main__':
@@ -94,7 +94,7 @@ if __name__ == '__main__':
             
             table.append([architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp)])
     table = tabulate(table, headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification'],
-                     tablefmt='github')
+                     tablefmt='github', stralign="center")
     import pathlib
     import re
 
