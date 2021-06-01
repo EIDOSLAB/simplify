@@ -95,4 +95,15 @@ if __name__ == '__main__':
             table.append([architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp)])
     table = tabulate(table, headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification'],
                      tablefmt='github')
-    print(table)
+    import pathlib
+    import re
+    
+    root = pathlib.Path(__file__).parent.resolve()
+    
+    index_re = re.compile(r"<!\-\- table starts \-\->.*<!\-\- table ends \-\->", re.DOTALL)
+    
+    index = ["<!-- table starts -->", table, "<!-- table ends -->"]
+    readme = root / "README.md"
+    index_txt = "\n".join(index).strip()
+    readme_contents = readme.open().read()
+    readme.open("w").write(index_re.sub(index_txt, readme_contents))

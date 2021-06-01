@@ -1,0 +1,40 @@
+name: Build README and deploy Datasette
+
+on:
+  push:
+    branches:
+    - master
+    paths-ignore:
+    - README.md
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@v2
+      # We need full history to introspect created/updated:
+      with:
+        fetch-depth: 0
+
+    - name: setup up node
+      uses: actions/setup-node@v1
+
+    - name: install dependencies
+      run: pip3 install -r requirements.txt
+
+    - name: run tests
+      run: python3 build_steps_table.py
+
+    - name: Update README
+      run: |-
+        python update_readme.py --rewrite
+        cat README.md
+
+    - name: Commit and push if README changed
+      run: |-
+        git diff
+        git config --global user.email "readme-bot@example.com"
+        git config --global user.name "README-bot"
+        git diff --quiet || (git add README.md && git commit -m "Updated README")
+        git push
