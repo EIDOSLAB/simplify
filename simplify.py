@@ -1,9 +1,11 @@
 from collections import OrderedDict
 from os import error
 from typing import Any, Dict, List
+from numpy import isin
 
 import torch
 import torch.nn as nn
+from torch.nn.modules import activation
 
 import fuser
 from conv import ConvB, ConvExpand
@@ -138,9 +140,18 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
     def __skip_activation_hook(module, input, output):
         return input[0]
     
+    # TODO: add all activation layers
+    activations = [
+        nn.ReLU,
+        nn.Tanh,
+        nn.Sigmoid,
+        nn.Hardswish
+    ]
+
     handles = []
     for name, module in model.named_modules():
-        if not isinstance(module, (nn.ReLU, nn.Linear, nn.Conv2d)):
+        # TODO: add all parameters layers
+        if not isinstance(module, (*activations, nn.Linear, nn.Conv2d)):
             continue
         
         if len(list(module.parameters())) == 0:
