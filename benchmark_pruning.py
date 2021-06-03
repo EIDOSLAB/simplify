@@ -24,8 +24,12 @@ device = 'cpu'
 def run_pruning(architecture):
     print('\n----', architecture.__name__, '----')
     
+    pretrained = True
+    if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
+        pretrained = False
+
     full_time, simplified_time = [], []
-    model = architecture(pretrained=True).to(device)
+    model = architecture(pretrained=pretrained).to(device)
     model.eval()
     
     for name, module in model.named_modules():
@@ -87,8 +91,24 @@ if __name__ == '__main__':
             full_time, s_time = run_pruning(architecture)
         except Exception as e:
             full_time, s_time = [0.], [0.]
-            
+
         table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}',
                       f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
     table = tabulate(table, headers=['Architecture', 'Pruned time', 'Simplified time (p=50%)'], tablefmt='github')
     print(table)
+
+    import datetime
+    import pathlib
+    import re
+
+    root = pathlib.Path(__file__).parent.resolve()
+
+    index_re = re.compile(r"<!\-\- benchmark starts \-\->.*<!\-\- benchmark ends \-\->", re.DOTALL)
+    
+    updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"
+    
+    index = ["<!-- table starts -->", updated, table, "<!-- table ends -->"]
+    readme = root / "README.md"
+    index_txt = "\n".join(index).strip()
+    readme_contents = readme.open().read()
+    readme.open("w").write(index_re.sub(index_txt, readme_contents))
