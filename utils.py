@@ -70,7 +70,7 @@ def get_pinned_out(model):
                 pinned_out.append(name)
 
     elif isinstance(model, MobileNetV2):
-        pinned_out = []
+        pinned_out = ['features.0.0']
 
         last_module = None
         for name, module in model.named_modules():
@@ -78,6 +78,14 @@ def get_pinned_out(model):
                 if module.groups > 1 and last_module is not None:
                     pinned_out.append(last_module)
                 last_module = name
-    
+
+            if isinstance(module, InvertedResidual_MobileNetV2):
+                block_len = len(module.conv)
+                if module.use_res_connect:
+                    pinned_out.append(f'{name}.conv.{block_len-2}')
+                    if last_block is not None:
+                        pinned_out.append(f'{last_block[0]}.conv.{len(last_block[1].conv)-2}')
+                last_block = (name, module)
+
     return pinned_out
 
