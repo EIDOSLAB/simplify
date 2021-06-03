@@ -28,7 +28,7 @@
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 03/06/2021 16:55:37
+Update timestamp 03/06/2021 17:30:42
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
@@ -54,10 +54,10 @@ Update timestamp 03/06/2021 16:55:37
 |    densenet201     |   :cursing_face:    |  :man_shrugging:   |  :man_shrugging:   |   False    |
 |    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |     googlenet      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
+| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 |    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 | mobilenet_v3_small | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 | mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
