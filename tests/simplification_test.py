@@ -11,7 +11,7 @@ from tests.benchmark_models import models
 from utils import set_seed
 
 
-class IntegrationTest(unittest.TestCase):
+class SimplificationTest(unittest.TestCase):
     def setUp(self):
         set_seed(3)
     
