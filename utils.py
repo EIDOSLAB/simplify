@@ -46,10 +46,12 @@ def get_pinned_out(model):
             if module.downsample is not None:
                 pinned_out.append(f'{name}.downsample.0')
 
-    if isinstance(model, MobileNetV3):
-        pinned_out = ['features.0.0', f'features.{len(model.features)-1}.0']
+    elif isinstance(model, MobileNetV3):
+        pinned_out = ['features.0.0']
 
         last_module = None
+        last_block = None
+
         for name, module in model.named_modules():
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
@@ -58,13 +60,16 @@ def get_pinned_out(model):
 
             if isinstance(module, InvertedResidual_MobileNetV3):
                 block_len = len(module.block)
-                #if module.use_res_connect:
-                pinned_out.append(f'{name}.block.{block_len-1}.0')
+                if module.use_res_connect:
+                    pinned_out.append(f'{name}.block.{block_len-1}.0')
+                    if last_block is not None:
+                        pinned_out.append(f'{last_block[0]}.block.{len(last_block[1].block)-1}.0')
+                last_block = (name, module)
 
             if 'fc' in name:
                 pinned_out.append(name)
 
-    if isinstance(model, MobileNetV2):
+    elif isinstance(model, MobileNetV2):
         pinned_out = []
 
         last_module = None
