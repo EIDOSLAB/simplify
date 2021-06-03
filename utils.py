@@ -11,6 +11,7 @@ from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
 from torchvision.models.mobilenetv3 import MobileNetV3, InvertedResidual as InvertedResidual_MobileNetV3 
 from torchvision.models.mobilenetv2 import MobileNetV2, InvertedResidual as InvertedResidual_MobileNetV2
 from torchvision.models.mnasnet import MNASNet, _InvertedResidual as InvertedResidual_MNASNet
+from torchvision.models.shufflenetv2 import ShuffleNetV2
 
 def set_seed(seed):
     random.seed(seed)
@@ -54,6 +55,7 @@ def get_pinned_out(model):
         for name, module in model.named_modules():
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
+                    pinned_out.append(name)
                     pinned_out.append(last_module)
                 last_module = name
 
@@ -65,7 +67,7 @@ def get_pinned_out(model):
                         pinned_out.append(f'{last_block[0]}.block.{len(last_block[1].block)-1}.0')
                 last_block = (name, module)
 
-            if 'fc' in name:
+            if 'fc2' in name:
                 pinned_out.append(name)
 
     elif isinstance(model, MobileNetV2):
@@ -104,5 +106,16 @@ def get_pinned_out(model):
                         pinned_out.append(f'{last_block[0]}.layers.{len(last_block[1].layers)-2}')
                 last_block = (name, module)
 
+    elif isinstance(model, ShuffleNetV2):
+        pinned_out = ['conv1.0']
+
+        last_module, last_block = None, None
+        for name, module in model.named_modules():
+            if isinstance(module, nn.Conv2d):
+                if module.groups > 1 and last_module is not None:
+                    pinned_out.append(last_module)
+                last_module = name
+
+    print(pinned_out)
     return pinned_out
 
