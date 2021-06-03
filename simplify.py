@@ -89,9 +89,11 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
                 output *= (pruned_channels[None, :, None, None])
                 output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan') 
                 module.bf.data.mul_(~pruned_channels[:, None, None])
-                
-        for output_channel in output[0]:
-            assert torch.unique(output_channel).shape[0] == 1
+        
+            #output[output == 0] = float('nan')
+        
+        #for output_channel in output[0]:
+        #    assert torch.unique(output_channel).shape[0] == 1
         
         return output
     
