@@ -28,7 +28,13 @@ def get_pinned_out(model):
     if isinstance(model, ResNet):
         pinned_out = ['conv1']
         
+        last_module = None
         for name, module in model.named_modules():
+            if isinstance(module, nn.Conv2d):
+                if module.groups > 1 and last_module is not None:
+                    pinned_out.append(last_module)
+                last_module = name
+
             if not isinstance(module, (BasicBlock, Bottleneck)):
                 continue
             
@@ -44,7 +50,6 @@ def get_pinned_out(model):
         pinned_out = ['features.0.0', f'features.{len(model.features)-1}.0']
 
         last_module = None
-
         for name, module in model.named_modules():
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
