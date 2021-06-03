@@ -42,7 +42,6 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
 
         # Step 1. Fuse biases of pruned channels in the previous module into the current module
         input = input[0]
-        assert torch.isinf(output).sum() == 0
 
         if torch.isnan(input).sum() > 0:       
             input[torch.isnan(input)] = 0
@@ -51,11 +50,6 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         
         bias_feature_maps = output[0].clone()
         
-        assert torch.isinf(bias_feature_maps).sum() == 0
-        assert torch.isnan(bias_feature_maps).sum() == 0
-        assert torch.isinf(output).sum() == 0
-        assert torch.isnan(output).sum() == 0
-
         if isinstance(module, nn.Conv2d):            
             if getattr(module, 'bias', None) is not None:
                 module.register_parameter('bias', None)
@@ -89,11 +83,6 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
                 output *= (pruned_channels[None, :, None, None])
                 output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan') 
                 module.bf.data.mul_(~pruned_channels[:, None, None])
-        
-            #output[output == 0] = float('nan')
-        
-        #for output_channel in output[0]:
-        #    assert torch.unique(output_channel).shape[0] == 1
         
         return output
     
