@@ -11,7 +11,7 @@ from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
 from torchvision.models.mobilenetv3 import MobileNetV3, InvertedResidual as InvertedResidual_MobileNetV3 
 from torchvision.models.mobilenetv2 import MobileNetV2, InvertedResidual as InvertedResidual_MobileNetV2
 from torchvision.models.mnasnet import MNASNet, _InvertedResidual as InvertedResidual_MNASNet
-from torchvision.models.shufflenetv2 import ShuffleNetV2
+from torchvision.models.shufflenetv2 import ShuffleNetV2, InvertedResidual as InvertedResidual_ShuffleNetV2
 
 def set_seed(seed):
     random.seed(seed)
@@ -109,13 +109,20 @@ def get_pinned_out(model):
     elif isinstance(model, ShuffleNetV2):
         pinned_out = ['conv1.0']
 
-        last_module, last_block = None, None
+        last_module = None
         for name, module in model.named_modules():
+            # works for modules within same branch
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
                     pinned_out.append(last_module)
                 last_module = name
 
-    print(pinned_out)
+            if isinstance(module, InvertedResidual_ShuffleNetV2):
+                if len(module.branch1) > 0:
+                    pinned_out.append(f'{name}.branch1.{len(module.branch1)-3}')
+            
+                if len(module.branch2) > 0:
+                    pinned_out.append(f'{name}.branch2.{len(module.branch2)-3}')
+                   
     return pinned_out
 
