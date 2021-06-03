@@ -16,6 +16,7 @@ import profile
 import simplify
 import utils
 from tests.benchmark_models import models
+from datetime import datetime
 
 device = 'cpu'
 
@@ -97,7 +98,6 @@ if __name__ == '__main__':
     table = tabulate(table, headers=['Architecture', 'Pruned time', 'Simplified time (p=50%)'], tablefmt='github')
     print(table)
 
-    import datetime
     import pathlib
     import re
 
