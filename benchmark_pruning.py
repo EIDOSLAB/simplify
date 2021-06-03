@@ -15,6 +15,7 @@ from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
 import profile
 import simplify
 import utils
+from tests.benchmark_models import models
 
 device = 'cpu'
 
@@ -81,8 +82,7 @@ if __name__ == '__main__':
     utils.set_seed(3)
     
     table = []
-    for architecture in [alexnet, resnet18, resnet34, resnet50, resnet101, resnet152, squeezenet1_0, squeezenet1_1,
-                         vgg16, vgg16_bn, vgg19, vgg19_bn]:
+    for architecture in models:
         full_time, s_time = run_pruning(architecture)
         table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}',
                       f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
