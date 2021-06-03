@@ -3,13 +3,14 @@ import random
 
 import numpy as np
 from numpy.lib import isin
+from numpy.lib.function_base import insert
 import torch
 import torch.nn as nn
-from torchvision.models.mobilenetv3 import MobileNetV3, InvertedResidual as InvertedResidual_MobileNetV3 
-from torchvision.models.mobilenetv2 import MobileNetV2, InvertedResidual as InvertedResidual_MobileNetV2
 
 from torchvision.models.resnet import ResNet, BasicBlock, Bottleneck
-
+from torchvision.models.mobilenetv3 import MobileNetV3, InvertedResidual as InvertedResidual_MobileNetV3 
+from torchvision.models.mobilenetv2 import MobileNetV2, InvertedResidual as InvertedResidual_MobileNetV2
+from torchvision.models.mnasnet import MNASNet, _InvertedResidual as InvertedResidual_MNASNet
 
 def set_seed(seed):
     random.seed(seed)
@@ -49,9 +50,7 @@ def get_pinned_out(model):
     elif isinstance(model, MobileNetV3):
         pinned_out = ['features.0.0']
 
-        last_module = None
-        last_block = None
-
+        last_module, last_block = None, None
         for name, module in model.named_modules():
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
@@ -72,7 +71,7 @@ def get_pinned_out(model):
     elif isinstance(model, MobileNetV2):
         pinned_out = ['features.0.0']
 
-        last_module = None
+        last_module, last_block = None, None
         for name, module in model.named_modules():
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
@@ -85,6 +84,24 @@ def get_pinned_out(model):
                     pinned_out.append(f'{name}.conv.{block_len-2}')
                     if last_block is not None:
                         pinned_out.append(f'{last_block[0]}.conv.{len(last_block[1].conv)-2}')
+                last_block = (name, module)
+
+    elif isinstance(model, MNASNet):
+        pinned_out = ['layers.6']
+
+        last_module, last_block = None, None
+        for name, module in model.named_modules():
+            if isinstance(module, nn.Conv2d):
+                if module.groups > 1 and last_module is not None:
+                    pinned_out.append(last_module)
+                last_module = name
+
+            if isinstance(module, InvertedResidual_MNASNet):
+                if module.apply_residual:
+                    block_len = len(module.layers)
+                    pinned_out.append(f'{name}.layers.{block_len-2}')
+                    if last_block is not None:
+                        pinned_out.append(f'{last_block[0]}.layers.{len(last_block[1].layers)-2}')
                 last_block = (name, module)
 
     return pinned_out
