@@ -94,16 +94,20 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
         
         # Remove input channels
         nonzero_idx = ~(input.view(input.shape[0], -1).sum(dim=1) == 0)
-        module.weight.data = module.weight.data[:, nonzero_idx]
-        
+
         if isinstance(module, nn.Conv2d):
-            module.in_channels = module.weight.shape[1]
+            if module.groups == 1:
+                module.weight.data = module.weight.data[:, nonzero_idx]
+                module.in_channels = module.weight.shape[1]
+
         elif isinstance(module, nn.Linear):
             module.in_features = module.weight.shape[1]
         
         # Compute remaining channels indices
         output = torch.ones_like(output)
-        
+        if isinstance(module, nn.Conv2d) and module.groups > 1:
+            return output
+            
         # If not pinned: remove zeroed output channels
         shape = module.weight.shape
         nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
