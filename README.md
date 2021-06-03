@@ -2,6 +2,7 @@
 
 [![tests](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml/badge.svg)](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml)
 
+<!-- benchmark starts -->
 | Architecture   | Pruned time    | Simplified time (p=50%)   |
 |----------------|----------------|---------------------------|
 | alexnet        | 0.2457s±0.0066 | 0.1077s±0.0020            |
@@ -16,6 +17,7 @@
 | vgg16_bn       | 6.5032s±0.0037 | 2.0776s±0.0073            |
 | vgg19          | 6.0119s±0.0489 | 2.3946s±0.0012            |
 | vgg19_bn       | 7.6872s±0.0080 | 2.3907s±0.0009            |
+<!-- benchmark ends -->
 
 ### Status of torchvision.models
 
