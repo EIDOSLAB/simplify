@@ -10,6 +10,23 @@ from torch.nn.modules import activation
 import fuser
 from conv import ConvB, ConvExpand
 
+# This is weird, IDK
+class no_forward_hooks():
+    """
+    Context manager to temporarily disable forward hooks
+    when execting a forward() inside a hook (i.e. avoid
+    recursion)
+    """
+
+    def __init__(self, module: nn.Module):
+        self.module = module
+        self.hooks = module._forward_hooks
+
+    def __enter__(self) -> None:
+        self.module._forward_hooks = OrderedDict()
+
+    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        self.module._forward_hooks = self.hooks
 
 @torch.no_grad()
 def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
@@ -22,16 +39,26 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
                     and thus should be used to update the current biases
             - output: torch.Tensor
         """
-        
+
         # Step 1. Fuse biases of pruned channels in the previous module into the current module
+        input = input[0]
+        assert torch.isinf(output).sum() == 0
+
+        if torch.isnan(input).sum() > 0:       
+            input[torch.isnan(input)] = 0
+            with no_forward_hooks(module):
+                output = module(input)
+        
         bias_feature_maps = output[0].clone()
         
-        if isinstance(module, nn.Conv2d):
-            #assert module.dilation[0] == 1
-            
+        assert torch.isinf(bias_feature_maps).sum() == 0
+        assert torch.isnan(bias_feature_maps).sum() == 0
+        assert torch.isinf(output).sum() == 0
+        assert torch.isnan(output).sum() == 0
+
+        if isinstance(module, nn.Conv2d):            
             if getattr(module, 'bias', None) is not None:
                 module.register_parameter('bias', None)
-            
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
@@ -48,19 +75,21 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         
         if name in pinned_out:
             # No bias is propagated for pinned layers
-            return output * 0.
+            return output * float('nan')
         
         if getattr(module, 'bias', None) is not None or getattr(module, 'bf', None) is not None:
             # Propagate only the bias values corresponding to pruned channels
             # Zero out biases of pruned channels in current layer
             if isinstance(module, nn.Linear):
                 output *= pruned_channels
+                output[~pruned_channels[None, :].expand_as(output)] *= float('nan')
                 module.bias.data.mul_(~pruned_channels)
             
             elif isinstance(module, ConvB):
                 output *= (pruned_channels[None, :, None, None])
+                output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan') 
                 module.bf.data.mul_(~pruned_channels[:, None, None])
-        
+                
         for output_channel in output[0]:
             assert torch.unique(output_channel).shape[0] == 1
         
@@ -150,7 +179,8 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
         nn.ReLU,
         nn.Tanh,
         nn.Sigmoid,
-        nn.Hardswish
+        nn.Hardswish,
+        nn.Hardsigmoid
     ]
 
     handles = []
