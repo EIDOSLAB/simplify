@@ -101,6 +101,7 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
                 module.in_channels = module.weight.shape[1]
 
         elif isinstance(module, nn.Linear):
+            module.weight.data = module.weight.data[:, nonzero_idx]
             module.in_features = module.weight.shape[1]
         
         # Compute remaining channels indices
