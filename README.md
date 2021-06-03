@@ -28,7 +28,7 @@
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 03/06/2021 11:30:01
+Update timestamp 03/06/2021 12:07:36
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
@@ -58,15 +58,15 @@ Update timestamp 03/06/2021 11:30:01
 | shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
 | shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
 | shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
+|    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 | mobilenet_v3_small | :heavy_check_mark:  |        :x:         |  :man_shrugging:   |    True    |
 | mobilenet_v3_large | :heavy_check_mark:  |        :x:         |  :man_shrugging:   |    True    |
 |  resnext50_32x4d   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 |  resnext101_32x8d  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 |  wide_resnet50_2   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|     mnasnet0_5     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
+|     mnasnet0_5     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+|    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+|     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
 <!-- table ends -->
