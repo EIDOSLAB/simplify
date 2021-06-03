@@ -83,7 +83,11 @@ if __name__ == '__main__':
     
     table = []
     for architecture in models:
-        full_time, s_time = run_pruning(architecture)
+        try:
+            full_time, s_time = run_pruning(architecture)
+        except Exception as e:
+            full_time, s_time = [0.], [0.]
+            
         table.append([architecture.__name__, f'{np.mean(full_time):.4f}s±{np.std(full_time):.4f}',
                       f'{np.mean(s_time):.4f}s±{np.std(s_time):.4f}'])
     table = tabulate(table, headers=['Architecture', 'Pruned time', 'Simplified time (p=50%)'], tablefmt='github')
