@@ -107,7 +107,7 @@ if __name__ == '__main__':
     
     updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"
     
-    index = ["<!-- table starts -->", updated, table, "<!-- table ends -->"]
+    index = ["<!-- benchmark starts -->", updated, table, "<!-- benchmark ends -->"]
     readme = root / "README.md"
     index_txt = "\n".join(index).strip()
     readme_contents = readme.open().read()

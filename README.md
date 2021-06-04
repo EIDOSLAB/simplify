@@ -2,7 +2,7 @@
 
 [![tests](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml/badge.svg)](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml)
 
-<!-- table starts -->
+<!-- benchmark starts -->
 Update timestamp 03/06/2021 18:18:16
 
 | Architecture       | Pruned time     | Simplified time (p=50%)   |
@@ -44,7 +44,7 @@ Update timestamp 03/06/2021 18:18:16
 | mnasnet0_75        | 1.9824s±0.0435  | 1.8158s±0.0118            |
 | mnasnet1_0         | 2.2817s±0.0178  | 2.1115s±0.0235            |
 | mnasnet1_3         | 3.4071s±0.0350  | 2.9455s±0.0616            |
-<!-- table ends -->
+<!-- benchmark ends -->
 
 ### Status of torchvision.models
 
