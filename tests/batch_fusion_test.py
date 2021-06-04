@@ -3,7 +3,6 @@ import unittest
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
-from torchvision.models import resnet18, densenet121
 from torchvision.models.squeezenet import SqueezeNet
 
 import utils
@@ -46,6 +45,6 @@ class BatchNormFusionTest(unittest.TestCase):
         im = torch.randint(0, 256, (256, 3, 224, 224))
         x = im / 255.
         
-        for architecture in [densenet121]:
+        for architecture in models:
             with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))
