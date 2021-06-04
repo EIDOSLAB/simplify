@@ -57,7 +57,7 @@ Update timestamp 03/06/2021 18:18:16
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 04/06/2021 11:31:57
+Update timestamp 04/06/2021 17:55:46
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
@@ -77,10 +77,10 @@ Update timestamp 04/06/2021 11:31:57
 |     resnet152      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |   squeezenet1_0    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|    densenet121     |   :cursing_face:    |  :man_shrugging:   |  :man_shrugging:   |   False    |
-|    densenet161     |   :cursing_face:    |  :man_shrugging:   |  :man_shrugging:   |   False    |
-|    densenet169     |   :cursing_face:    |  :man_shrugging:   |  :man_shrugging:   |   False    |
-|    densenet201     |   :cursing_face:    |  :man_shrugging:   |  :man_shrugging:   |   False    |
+|    densenet121     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
+|    densenet161     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
+|    densenet169     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
+|    densenet201     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
 |    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |     googlenet      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 | shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
