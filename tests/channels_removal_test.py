@@ -38,7 +38,7 @@ class ChannelsRemovalTest(unittest.TestCase):
             propagate_bias(model, zeros, pinned_out)
             y_src = model(x)
             
-            model = remove_zeroed(model, pinned_out)
+            model = remove_zeroed(model, zeros, pinned_out)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
