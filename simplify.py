@@ -58,12 +58,10 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
             # Propagate only the bias values corresponding to pruned channels
             # Zero out biases of pruned channels in current layer
             if isinstance(module, nn.Linear):
-                output *= pruned_channels
                 output[~pruned_channels[None, :].expand_as(output)] *= float('nan')
                 module.bias.data.mul_(~pruned_channels)
             
             elif isinstance(module, ConvB):
-                output *= (pruned_channels[None, :, None, None])
                 output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan') 
                 module.bf.data.mul_(~pruned_channels[:, None, None])
         
