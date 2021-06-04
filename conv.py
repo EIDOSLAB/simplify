@@ -15,9 +15,8 @@ class ConvB(nn.Conv2d):
 
 
 class ConvExpand(nn.Conv2d):
-    
     @staticmethod
-    def from_conv(module: ConvB, idxs, bias):
+    def from_conv(module: nn.Conv2d, idxs, bias):
         module.__class__ = ConvExpand
         setattr(module, 'idxs', idxs)
         module.register_parameter('bf', torch.nn.Parameter(bias))
