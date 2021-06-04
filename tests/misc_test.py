@@ -7,7 +7,7 @@ from torch.nn.modules.activation import ReLU6
 import torch.nn.utils.prune as prune
 
 import utils
-from fuser import fuse
+from fuser import convert_bn
 from simplify import __propagate_bias as propagate_bias
 from simplify import __remove_zeroed as remove_zeroed
 from utils import set_seed

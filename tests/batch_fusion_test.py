@@ -3,9 +3,11 @@ import unittest
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
+from torchvision.models import resnet18, densenet121
 from torchvision.models.squeezenet import SqueezeNet
 
-from fuser import fuse
+import utils
+from fuser import convert_bn
 from tests.benchmark_models import models
 from utils import set_seed
 
@@ -29,7 +31,8 @@ class BatchNormFusionTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             y_src = model(x)
-            model = fuse(model)
+            bn_folding = utils.get_bn_folding(model)
+            model = convert_bn(model, bn_folding)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
@@ -43,6 +46,6 @@ class BatchNormFusionTest(unittest.TestCase):
         im = torch.randint(0, 256, (256, 3, 224, 224))
         x = im / 255.
         
-        for architecture in models:
+        for architecture in [densenet121]:
             with self.subTest(arch=architecture, pretrained=True):
                 self.assertTrue(test_arch(architecture, x, True))

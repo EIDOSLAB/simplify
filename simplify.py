@@ -179,11 +179,13 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
     return model
 
 
-def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List=None) -> nn.Module:
+def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List=None, bn_folding: List=None) -> nn.Module:
+    if bn_folding is None:
+        bn_folding = []
     if pinned_out is None:
         pinned_out = []
-    
-    model = fuser.fuse(model)
+
+    model = fuser.convert_bn(model, bn_folding)
     __propagate_bias(model, x, pinned_out)
     __remove_zeroed(model, x, pinned_out)
     

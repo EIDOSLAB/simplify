@@ -3,6 +3,16 @@ import torch.nn as nn
 
 
 @torch.no_grad()
+def get_module(model, name):
+    module = model
+    for idx, sub in enumerate(name):
+        if idx < len(name):
+            module = getattr(module, sub)
+            
+    return module
+
+
+@torch.no_grad()
 def substitute_module(model, new_module, sub_module_names):
     """
     Substitute a nn.module in a given PyTorch model with another.
@@ -21,44 +31,41 @@ def substitute_module(model, new_module, sub_module_names):
 
 
 @torch.no_grad()
-def fuse(model, device="cpu"):
-    """
-    Fuse adjacent nn.Conv2d and nn.BatchNorm2d modules in a PyTorch model.
-    :param model: Pytorch model.
-    :param device: device on which create the new, fused module.
-    :return: PyTorch model with fused nn.Conv2d and nn.BatchNorm2d in place of the previous nn.Conv2d
-    and nn.Identity in place of previous nn.BatchNorm2d
-    """
-    skip = False
-    modules = list(model.named_modules())
-    for i, (module_name, module) in enumerate(modules):
-        if skip:
-            skip = False
-            continue
-        if isinstance(module, nn.Conv2d):
-            conv = module
-            if len(modules) > i + 1:
-                next_module = modules[i + 1]
-                if isinstance(next_module[1], nn.BatchNorm2d):
-                    batch_name, batch_module = next_module
-                    fused = fuse_conv_and_bn(conv, batch_module, device)
-                    substitute_module(model, fused, module_name.split("."))
-                    substitute_module(model, nn.Identity(), batch_name.split("."))
-                    skip = True
-            else:
-                continue
-        if isinstance(module, nn.Linear):
-            fc = module
-            if len(modules) > i + 1:
-                next_module = modules[i + 1]
-                if isinstance(next_module[1], nn.BatchNorm1d):
-                    batch_name, batch_module = next_module
-                    fused = fuse_fc_and_bn(fc, batch_module, device)
-                    substitute_module(model, fused, module_name.split("."))
-                    substitute_module(model, nn.Identity(), batch_name.split("."))
-                    skip = True
-            else:
-                continue
+def convert_bn(model, bn_folding, device="cpu"):
+    for module_pair in bn_folding:
+        preceding_name = module_pair[0].split(".")
+        bn_name = module_pair[1].split(".")
+        preceding = get_module(model, preceding_name)
+        bn = get_module(model, bn_name)
+        
+        if isinstance(preceding, nn.Linear):
+            fused_module = fuse_fc_and_bn(preceding, bn, device)
+        if isinstance(preceding, nn.Conv2d):
+            fused_module = fuse_conv_and_bn(preceding, bn, device)
+
+        substitute_module(model, fused_module, preceding_name)
+        substitute_module(model, nn.Identity(), bn_name)
+        
+    for name, module in model.named_modules():
+        if isinstance(module, nn.BatchNorm2d):
+            bn_w = module.weight.data
+            bn_b = module.bias.data
+            bn_m = module.running_mean.data
+            bn_v = module.running_var.data
+    
+            conv_w = bn_w / torch.sqrt(bn_v + module.eps)
+            conv_b = bn_b - (bn_w * bn_m) / torch.sqrt(bn_v + module.eps)
+    
+            bn_as_conv = nn.Conv2d(module.weight.shape[0], module.weight.shape[0], (1, 1))
+
+            bn_as_conv.bias.data = conv_b
+            conv_w_zero = torch.zeros_like(bn_as_conv.weight.data)
+            for ch in range(conv_w.shape[0]):
+                conv_w_zero[ch, ch] = conv_w[ch]
+            bn_as_conv.weight.data = conv_w_zero
+
+            substitute_module(model, bn_as_conv, name.split("."))
+    
     return model
 
 

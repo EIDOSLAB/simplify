@@ -6,7 +6,7 @@ import torch.nn.utils.prune as prune
 from torchvision.models import SqueezeNet
 
 import utils
-from fuser import fuse
+from fuser import convert_bn
 from simplify import __propagate_bias as propagate_bias
 from tests.benchmark_models import models
 from utils import set_seed
@@ -31,7 +31,8 @@ class BiasPropagationTest(unittest.TestCase):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
-            model = fuse(model)
+            bn_folding = utils.get_bn_folding(model)
+            model = convert_bn(model, bn_folding)
             y_src = model(x)
             
             zeros = torch.zeros(1, *x.shape[1:])
