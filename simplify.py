@@ -10,26 +10,15 @@ from torch.nn.modules import activation
 import fuser
 from conv import ConvB, ConvExpand
 
-# This is weird, IDK
-class no_forward_hooks():
-    """
-    Context manager to temporarily disable forward hooks
-    when execting a forward() inside a hook (i.e. avoid
-    recursion)
-    """
-
-    def __init__(self, module: nn.Module):
-        self.module = module
-        self.hooks = module._forward_hooks
-
-    def __enter__(self) -> None:
-        self.module._forward_hooks = OrderedDict()
-
-    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
-        self.module._forward_hooks = self.hooks
-
 @torch.no_grad()
 def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
+
+    @torch.no_grad()
+    def __remove_nan(module, input):
+        if torch.isnan(input[0]).sum() > 0:       
+            input[0][torch.isnan(input[0])] = 0
+        return input
+    
     @torch.no_grad()
     def __propagate_biases_hook(module, input, output, name=None):
         """
@@ -42,12 +31,6 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
 
         # Step 1. Fuse biases of pruned channels in the previous module into the current module
         input = input[0]
-
-        if torch.isnan(input).sum() > 0:       
-            input[torch.isnan(input)] = 0
-            with no_forward_hooks(module):
-                output = module(input)
-        
         bias_feature_maps = output[0].clone()
         
         if isinstance(module, nn.Conv2d):            
@@ -89,6 +72,8 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
     handles = []
     for name, module in model.named_modules():
         if isinstance(module, (nn.Conv2d, nn.Linear)):
+            handle = module.register_forward_pre_hook(__remove_nan)
+            handles.append(handle)
             handle = module.register_forward_hook(lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
             handles.append(handle)
     
