@@ -46,25 +46,25 @@ def convert_bn(model, bn_folding, device="cpu"):
         substitute_module(model, fused_module, preceding_name)
         substitute_module(model, nn.Identity(), bn_name)
         
-    for name, module in model.named_modules():
-        if isinstance(module, nn.BatchNorm2d):
-            bn_w = module.weight.data
-            bn_b = module.bias.data
-            bn_m = module.running_mean.data
-            bn_v = module.running_var.data
-    
-            conv_w = bn_w / torch.sqrt(bn_v + module.eps)
-            conv_b = bn_b - (bn_w * bn_m) / torch.sqrt(bn_v + module.eps)
-    
-            bn_as_conv = nn.Conv2d(module.weight.shape[0], module.weight.shape[0], (1, 1))
-
-            bn_as_conv.bias.data = conv_b
-            conv_w_zero = torch.zeros_like(bn_as_conv.weight.data)
-            for ch in range(conv_w.shape[0]):
-                conv_w_zero[ch, ch] = conv_w[ch]
-            bn_as_conv.weight.data = conv_w_zero
-
-            substitute_module(model, bn_as_conv, name.split("."))
+    # for name, module in model.named_modules():
+    #     if isinstance(module, nn.BatchNorm2d):
+    #         bn_w = module.weight.data
+    #         bn_b = module.bias.data
+    #         bn_m = module.running_mean.data
+    #         bn_v = module.running_var.data
+    #
+    #         conv_w = bn_w / torch.sqrt(bn_v + module.eps)
+    #         conv_b = bn_b - (bn_w * bn_m) / torch.sqrt(bn_v + module.eps)
+    #
+    #         bn_as_conv = nn.Conv2d(module.weight.shape[0], module.weight.shape[0], (1, 1))
+    #
+    #         bn_as_conv.bias.data = conv_b
+    #         conv_w_zero = torch.zeros_like(bn_as_conv.weight.data)
+    #         for ch in range(conv_w.shape[0]):
+    #             conv_w_zero[ch, ch] = conv_w[ch]
+    #         bn_as_conv.weight.data = conv_w_zero
+    #
+    #         substitute_module(model, bn_as_conv, name.split("."))
     
     return model
 

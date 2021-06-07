@@ -3,6 +3,7 @@ import unittest
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
+from torchvision.models import densenet121
 from torchvision.models.squeezenet import SqueezeNet
 
 import simplify
@@ -33,7 +34,8 @@ class SimplificationTest(unittest.TestCase):
             y_src = model(x)
             zeros = torch.zeros(1, *x.shape[1:])
             
-            simplify.simplify(model, zeros, pinned_out)
+            bn_folding = utils.get_bn_folding(model)
+            simplify.simplify(model, zeros, pinned_out, bn_folding)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

@@ -60,7 +60,8 @@ def run_pruning(architecture):
     pinned_out = utils.get_pinned_out(model)
     
     model = model.to('cpu')
-    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out)
+    bn_folding = utils.get_bn_folding(model)
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out, bn_folding=bn_folding)
     model = model.to(device)
     
     for i in range(10):

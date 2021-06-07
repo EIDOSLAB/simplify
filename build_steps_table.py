@@ -9,7 +9,7 @@ from torchvision.models import SqueezeNet
 import fuser
 import utils
 from simplify import __propagate_bias, __remove_zeroed
-from tests.benchmark_models import models
+from tests import models
 
 
 def get_mark(passed):
@@ -85,6 +85,7 @@ if __name__ == '__main__':
                     print("Simplification")
                     try:
                         __remove_zeroed(model, x, pinned_out)
+                        print(model)
                         model.eval()
                         exception = None
                         y_dest = model(input)
@@ -98,14 +99,16 @@ if __name__ == '__main__':
             else:
                 passed_bp, passed_simp = "skipped", "skipped"
             
-            table.append([architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp), str(grouping)])
-    table = tabulate(table, headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification', 'Grouping'],
+            table.append(
+                [architecture.__name__, get_mark(passed_bf), get_mark(passed_bp), get_mark(passed_simp), str(grouping)])
+    table = tabulate(table,
+                     headers=['Architecture', 'BatchNorm Folding', 'Bias Propagation', 'Simplification', 'Grouping'],
                      tablefmt='github', stralign="center")
     import pathlib
     import re
-
+    
     root = pathlib.Path(__file__).parent.resolve()
-
+    
     index_re = re.compile(r"<!\-\- table starts \-\->.*<!\-\- table ends \-\->", re.DOTALL)
     
     updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"

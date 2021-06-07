@@ -15,7 +15,7 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
 
     @torch.no_grad()
     def __remove_nan(module, input):
-        if torch.isnan(input[0]).sum() > 0:       
+        if torch.isnan(input[0]).sum() > 0:
             input[0][torch.isnan(input[0])] = 0
         return input
     
@@ -33,7 +33,12 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         input = input[0]
         bias_feature_maps = output[0].clone()
         
-        if isinstance(module, nn.Conv2d):            
+        shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
+        pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
+        pruned_input = input.squeeze(dim=0)
+        pruned_input = pruned_input.view(pruned_input.shape[0], -1).sum(dim=1) != 0
+        
+        if isinstance(module, nn.Conv2d):
             if getattr(module, 'bias', None) is not None:
                 module.register_parameter('bias', None)
             module = ConvB.from_conv(module, bias_feature_maps)
@@ -43,13 +48,18 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
             if getattr(module, 'bias', None) is not None:
                 module.bias.copy_(bias_feature_maps)
         
+        elif isinstance(module, nn.BatchNorm2d):
+            # TODO: if bias is missing, it must be inserted here
+            if getattr(module, 'bias', None) is not None:
+                module.bias[pruned_channels | pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_channels | pruned_input])
+                module.weight.data.mul_(~pruned_input)
+                shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
+                pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
+        
         else:
             error('Unsupported module type:', module)
         
         # Step 2. Propagate output to next module
-        shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
-        pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
-        
         if name in pinned_out:
             # No bias is propagated for pinned layers
             return output * float('nan')
@@ -62,14 +72,20 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
                 module.bias.data.mul_(~pruned_channels)
             
             elif isinstance(module, ConvB):
-                output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan') 
+                output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
                 module.bf.data.mul_(~pruned_channels[:, None, None])
+                
+            if isinstance(module, nn.BatchNorm2d):
+                output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
+                module.bias.data.mul_(~pruned_channels)
+                module.running_mean.data.mul_(~pruned_channels)
+                module.running_var.data[pruned_channels] = 1.
         
         return output
     
     handles = []
     for name, module in model.named_modules():
-        if isinstance(module, (nn.Conv2d, nn.Linear)):
+        if isinstance(module, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
             handle = module.register_forward_pre_hook(__remove_nan)
             handles.append(handle)
             handle = module.register_forward_hook(lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
@@ -106,6 +122,10 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
         elif isinstance(module, nn.Linear):
             module.weight.data = module.weight.data[:, nonzero_idx]
             module.in_features = module.weight.shape[1]
+
+        elif isinstance(module, nn.BatchNorm2d):
+            module.weight.data = module.weight.data[nonzero_idx]
+            module.num_features = module.weight.shape[0]
         
         # Compute remaining channels indices
         output = torch.ones_like(output)
@@ -160,7 +180,7 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
     handles = []
     for name, module in model.named_modules():
         # TODO: add all parameters layers
-        if not isinstance(module, (*activations, nn.Linear, nn.Conv2d)):
+        if not isinstance(module, (*activations, nn.Linear, nn.Conv2d, nn.BatchNorm2d)):
             continue
         
         if len(list(module.parameters())) == 0:
