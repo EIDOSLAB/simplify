@@ -133,9 +133,10 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
             return output
             
         # If not pinned: remove zeroed output channels
-        shape = module.weight.shape
-        nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
-        module.weight.data = module.weight.data[nonzero_idx]
+        if not isinstance(module, nn.BatchNorm2d):
+            shape = module.weight.shape
+            nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
+            module.weight.data = module.weight.data[nonzero_idx]
         
         if name in pinned_out:
             idxs = []
@@ -154,6 +155,10 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
             
             if getattr(module, 'bf', None) is not None:
                 module.bf.data = module.bf.data[nonzero_idx]
+                
+            if isinstance(module, nn.BatchNorm2d):
+                module.running_mean.data = module.running_mean.data[nonzero_idx]
+                module.running_var.data = module.running_var.data[nonzero_idx]
             
             output *= 0.
             output[:, nonzero_idx] = 1
