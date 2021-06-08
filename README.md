@@ -57,7 +57,7 @@ Update timestamp 03/06/2021 18:18:16
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 08/06/2021 12:37:16
+Update timestamp 08/06/2021 14:08:53
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
@@ -70,32 +70,32 @@ Update timestamp 08/06/2021 12:37:16
 |      vgg16_bn      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |       vgg19        | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |      vgg19_bn      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|      resnet18      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+|      resnet18      | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
 |      resnet34      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |      resnet50      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|     resnet101      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+|     resnet101      | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
 |     resnet152      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |   squeezenet1_0    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |    densenet121     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|    densenet161     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+|    densenet161     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
 |    densenet169     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|    densenet201     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+|    densenet201     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
 |    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
 |     googlenet      | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
-| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
-| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
-| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
-|    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-| mobilenet_v3_small | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-| mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|  resnext50_32x4d   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
-|  resnext101_32x8d  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |    True    |
+| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+|    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+| mobilenet_v3_small | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+| mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+|  resnext50_32x4d   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+|  resnext101_32x8d  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |  wide_resnet50_2   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-|     mnasnet0_5     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
-|     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |    True    |
+|     mnasnet0_5     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+|    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |   False    |
+|     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 <!-- table ends -->
