@@ -57,7 +57,7 @@ Update timestamp 03/06/2021 18:18:16
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 08/06/2021 14:08:53
+Update timestamp 08/06/2021 14:44:10
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
