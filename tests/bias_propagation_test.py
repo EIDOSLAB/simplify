@@ -21,13 +21,26 @@ class BiasPropagationTest(unittest.TestCase):
         def test_arch(arch, x, pretrained=False):
             model = arch(pretrained, progress=False)
             model.eval()
-            pinned_out = utils.get_pinned_out(model)
             
-            for name, module in model.named_modules():
-                if isinstance(model, SqueezeNet) and 'classifier.1' in name:
+            modules = [module for module in model.modules() if
+                       isinstance(module, (nn.Conv2d, nn.BatchNorm2d, nn.Linear))]
+            
+            for i, module in enumerate(modules):
+                
+                if i == len(modules) - 1:
                     continue
                 
                 if isinstance(module, nn.Conv2d):
+                    if module.groups != 1:
+                        grouping = True
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.remove(module, 'weight')
+                
+                if isinstance(module, nn.BatchNorm2d):
+                    prune.random_unstructured(module, 'weight', amount=0.8)
+                    prune.remove(module, 'weight')
+                
+                if isinstance(module, nn.Linear):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
@@ -36,6 +49,7 @@ class BiasPropagationTest(unittest.TestCase):
             y_src = model(x)
             
             zeros = torch.zeros(1, *x.shape[1:])
+            pinned_out = utils.get_pinned_out(model)
             propagate_bias(model, zeros, pinned_out)
             y_prop = model(x)
             
