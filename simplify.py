@@ -29,7 +29,7 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
             - output: torch.Tensor
         """
 
-        # Step 1. Fuse biases of pruned channels in the previous module into the current module
+        # STEP 1. Fuse biases of pruned channels in the previous module into the current module
         input = input[0]
         bias_feature_maps = output[0].clone()
         
@@ -39,27 +39,31 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         pruned_input = pruned_input.view(pruned_input.shape[0], -1).sum(dim=1) != 0
         
         if isinstance(module, nn.Conv2d):
+            # For a conv layer, we remove the scalar biases
+            # and use bias matrices (ConvB)
             if getattr(module, 'bias', None) is not None:
                 module.register_parameter('bias', None)
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
-            # TODO: if bias is missing, it must be inserted here
+            # For a linear layer, we can just update the scalar bias values
             if getattr(module, 'bias', None) is not None:
                 module.bias.copy_(bias_feature_maps)
+            # TODO: if bias is missing, it must be inserted here
         
         elif isinstance(module, nn.BatchNorm2d):
-            # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
+                #TODO: check if bias can be != scalar ([:, 0, 0])
                 module.bias[pruned_channels | pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_channels | pruned_input])
                 module.weight.data.mul_(~pruned_input)
                 shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
                 pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
-        
+            # TODO: if bias is missing, it must be inserted here
+
         else:
             error('Unsupported module type:', module)
         
-        # Step 2. Propagate output to next module
+        # STEP 2. Propagate output to next module
         if name in pinned_out:
             # No bias is propagated for pinned layers
             return output * float('nan')
@@ -118,6 +122,7 @@ def __remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.M
             if module.groups == 1:
                 module.weight.data = module.weight.data[:, nonzero_idx]
                 module.in_channels = module.weight.shape[1]
+            #TODO: handle when groups > 1 (if possible)
 
         elif isinstance(module, nn.Linear):
             module.weight.data = module.weight.data[:, nonzero_idx]
