@@ -4,6 +4,7 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
+from torchvision.models import SqueezeNet, inception_v3
 
 import fuser
 import utils
@@ -28,7 +29,7 @@ if __name__ == '__main__':
     
     with torch.no_grad():
         table = []
-        for architecture in models:
+        for architecture in [inception_v3]:
             grouping = False
             print(architecture.__name__)
             if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
@@ -38,26 +39,16 @@ if __name__ == '__main__':
             model = architecture(pretrained)
             model.eval()
             
-            modules = [module for module in model.modules() if
-                       isinstance(module, (nn.Conv2d, nn.BatchNorm2d, nn.Linear))]
-            
-            for i, module in enumerate(modules):
-                
-                if i == len(modules) - 1:
+            for name, module in model.named_modules():
+                if isinstance(model, SqueezeNet) and 'classifier.1' in name:
                     continue
                 
                 if isinstance(module, nn.Conv2d):
-                    if module.groups != 1:
-                        grouping = True
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
-                
+                    
                 if isinstance(module, nn.BatchNorm2d):
                     prune.random_unstructured(module, 'weight', amount=0.8)
-                    prune.remove(module, 'weight')
-                
-                if isinstance(module, nn.Linear):
-                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
             y_src = model(input)
