@@ -31,15 +31,16 @@ class SimplificationTest(unittest.TestCase):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
                     
-                if isinstance(module, nn.BatchNorm2d):
-                    prune.random_unstructured(module, 'weight', amount=0.8)
-                    prune.remove(module, 'weight')
+                #if isinstance(module, nn.BatchNorm2d):
+                #    prune.random_unstructured(module, 'weight', amount=0.8)
+                #    prune.remove(module, 'weight')
             
             y_src = model(x)
             zeros = torch.zeros(1, *x.shape[1:])
             
             bn_folding = utils.get_bn_folding(model)
             simplify.simplify(model, zeros, pinned_out, bn_folding)
+            print(model)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

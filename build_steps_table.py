@@ -47,9 +47,9 @@ if __name__ == '__main__':
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
                     
-                if isinstance(module, nn.BatchNorm2d):
-                    prune.random_unstructured(module, 'weight', amount=0.5)
-                    prune.remove(module, 'weight')
+                #if isinstance(module, nn.BatchNorm2d):
+                #    prune.random_unstructured(module, 'weight', amount=0.5)
+                #    prune.remove(module, 'weight')
             
             y_src = model(input)
             
