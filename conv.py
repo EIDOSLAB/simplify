@@ -13,6 +13,16 @@ class ConvB(nn.Conv2d):
         x = super().forward(x)
         return x + self.bf
 
+class BatchNorm2dB(nn.BatchNorm2d):
+    @staticmethod
+    def from_batchnorm(module: nn.BatchNorm2d, bias: torch.Tensor):
+        module.__clas__ = BatchNorm2dB
+        module.register_parameter('bf', torch.nn.Parameter(bias))
+        return module
+    
+    def forward(self, x):
+        x = super().forward(x)
+        return x + self.bf
 
 class ConvExpand(nn.Conv2d):
     @staticmethod
