@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 
 import fuser
-from conv import BatchNorm2dB, ConvB, ConvExpand
+from conv import ConvB, ConvExpand
 
 
 @torch.no_grad()
@@ -51,11 +51,8 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
 
             # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
-                # TODO: check if bias can be != scalar ([:, 0, 0])
-                #module.register_parameter('bias', None)
-                #module = BatchNorm2dB.from_batchnorm(module, bias_feature_maps)
                 module.bias[pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_input])
-            module.weight.data.mul_(~pruned_input)
+            module.weight.data.mul_(~pruned_input) # Mark corresponding weights to be pruned
 
         else:
             error('Unsupported module type:', module)
