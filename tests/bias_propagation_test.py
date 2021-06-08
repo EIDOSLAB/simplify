@@ -30,6 +30,10 @@ class BiasPropagationTest(unittest.TestCase):
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
+                    
+                if isinstance(module, nn.BatchNorm2d):
+                    prune.random_unstructured(module, 'weight', amount=0.8)
+                    prune.remove(module, 'weight')
             
             bn_folding = utils.get_bn_folding(model)
             model = convert_bn(model, bn_folding)

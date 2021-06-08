@@ -4,7 +4,7 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet
+from torchvision.models import SqueezeNet, densenet121
 
 import fuser
 import utils
@@ -47,6 +47,10 @@ if __name__ == '__main__':
                     if module.groups != 1:
                         grouping = True
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.remove(module, 'weight')
+                    
+                if isinstance(module, nn.BatchNorm2d):
+                    prune.random_unstructured(module, 'weight', amount=0.8)
                     prune.remove(module, 'weight')
             
             y_src = model(input)
