@@ -1,14 +1,13 @@
-from collections import OrderedDict
 from os import error
-from typing import Any, Dict, List
-from numpy import isin
+from os import error
+from typing import List
 
 import torch
 import torch.nn as nn
-from torch.nn.modules import activation
 
 import fuser
 from conv import ConvB, ConvExpand
+
 
 @torch.no_grad()
 def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
@@ -33,8 +32,6 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         input = input[0]
         bias_feature_maps = output[0].clone()
         
-        shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
-        pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
         pruned_input = input.squeeze(dim=0)
         pruned_input = pruned_input.view(pruned_input.shape[0], -1).sum(dim=1) != 0
         
@@ -54,16 +51,17 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         elif isinstance(module, nn.BatchNorm2d):
             if getattr(module, 'bias', None) is not None:
                 #TODO: check if bias can be != scalar ([:, 0, 0])
-                module.bias[pruned_channels | pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_channels | pruned_input])
+                module.bias[pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_input])
                 module.weight.data.mul_(~pruned_input)
-                shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
-                pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
             # TODO: if bias is missing, it must be inserted here
 
         else:
             error('Unsupported module type:', module)
         
         # STEP 2. Propagate output to next module
+        shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
+        pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
+        
         if name in pinned_out:
             # No bias is propagated for pinned layers
             return output * float('nan')
