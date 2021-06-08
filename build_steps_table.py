@@ -4,7 +4,6 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet, densenet121
 
 import fuser
 import utils
@@ -39,8 +38,12 @@ if __name__ == '__main__':
             model = architecture(pretrained)
             model.eval()
             
-            for name, module in model.named_modules():
-                if isinstance(model, SqueezeNet) and 'classifier.1' in name:
+            modules = [module for module in model.modules() if
+                       isinstance(module, (nn.Conv2d, nn.BatchNorm2d, nn.Linear))]
+            
+            for i, module in enumerate(modules):
+                
+                if i == len(modules) - 1:
                     continue
                 
                 if isinstance(module, nn.Conv2d):
@@ -48,9 +51,13 @@ if __name__ == '__main__':
                         grouping = True
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
-                    
+                
                 if isinstance(module, nn.BatchNorm2d):
                     prune.random_unstructured(module, 'weight', amount=0.8)
+                    prune.remove(module, 'weight')
+                
+                if isinstance(module, nn.Linear):
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
             y_src = model(input)
