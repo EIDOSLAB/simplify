@@ -44,11 +44,11 @@ if __name__ == '__main__':
                     continue
                 
                 if isinstance(module, nn.Conv2d):
-                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                    prune.random_structured(module, 'weight', amount=0.5, dim=0)
                     prune.remove(module, 'weight')
                     
                 if isinstance(module, nn.BatchNorm2d):
-                    prune.random_unstructured(module, 'weight', amount=0.8)
+                    prune.random_unstructured(module, 'weight', amount=0.5)
                     prune.remove(module, 'weight')
             
             y_src = model(input)
