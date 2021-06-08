@@ -54,7 +54,6 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
                 #TODO: check if bias can be != scalar ([:, 0, 0])
                 module.bias[pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_input])
                 module.weight.data.mul_(~pruned_input)
-            # TODO: if bias is missing, it must be inserted here
 
         else:
             error('Unsupported module type:', module)
