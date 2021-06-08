@@ -57,7 +57,7 @@ Update timestamp 03/06/2021 18:18:16
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 04/06/2021 17:55:46
+Update timestamp 08/06/2021 10:31:20
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
@@ -78,7 +78,7 @@ Update timestamp 04/06/2021 17:55:46
 |   squeezenet1_0    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |    densenet121     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
-|    densenet161     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
+|    densenet161     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |    densenet169     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
 |    densenet201     | :heavy_check_mark:  | :heavy_check_mark: |        :x:         |   False    |
 |    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
