@@ -36,7 +36,7 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
         pruned_input = input.squeeze(dim=0)
-        pruned_input = pruned_input.view(pruned_input.shape[0], -1).sum(dim=1) != 0
+        pruned_input = pruned_input.view(pruned_input.shape[0], -1).sum(dim=1) == 0
         
         if isinstance(module, nn.Conv2d):
             # For a conv layer, we remove the scalar biases
@@ -54,9 +54,9 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
         elif isinstance(module, nn.BatchNorm2d):
             # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
-                #TODO: check if bias can be != scalar ([:, 0, 0])
-                module.bias[pruned_channels | pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_channels | pruned_input])
-                module.weight.data.mul_(~pruned_input)
+                # TODO: check if bias can be != scalar ([:, 0, 0])
+                module.bias[pruned_channels | ~pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_channels | ~pruned_input])
+                module.weight.data.mul_(pruned_input) # Mark corresponding weight to be removed
                 shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
                 pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
 
