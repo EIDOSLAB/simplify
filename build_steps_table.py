@@ -4,7 +4,7 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet, inception_v3
+from torchvision.models import SqueezeNet, inception_v3, resnet18
 
 import fuser
 import utils
@@ -94,6 +94,7 @@ if __name__ == '__main__':
                         print(
                             f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_dest.argmax(dim=1)).sum()}/{y_dest.shape[0]}')
                     except Exception as e:
+                        print(e)
                         passed_simp = "exception"
                 else:
                     passed_simp = "skipped"
