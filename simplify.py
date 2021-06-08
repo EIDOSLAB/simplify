@@ -46,19 +46,19 @@ def __propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.
             module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
+            # TODO: if bias is missing, it must be inserted here
             # For a linear layer, we can just update the scalar bias values
             if getattr(module, 'bias', None) is not None:
                 module.bias.copy_(bias_feature_maps)
-            # TODO: if bias is missing, it must be inserted here
         
         elif isinstance(module, nn.BatchNorm2d):
+            # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
                 #TODO: check if bias can be != scalar ([:, 0, 0])
                 module.bias[pruned_channels | pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_channels | pruned_input])
                 module.weight.data.mul_(~pruned_input)
                 shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
                 pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
-            # TODO: if bias is missing, it must be inserted here
 
         else:
             error('Unsupported module type:', module)
