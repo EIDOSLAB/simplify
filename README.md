@@ -44,6 +44,7 @@ Update timestamp 08/06/2021 16:11:45
 | mnasnet0_75        | 2.2768s ± 0.0472  | 1.9868s ± 0.0481  |
 | mnasnet1_0         | 2.6419s ± 0.0527  | 2.3018s ± 0.0273  |
 | mnasnet1_3         | 3.6410s ± 0.0518  | 3.0887s ± 0.0546  |
+
 <!-- benchmark ends -->
 
 ### Status of torchvision.models
@@ -98,4 +99,5 @@ Update timestamp 08/06/2021 17:22:58
 |    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
+
 <!-- table ends -->

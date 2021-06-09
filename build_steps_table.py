@@ -4,10 +4,10 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet, inception_v3, resnet18, densenet121
+from torchvision.models import SqueezeNet
 
-import utils
 import simplify
+import utils
 from tests import models
 
 
@@ -45,8 +45,8 @@ if __name__ == '__main__':
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
-                    
-                #if isinstance(module, nn.BatchNorm2d):
+                
+                # if isinstance(module, nn.BatchNorm2d):
                 #    prune.random_unstructured(module, 'weight', amount=0.5)
                 #    prune.remove(module, 'weight')
             

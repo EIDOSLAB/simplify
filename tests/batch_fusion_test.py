@@ -5,8 +5,8 @@ import torch.nn as nn
 import torch.nn.utils.prune as prune
 from torchvision.models.squeezenet import SqueezeNet
 
-import utils
 import simplify
+import utils
 from tests.benchmark_models import models
 from utils import set_seed
 
@@ -28,8 +28,8 @@ class BatchNormFusionTest(unittest.TestCase):
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
-                    
-                #if isinstance(module, nn.BatchNorm2d):
+                
+                # if isinstance(module, nn.BatchNorm2d):
                 #    prune.random_unstructured(module, 'weight', amount=0.8)
                 #    prune.remove(module, 'weight')
             

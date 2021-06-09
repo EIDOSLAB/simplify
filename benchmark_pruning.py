@@ -1,22 +1,17 @@
-import os
-import random
 import time
+from datetime import datetime
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
 from tabulate import tabulate
-from torchvision.models.alexnet import alexnet
-from torchvision.models.resnet import resnet18, resnet34, resnet50, resnet101, resnet152
-from torchvision.models.squeezenet import SqueezeNet, squeezenet1_0, squeezenet1_1
-from torchvision.models.vgg import vgg16, vgg16_bn, vgg19, vgg19_bn
+from torchvision.models.squeezenet import SqueezeNet
 
 import profile
 import simplify
 import utils
 from tests.benchmark_models import models
-from datetime import datetime
 
 device = 'cpu'
 
@@ -28,7 +23,7 @@ def run_pruning(architecture, amount):
     pretrained = True
     if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
         pretrained = False
-
+    
     full_time, simplified_time = [], []
     model = architecture(pretrained=pretrained).to(device)
     model.eval()
@@ -40,8 +35,8 @@ def run_pruning(architecture, amount):
         if isinstance(module, nn.Conv2d):
             prune.random_structured(module, 'weight', amount=amount, dim=0)
             prune.remove(module, 'weight')
-            
-        #if isinstance(module, nn.BatchNorm2d):
+        
+        # if isinstance(module, nn.BatchNorm2d):
         #    prune.random_unstructured(module, 'weight', amount=amount)
         #    prune.remove(module, 'weight')
     
@@ -99,17 +94,17 @@ if __name__ == '__main__':
             full_time, s_time = run_pruning(architecture, amount)
         except Exception as e:
             full_time, s_time = [0.], [0.]
-
+        
         table.append([architecture.__name__, f'{np.mean(full_time):.4f}s ± {np.std(full_time):.4f}',
                       f'{np.mean(s_time):.4f}s ± {np.std(s_time):.4f}'])
     table = tabulate(table, headers=['Architecture', 'Pruned time', 'Simplified time'], tablefmt='github')
     print(table)
-
+    
     import pathlib
     import re
-
+    
     root = pathlib.Path(__file__).parent.resolve()
-
+    
     index_re = re.compile(r"<!\-\- benchmark starts \-\->.*<!\-\- benchmark ends \-\->", re.DOTALL)
     
     updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"

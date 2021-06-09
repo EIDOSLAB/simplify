@@ -1,13 +1,14 @@
+from os import error
+from typing import List
+
 import torch
 import torch.nn as nn
 
-from os import error
-from typing import List
 from .layers import ConvB
+
 
 @torch.no_grad()
 def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
-
     @torch.no_grad()
     def __remove_nan(module, input):
         if torch.isnan(input[0]).sum() > 0:
@@ -23,7 +24,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
                     and thus should be used to update the current biases
             - output: torch.Tensor
         """
-
+        
         # STEP 1. Fuse biases of pruned channels in the previous module into the current module
         input = input[0]
         bias_feature_maps = output[0].clone()
@@ -44,12 +45,12 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         elif isinstance(module, nn.BatchNorm2d):
             pruned_input = input.squeeze(dim=0)
             pruned_input = pruned_input.view(pruned_input.shape[0], -1).sum(dim=1) != 0
-
+            
             # TODO: if bias is missing, it must be inserted here
             if getattr(module, 'bias', None) is not None:
                 module.bias[pruned_input].copy_(bias_feature_maps[:, 0, 0][pruned_input])
-            module.weight.data.mul_(~pruned_input) # Mark corresponding weights to be pruned
-
+            module.weight.data.mul_(~pruned_input)  # Mark corresponding weights to be pruned
+        
         else:
             error('Unsupported module type:', module)
         
@@ -71,7 +72,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             elif isinstance(module, ConvB):
                 output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
                 module.bf.data.mul_(~pruned_channels[:, None, None])
-                
+            
             if isinstance(module, nn.BatchNorm2d):
                 output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
                 module.bias.data.mul_(~pruned_channels)

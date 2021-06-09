@@ -13,6 +13,7 @@ class ConvB(nn.Conv2d):
         x = super().forward(x)
         return x + self.bf
 
+
 class ConvExpand(nn.Conv2d):
     @staticmethod
     def from_conv(module: nn.Conv2d, idxs, bias):

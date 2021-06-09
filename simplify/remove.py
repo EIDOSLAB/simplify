@@ -103,4 +103,3 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         h.remove()
     
     return model
-
