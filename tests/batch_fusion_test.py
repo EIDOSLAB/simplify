@@ -35,7 +35,7 @@ class BatchNormFusionTest(unittest.TestCase):
             
             y_src = model(x)
             bn_folding = utils.get_bn_folding(model)
-            model = simplify.convert_bn(model, bn_folding)
+            model = simplify.fuse(model, bn_folding)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

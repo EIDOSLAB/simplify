@@ -36,7 +36,7 @@ class ChannelsRemovalTest(unittest.TestCase):
             pinned_out = utils.get_pinned_out(model)
             
             bn_folding = utils.get_bn_folding(model)
-            model = simplify.convert_bn(model, bn_folding)
+            model = simplify.fuse(model, bn_folding)
             zeros = torch.zeros(1, *x.shape[1:])
             simplify.propagate_bias(model, zeros, pinned_out)
             y_src = model(x)

@@ -8,7 +8,7 @@ def get_module(model, name):
     for idx, sub in enumerate(name):
         if idx < len(name):
             module = getattr(module, sub)
-            
+    
     return module
 
 
@@ -31,55 +31,39 @@ def substitute_module(model, new_module, sub_module_names):
 
 
 @torch.no_grad()
-def convert_bn(model, bn_folding, device="cpu"):
+def fuse(model, bn_folding):
     for module_pair in bn_folding:
+        fused_module = None
+        
         preceding_name = module_pair[0].split(".")
         bn_name = module_pair[1].split(".")
         preceding = get_module(model, preceding_name)
         bn = get_module(model, bn_name)
         
         if isinstance(preceding, nn.Linear):
-            fused_module = fuse_fc_and_bn(preceding, bn, device)
+            fused_module = fuse_fc_and_bn(preceding, bn)
         if isinstance(preceding, nn.Conv2d):
-            fused_module = fuse_conv_and_bn(preceding, bn, device)
-
-        substitute_module(model, fused_module, preceding_name)
-        substitute_module(model, nn.Identity(), bn_name)
+            fused_module = fuse_conv_and_bn(preceding, bn)
         
-    # for name, module in model.named_modules():
-    #     if isinstance(module, nn.BatchNorm2d):
-    #         bn_w = module.weight.data
-    #         bn_b = module.bias.data
-    #         bn_m = module.running_mean.data
-    #         bn_v = module.running_var.data
-    #
-    #         conv_w = bn_w / torch.sqrt(bn_v + module.eps)
-    #         conv_b = bn_b - (bn_w * bn_m) / torch.sqrt(bn_v + module.eps)
-    #
-    #         bn_as_conv = nn.Conv2d(module.weight.shape[0], module.weight.shape[0], (1, 1))
-    #
-    #         bn_as_conv.bias.data = conv_b
-    #         conv_w_zero = torch.zeros_like(bn_as_conv.weight.data)
-    #         for ch in range(conv_w.shape[0]):
-    #             conv_w_zero[ch, ch] = conv_w[ch]
-    #         bn_as_conv.weight.data = conv_w_zero
-    #
-    #         substitute_module(model, bn_as_conv, name.split("."))
+        if fused_module is not None:
+            substitute_module(model, fused_module, preceding_name)
+            substitute_module(model, nn.Identity(), bn_name)
     
     return model
 
 
 @torch.no_grad()
-def fuse_conv_and_bn(conv, bn, device):
+def fuse_conv_and_bn(conv, bn):
     """
     Perform modules fusion.
     :param conv: nn.Conv2d module.
     :param bn: nn.BatchNorm2d module.
-    :param device: Device on which build the new nn.Conv2d module.
     :return: nn.Conv2d originated from $conv$ and $bn$ fusion.
     """
     # https://tehnokv.com/posts/fusing-batchnorm-and-conv/
     # init
+    device = conv.weight.device
+    
     fusedconv = nn.Conv2d(in_channels=conv.in_channels,
                           out_channels=conv.out_channels,
                           kernel_size=conv.kernel_size,
@@ -112,8 +96,10 @@ def fuse_conv_and_bn(conv, bn, device):
 
 
 @torch.no_grad()
-def fuse_fc_and_bn(fc, bn, device):
-    fusedlinear = nn.Linear(in_features=fc.in_features, out_features=fc.out_features, bias=True)
+def fuse_fc_and_bn(fc, bn):
+    device = fc.weight.device
+    
+    fusedlinear = nn.Linear(in_features=fc.in_features, out_features=fc.out_features, bias=True).to(device)
     
     bn_weight = bn.weight.to(torch.double)
     bn_bias = bn.bias.to(torch.double)

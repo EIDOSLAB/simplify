@@ -55,7 +55,7 @@ if __name__ == '__main__':
             print("BatchNorm Folding")
             try:
                 bn_folding = utils.get_bn_folding(model)
-                model = simplify.convert_bn(model, bn_folding)
+                model = simplify.fuse(model, bn_folding)
                 model.eval()
                 exception = None
                 y_dest = model(input)

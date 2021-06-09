@@ -3,7 +3,7 @@ import torch.nn as nn
 from typing import List
 
 from . import layers
-from .fuse import convert_bn
+from .fuse import fuse
 from .propagate import propagate_bias
 from .remove import remove_zeroed
 
@@ -13,7 +13,7 @@ def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List=None, bn_foldin
     if pinned_out is None:
         pinned_out = []
 
-    convert_bn(model, bn_folding)
+    fuse(model, bn_folding)
     propagate_bias(model, x, pinned_out)
     remove_zeroed(model, x, pinned_out)
     

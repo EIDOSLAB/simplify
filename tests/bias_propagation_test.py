@@ -34,7 +34,7 @@ class BiasPropagationTest(unittest.TestCase):
                 #    prune.remove(module, 'weight')
             
             bn_folding = utils.get_bn_folding(model)
-            model = simplify.convert_bn(model, bn_folding)
+            model = simplify.fuse(model, bn_folding)
             y_src = model(x)
             
             zeros = torch.zeros(1, *x.shape[1:])
