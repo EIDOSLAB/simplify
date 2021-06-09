@@ -6,9 +6,8 @@ from torch import nn
 from torch.nn.utils import prune
 from torchvision.models import SqueezeNet, inception_v3, resnet18
 
-import fuser
 import utils
-from simplify import __propagate_bias, __remove_zeroed
+import simplify
 from tests import models
 
 
@@ -56,7 +55,7 @@ if __name__ == '__main__':
             print("BatchNorm Folding")
             try:
                 bn_folding = utils.get_bn_folding(model)
-                model = fuser.convert_bn(model, bn_folding)
+                model = simplify.convert_bn(model, bn_folding)
                 model.eval()
                 exception = None
                 y_dest = model(input)
@@ -72,7 +71,7 @@ if __name__ == '__main__':
                 
                 print("Bias Propagation")
                 try:
-                    __propagate_bias(model, x, pinned_out)
+                    simplify.propagate_bias(model, x, pinned_out)
                     model.eval()
                     exception = None
                     y_dest = model(input)
@@ -86,7 +85,7 @@ if __name__ == '__main__':
                     
                     print("Simplification")
                     try:
-                        __remove_zeroed(model, x, pinned_out)
+                        simplify.remove_zeroed(model, x, pinned_out)
                         model.eval()
                         exception = None
                         y_dest = model(input)
