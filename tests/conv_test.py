@@ -27,6 +27,7 @@ class ConvBTest(unittest.TestCase):
 
 
 class ConvExpandTest(unittest.TestCase):
+    #TODO update __repr__ with correct output size
     def setUp(self):
         set_seed(3)
     

@@ -5,8 +5,17 @@ import torch.nn as nn
 
 from .layers import ConvExpand
 
+
 @torch.no_grad()
 def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
+    @torch.no_grad()
+    def __remove_nan(module, input):
+        nan_idx = torch.isnan(input[0])
+        new_input = input[0].clone()
+        new_input[~nan_idx] = 0
+        new_input[nan_idx] = 1
+        return (new_input, *input[1:])
+    
     @torch.no_grad()
     def __remove_zeroed_channels_hook(module, input, output, name):
         """
@@ -18,26 +27,26 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         
         # Remove input channels
         nonzero_idx = ~(input.view(input.shape[0], -1).sum(dim=1) == 0)
-
+        
         if isinstance(module, nn.Conv2d):
             if module.groups == 1:
                 module.weight.data = module.weight.data[:, nonzero_idx]
                 module.in_channels = module.weight.shape[1]
-            #TODO: handle when groups > 1 (if possible)
-
+            # TODO: handle when groups > 1 (if possible)
+        
         elif isinstance(module, nn.Linear):
             module.weight.data = module.weight.data[:, nonzero_idx]
             module.in_features = module.weight.shape[1]
-
+        
         elif isinstance(module, nn.BatchNorm2d):
             module.weight.data = module.weight.data[nonzero_idx]
             module.num_features = module.weight.shape[0]
         
         # Compute remaining channels indices
-        output = torch.ones_like(output)
+        output = torch.ones_like(output) * float('nan')
         if isinstance(module, nn.Conv2d) and module.groups > 1:
             return output
-            
+        
         # If not pinned: remove zeroed output channels
         if not isinstance(module, nn.BatchNorm2d):
             shape = module.weight.shape
@@ -61,13 +70,13 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             
             if getattr(module, 'bf', None) is not None:
                 module.bf.data = module.bf.data[nonzero_idx]
-                
+            
             if isinstance(module, nn.BatchNorm2d):
                 module.running_mean.data = module.running_mean.data[nonzero_idx]
                 module.running_var.data = module.running_var.data[nonzero_idx]
             
-            output *= 0.
-            output[:, nonzero_idx] = 1
+            output = torch.zeros_like(output)
+            output[:, nonzero_idx] = float('nan')
         
         if isinstance(module, nn.Conv2d):
             module.out_channels = module.weight.shape[0]
@@ -76,32 +85,18 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         
         return output
     
-    def __skip_activation_hook(module, input, output):
-        return input[0]
-    
-    # TODO: add all activation layers
-    activations = [
-        nn.ReLU,
-        nn.Tanh,
-        nn.Sigmoid,
-        nn.Hardswish,
-        nn.Hardsigmoid
-    ]
-
     handles = []
     for name, module in model.named_modules():
         # TODO: add all parameters layers
-        if not isinstance(module, (*activations, nn.Linear, nn.Conv2d, nn.BatchNorm2d)):
+        if not isinstance(module, (nn.Linear, nn.Conv2d, nn.BatchNorm2d)):
             continue
         
-        if len(list(module.parameters())) == 0:
-            # Skip activation/identity etc layers
-            handle = module.register_forward_hook(__skip_activation_hook)
-        else:
-            handle = module.register_forward_hook(lambda m, i, o, n=name: __remove_zeroed_channels_hook(m, i, o, n))
+        handle = module.register_forward_pre_hook(__remove_nan)
+        handles.append(handle)
+        handle = module.register_forward_hook(lambda m, i, o, n=name: __remove_zeroed_channels_hook(m, i, o, n))
         handles.append(handle)
     
-    x = torch.ones_like(x)
+    x = torch.ones_like(x) * float("nan")
     model(x)
     
     for h in handles:
