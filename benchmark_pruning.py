@@ -35,10 +35,6 @@ def run_pruning(architecture, amount):
         if isinstance(module, nn.Conv2d):
             prune.random_structured(module, 'weight', amount=amount, dim=0)
             prune.remove(module, 'weight')
-        
-        # if isinstance(module, nn.BatchNorm2d):
-        #    prune.random_unstructured(module, 'weight', amount=amount)
-        #    prune.remove(module, 'weight')
     
     im = torch.randint(0, 256, (100, 3, 224, 224))
     x = (im / 255.).to(device)
