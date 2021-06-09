@@ -38,7 +38,6 @@ class SimplificationTest(unittest.TestCase):
             
             bn_folding = utils.get_bn_folding(model)
             simplify.simplify(model, zeros, pinned_out, bn_folding)
-            print(model)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
