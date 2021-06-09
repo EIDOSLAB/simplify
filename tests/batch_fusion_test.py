@@ -18,6 +18,9 @@ class BatchNormFusionTest(unittest.TestCase):
     def test_batchnorm_fusion(self):
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False):
+            if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
+                pretrained = False
+                
             model = arch(pretrained, progress=False)
             model.eval()
             
@@ -28,10 +31,6 @@ class BatchNormFusionTest(unittest.TestCase):
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
-                
-                # if isinstance(module, nn.BatchNorm2d):
-                #    prune.random_unstructured(module, 'weight', amount=0.8)
-                #    prune.remove(module, 'weight')
             
             y_src = model(x)
             bn_folding = utils.get_bn_folding(model)
