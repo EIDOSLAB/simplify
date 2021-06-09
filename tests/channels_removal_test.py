@@ -6,9 +6,7 @@ import torch.nn.utils.prune as prune
 from torchvision.models.squeezenet import SqueezeNet
 
 import utils
-from fuser import convert_bn
-from simplify import __propagate_bias as propagate_bias
-from simplify import __remove_zeroed as remove_zeroed
+import simplify
 from tests.benchmark_models import models
 from utils import set_seed
 
@@ -38,12 +36,12 @@ class ChannelsRemovalTest(unittest.TestCase):
             pinned_out = utils.get_pinned_out(model)
             
             bn_folding = utils.get_bn_folding(model)
-            model = convert_bn(model, bn_folding)
+            model = simplify.convert_bn(model, bn_folding)
             zeros = torch.zeros(1, *x.shape[1:])
-            propagate_bias(model, zeros, pinned_out)
+            simplify.propagate_bias(model, zeros, pinned_out)
             y_src = model(x)
             
-            model = remove_zeroed(model, zeros, pinned_out)
+            model = simplify.remove_zeroed(model, zeros, pinned_out)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

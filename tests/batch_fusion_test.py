@@ -6,7 +6,7 @@ import torch.nn.utils.prune as prune
 from torchvision.models.squeezenet import SqueezeNet
 
 import utils
-from fuser import convert_bn
+import simplify
 from tests.benchmark_models import models
 from utils import set_seed
 
@@ -35,7 +35,7 @@ class BatchNormFusionTest(unittest.TestCase):
             
             y_src = model(x)
             bn_folding = utils.get_bn_folding(model)
-            model = convert_bn(model, bn_folding)
+            model = simplify.convert_bn(model, bn_folding)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')

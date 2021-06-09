@@ -6,10 +6,7 @@ import torch.nn as nn
 from torch.nn.modules.activation import ReLU6
 import torch.nn.utils.prune as prune
 
-import utils
-from fuser import convert_bn
-from simplify import __propagate_bias as propagate_bias
-from simplify import __remove_zeroed as remove_zeroed
+import simplify
 from utils import set_seed
 
 
@@ -61,7 +58,7 @@ class MiscTest(unittest.TestCase):
         zeros = torch.zeros(1, 128)
         
         y_src = model(x)
-        propagate_bias(model, zeros, [])
+        simplify.propagate_bias(model, zeros, [])
         y_prop = model(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -83,7 +80,7 @@ class MiscTest(unittest.TestCase):
         zeros = torch.zeros(1, 3, 128, 128)
         
         y_src = model(x)
-        model = propagate_bias(model, zeros, [])
+        model = simplify.propagate_bias(model, zeros, [])
         y_prop = model(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -128,7 +125,7 @@ class MiscTest(unittest.TestCase):
         x = torch.randn((10, 3, 128, 128))
         
         y_src = residual(x)
-        propagate_bias(residual, torch.zeros((1, 3, 128, 128)), {})
+        simplify.propagate_bias(residual, torch.zeros((1, 3, 128, 128)), {})
         y_prop = residual(x)
         self.assertFalse(torch.allclose(y_src, y_prop, atol=1e-6))
         
@@ -137,7 +134,7 @@ class MiscTest(unittest.TestCase):
         pinned = {
             'module2': [residual.module0]
         }
-        propagate_bias(residual, torch.zeros((1, 3, 128, 128)), pinned)
+        simplify.propagate_bias(residual, torch.zeros((1, 3, 128, 128)), pinned)
         y_prop = residual(x)
         self.assertFalse(torch.allclose(y_src, y_prop, atol=1e-6))
         
@@ -147,7 +144,7 @@ class MiscTest(unittest.TestCase):
             'module0': [residual.module2],
             'module2': [residual.module0]
         }
-        propagate_bias(residual, torch.zeros((1, 3, 128, 128)), pinned)
+        simplify.propagate_bias(residual, torch.zeros((1, 3, 128, 128)), pinned)
         y_prop = residual(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -195,7 +192,7 @@ class MiscTest(unittest.TestCase):
             'module1': [residual.module2],
             'module2': [residual.module1]
         }
-        propagate_bias(residual, torch.zeros((10, 3, 128, 128)), pinned)
+        simplify.propagate_bias(residual, torch.zeros((10, 3, 128, 128)), pinned)
         y_prop = residual(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -244,7 +241,7 @@ class MiscTest(unittest.TestCase):
             'module1': [residual.module2],
             'module2': [residual.module1]
         }
-        propagate_bias(residual, torch.zeros((1, 10)), pinned)
+        simplify.propagate_bias(residual, torch.zeros((1, 10)), pinned)
         y_prop = residual(x)
         
         print('abs max:', (y_src - y_prop).abs().max())
@@ -286,7 +283,7 @@ class MiscTest(unittest.TestCase):
         x = torch.randn((10, 3, 224, 224))
         
         y_src = residual(x)
-        propagate_bias(residual, torch.zeros((1, 3, 224, 224)), [])
+        simplify.propagate_bias(residual, torch.zeros((1, 3, 224, 224)), [])
         y_prop = residual(x)
         
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -307,7 +304,7 @@ class MiscTest(unittest.TestCase):
         x = torch.randn((100, 3, 224, 224))
         y_src = model(x)
 
-        propagate_bias(model, torch.zeros((1, 3, 224, 224)), [])
+        simplify.propagate_bias(model, torch.zeros((1, 3, 224, 224)), [])
         y_prop = model(x)
 
         self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
@@ -328,13 +325,13 @@ class MiscTest(unittest.TestCase):
         x = torch.randn((100, 3, 224, 224))
         y_src = model(x)
 
-        propagate_bias(model, torch.zeros((1, 3, 224, 224)), [])
+        simplify.propagate_bias(model, torch.zeros((1, 3, 224, 224)), [])
         y_prop = model(x)
 
         with self.subTest(test='propagate_bias'):
             self.assertTrue(torch.allclose(y_src, y_prop, atol=1e-6))
 
-        remove_zeroed(model, torch.zeros((1, 3, 224, 224)), [])
+        simplify.remove_zeroed(model, torch.zeros((1, 3, 224, 224)), [])
         y_prop = model(x)
 
         with self.subTest(test='remove_zeroed'):
