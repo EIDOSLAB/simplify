@@ -58,7 +58,7 @@ Update timestamp 08/06/2021 16:11:45
 :man_shrugging:: test skipped due to failing of the previous one
 
 <!-- table starts -->
-Update timestamp 08/06/2021 17:22:58
+Update timestamp 09/06/2021 14:26:11
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |  Grouping  |
 |--------------------|---------------------|--------------------|--------------------|------------|
@@ -99,5 +99,4 @@ Update timestamp 08/06/2021 17:22:58
 |    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
 |     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |   False    |
-
 <!-- table ends -->
