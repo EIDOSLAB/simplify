@@ -9,7 +9,6 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
-        # We need full history to introspect created/updated:
         with:
           fetch-depth: 0
 
@@ -21,11 +20,6 @@ jobs:
 
       - name: update README
         run: python3 build_steps_table.py
-
-      #    - name: Update README
-      #      run: |-
-      #        python update_readme.py --rewrite
-      #        cat README.md
 
       - name: commit and push if README changed
         run: |-

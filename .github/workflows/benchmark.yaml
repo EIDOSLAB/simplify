@@ -9,7 +9,6 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v2
-        # We need full history to introspect created/updated:
         with:
           fetch-depth: 0
 
