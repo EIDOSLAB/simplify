@@ -31,12 +31,17 @@ Simplification of pruned models for accelerated inference.
 ## Installation
 Simplify can be installed using pip:
 
-    pip3 install torch-simplify
+```bash
+pip3 install torch-simplify
+```
 
 or if you want to run the latest version of the code, you can install from git:
 
-    git clone https://github.com/EIDOSlab/simplify
-    pip3 install -r requirements.txt
+```bash
+git clone https://github.com/EIDOSlab/simplify
+cd simplify
+pip3 install -r requirements.txt
+```
 
 ## Example usage
 
@@ -117,6 +122,7 @@ Random structured pruning amount = 50.0%
 :cursing_face:: an exception occurred
 
 :man_shrugging:: test skipped due to failing of the previous one
+
 
 <!-- table starts -->
 Update timestamp 09/06/2021 17:00:55
