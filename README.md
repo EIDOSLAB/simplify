@@ -41,6 +41,14 @@ or if you want to run the latest version of the code, you can install from git:
 ## Example usage
 
 ```python
+import torch
+from torch import nn
+from torch.nn.utils import prune
+from torchvision.models import alexnet
+
+from simplify import simplify
+
+model = alexnet(pretrained=True)
 model.eval()
 
 for name, module in model.named_modules():
@@ -49,7 +57,7 @@ for name, module in model.named_modules():
         prune.remove(module, 'weight')
 
 zeros = torch.zeros(1, 3, 224, 224)
-simplify.simplify(model, zeros)
+simplify(model, zeros)
 ```
 
 <details>
