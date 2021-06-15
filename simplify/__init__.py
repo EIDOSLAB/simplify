@@ -8,7 +8,7 @@ from .fuse import fuse
 from .propagate import propagate_bias
 from .remove import remove_zeroed
 
-__version__ = "0.0.9"
+__version__ = "1.0.0"
 
 
 def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List = None, bn_folding: List = None) -> nn.Module:
