@@ -18,12 +18,8 @@ setup(
     packages=find_packages(exclude=('profile', '.github', '.idea')),
     zip_safe=False,
     install_requires=[
-        'numpy==1.20.3',
-        'Pillow==8.2.0',
-        'tabulate==0.8.9',
-        'torch==1.8.1',
-        'torchvision==0.9.1',
-        'typing-extensions==3.10.0.0',
+        'torch',
+        'torchvision',
     ],
     python_requires='>=3.6'
 )

@@ -1,6 +1,62 @@
-# simplify
+# Simplify
 
 [![tests](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml/badge.svg)](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml)
+
+Simplification of pruned models for accelerated inference.
+
+[comment]: <> (- [Installation]&#40;#installation&#41;)
+
+[comment]: <> (- [Modules]&#40;#usage&#41;)
+
+[comment]: <> (    - [Dataloaders]&#40;#dataloaders&#41;)
+
+[comment]: <> (    - [Evaluation]&#40;#evalutation&#41;)
+
+[comment]: <> (    - [Models]&#40;#models&#41;)
+
+[comment]: <> (    - [Pruning]&#40;#pruning&#41;)
+
+[comment]: <> (        - [CSNN]&#40;#CSNN&#41;)
+
+[comment]: <> (        - [Pruning]&#40;#Pruning&#41;)
+
+[comment]: <> (        - [Thresholding]&#40;#Thresholding&#41;)
+
+[comment]: <> (    - [Utils]&#40;#Utils&#41;)
+
+[comment]: <> (- [Contributing]&#40;#contributing&#41;   )
+
+[comment]: <> (- [License]&#40;#license&#41;)
+
+## Installation
+Simplify can be installed using pip:
+
+    pip3 install torch-simplify
+
+or if you want to run the latest version of the code, you can install from git:
+
+    git clone https://github.com/EIDOSlab/simplify
+    pip3 install -r requirements.txt
+
+## Example usage
+
+```python
+model.eval()
+
+for name, module in model.named_modules():
+    if isinstance(module, nn.Conv2d):
+        prune.random_structured(module, 'weight', amount=0.8, dim=0)
+        prune.remove(module, 'weight')
+
+zeros = torch.zeros(1, 3, 224, 224)
+simplify.simplify(model, zeros)
+```
+
+<details open>
+<summary>
+Benchmarks
+</summary>
+
 
 <!-- benchmark starts -->
 Update timestamp 09/06/2021 19:12:17
@@ -93,3 +149,4 @@ Update timestamp 09/06/2021 17:00:55
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 <!-- table ends -->
+</details>
