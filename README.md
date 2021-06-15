@@ -52,7 +52,7 @@ zeros = torch.zeros(1, 3, 224, 224)
 simplify.simplify(model, zeros)
 ```
 
-<details open>
+<details>
 <summary>
 Benchmarks
 </summary>
