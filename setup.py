@@ -14,7 +14,7 @@ setup(
     url='https://github.com/EIDOSlab/simplify',
     author='EIDOSlab',
     author_email='eidoslab@di.unito.it',
-    license='MIT',
+    license='BSD 3',
     packages=find_packages(exclude=('profile', '.github', '.idea')),
     zip_safe=False,
     install_requires=[
