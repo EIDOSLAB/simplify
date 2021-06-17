@@ -58,6 +58,9 @@ if __name__ == '__main__':
                 print(
                     f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_dest.argmax(dim=1)).sum()}/{y_dest.shape[0]}')
             except Exception as e:
+                print("BatchNorm Folding")
+                print(architecture.__name__)
+                print(e)
                 passed_bf = "exception"
             
             if isinstance(passed_bf, bool) and passed_bf:
@@ -74,6 +77,9 @@ if __name__ == '__main__':
                     print(
                         f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_dest.argmax(dim=1)).sum()}/{y_dest.shape[0]}')
                 except Exception as e:
+                    print("Bias Propagation")
+                    print(architecture.__name__)
+                    print(e)
                     passed_bp = "exception"
                 
                 if isinstance(passed_bp, bool) and passed_bp:
@@ -88,6 +94,8 @@ if __name__ == '__main__':
                         print(
                             f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_dest.argmax(dim=1)).sum()}/{y_dest.shape[0]}')
                     except Exception as e:
+                        print("Simplification")
+                        print(architecture.__name__)
                         print(e)
                         passed_simp = "exception"
                 else:
