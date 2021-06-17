@@ -4,7 +4,7 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet
+from torchvision.models import SqueezeNet, googlenet, shufflenet_v2_x0_5
 
 import simplify
 import utils
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     with torch.no_grad():
         table = []
-        for architecture in models:
+        for architecture in [shufflenet_v2_x0_5]:
             print(architecture.__name__)
             if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
