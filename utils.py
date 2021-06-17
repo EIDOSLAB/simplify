@@ -36,7 +36,7 @@ def get_pinned_out(model):
     for node in reversed(fx_model.graph.nodes):
         if len(node.all_input_nodes) > 1:
             for input_node in node.all_input_nodes:
-                if isinstance(modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
+                if input_node.target in modules and isinstance(modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
                     if input_node.target not in pinned_out:
                         pinned_out.append(input_node.target)
                 else:
