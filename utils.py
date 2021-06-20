@@ -27,7 +27,9 @@ def set_seed(seed):
 
 
 def get_previous_layer(node, modules):
+    # print("get_previous_layer")
     for input_node in node.all_input_nodes:
+        # print(input_node.name)
         if input_node.target in modules and isinstance(modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
             return input_node.target
         else:
@@ -121,6 +123,7 @@ def get_pinned_out(model):
         
         last_module = None
         for name, module in model.named_modules():
+            # print(name)
             # works for modules within same branch
             if isinstance(module, nn.Conv2d):
                 if module.groups > 1 and last_module is not None:
@@ -133,16 +136,26 @@ def get_pinned_out(model):
                 
                 if len(module.branch2) > 0:
                     pinned_out.append(f'{name}.branch2.{len(module.branch2) - 3}')
-                    
+
+    pinned_out_graph = []
     if not isinstance(model, GoogLeNet):
-        pinned_out_graph = []
         fx_model = fx.symbolic_trace(model)
         modules = dict(fx_model.named_modules())
-    
-        for node in reversed(fx_model.graph.nodes):
-            if len(node.all_input_nodes) > 1:
+        
+        last_module = None
+        
+        for node in fx_model.graph.nodes:
+            # print(list(node.users.keys()), "->", node.name, "->", node.all_input_nodes)
+            if node.target in modules and isinstance(modules[node.target], nn.Conv2d):
+                if modules[node.target].groups > 1 and last_module is not None:
+                    if last_module.target not in pinned_out_graph:
+                        pinned_out_graph.append(last_module.target)
+                last_module = node
+            
+            if len(node.all_input_nodes) > 1 or len(node.users) > 1:
                 for input_node in node.all_input_nodes:
-                    if input_node.target in modules and isinstance(modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
+                    if input_node.target in modules and isinstance(modules[input_node.target],
+                                                                   (nn.Conv2d, nn.BatchNorm2d)):
                         if input_node.target not in pinned_out_graph:
                             pinned_out_graph.append(input_node.target)
                     else:
@@ -150,13 +163,13 @@ def get_pinned_out(model):
                         if previous_layer not in pinned_out_graph:
                             pinned_out_graph.append(previous_layer)
     
-    return pinned_out
+    return pinned_out_graph
 
 
 def get_bn_folding(model):
     bn_folding = []
     
-    if not isinstance(model, GoogLeNet):
+    try:
         patterns = [(torch.nn.Conv2d, torch.nn.BatchNorm2d)]
         fx_model = fx.symbolic_trace(model)
         modules = dict(fx_model.named_modules())
@@ -164,10 +177,11 @@ def get_bn_folding(model):
         for pattern in patterns:
             for node in fx_model.graph.nodes:
                 if matches_module_pattern(pattern, node, modules):
-                    if len(node.args[0].users) > 1:  # Output of conv is used by other nodes
+                    if len(node.args[0].users) > 1:
                         continue
                     bn_folding.append([node.args[0].target, node.target])
-    else:
+    
+    except Exception as e:
         last_module = None
         
         for name, module in model.named_modules():
