@@ -33,3 +33,24 @@ class ConvExpand(nn.Conv2d):
         x = torch.cat([x, zeros], dim=1)
         
         return x[:, self.idxs] + self.bf
+
+
+class BatchNormExpand(nn.BatchNorm2d):
+    @staticmethod
+    def from_bn(module: nn.BatchNorm2d, idxs, bias, shape):
+        module.__class__ = BatchNormExpand
+        setattr(module, 'idxs', idxs)
+
+        module.register_parameter('bf', torch.nn.Parameter(bias))
+        module.register_buffer('zeros', torch.zeros(1, 1, *shape[2:]))
+        
+        return module
+    
+    def forward(self, x):
+        x = super().forward(x)
+        
+        zeros = self.zeros.repeat(x.shape[0], 1, 1, 1)
+        x = torch.cat([x, zeros], dim=1)
+        x = x[:, self.idxs]
+        
+        return x + self.bf[:, None, None].expand_as(x[0])
