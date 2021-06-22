@@ -36,7 +36,6 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             if bias_feature_maps.sum() != 0.:
                 if getattr(module, 'bias', None) is not None:
                     module.register_parameter('bias', None)
-                # TODO avoid to create a ConvB if bias_feature_map is all 0, i.e. the module has no biases or none are propagated
                 module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
