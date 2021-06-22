@@ -11,6 +11,7 @@ from torchvision.models.squeezenet import SqueezeNet
 import profile
 import simplify
 import utils
+from simplify import fuse
 from tests.benchmark_models import models
 
 device = 'cpu'
@@ -52,10 +53,10 @@ def run_pruning(architecture, amount):
     
     print('=> Full model inference time:', np.mean(full_time), np.std(full_time))
     
-    pinned_out = utils.get_pinned_out(model)
-    
     model = model.to('cpu')
     bn_folding = utils.get_bn_folding(model)
+    model = fuse(model, bn_folding)
+    pinned_out = utils.get_pinned_out(model)
     model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), pinned_out=pinned_out, bn_folding=bn_folding)
     model = model.to(device)
     
