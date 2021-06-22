@@ -33,10 +33,11 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         if isinstance(module, nn.Conv2d):
             # For a conv layer, we remove the scalar biases
             # and use bias matrices (ConvB)
-            if getattr(module, 'bias', None) is not None:
-                module.register_parameter('bias', None)
-            # TODO avoid to create a ConvB if bias_feature_map is all 0, i.e. the module has no biases or none are propagated
-            module = ConvB.from_conv(module, bias_feature_maps)
+            if bias_feature_maps.sum() != 0.:
+                if getattr(module, 'bias', None) is not None:
+                    module.register_parameter('bias', None)
+                # TODO avoid to create a ConvB if bias_feature_map is all 0, i.e. the module has no biases or none are propagated
+                module = ConvB.from_conv(module, bias_feature_maps)
         
         elif isinstance(module, nn.Linear):
             # TODO: handle missing bias
@@ -61,25 +62,28 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             # No bias is propagated for pinned layers
             return output * float('nan')
         
-        if getattr(module, 'bias', None) is not None or getattr(module, 'bf', None) is not None:
-            # Propagate only the bias values corresponding to pruned channels
-            # Zero out biases of pruned channels in current layer
-            if isinstance(module, nn.Linear):
-                output[~pruned_channels[None, :].expand_as(output)] *= float('nan')
+        # Propagate the pruned channels and the corresponding bias if present
+        # Zero out biases of pruned channels in current layer
+        if isinstance(module, nn.Linear):
+            output[~pruned_channels[None, :].expand_as(output)] *= float('nan')
+            if getattr(module, 'bias', None) is not None:
                 module.bias.data.mul_(~pruned_channels)
-            
-            elif isinstance(module, nn.Conv2d):
-                output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
-                if isinstance(module, ConvB):
+        
+        elif isinstance(module, nn.Conv2d):
+            output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
+            if isinstance(module, ConvB):
+                if getattr(module, 'bf', None) is not None:
                     module.bf.data.mul_(~pruned_channels[:, None, None])
-                else:
+            else:
+                if getattr(module, 'bias', None) is not None:
                     module.bias.data.mul_(~pruned_channels[:, None, None])
-            
-            if isinstance(module, nn.BatchNorm2d):
-                output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
+        
+        if isinstance(module, nn.BatchNorm2d):
+            output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
+            if getattr(module, 'bias', None) is not None:
                 module.bias.data.mul_(~pruned_channels)
-                module.running_mean.data.mul_(~pruned_channels)
-                module.running_var.data[pruned_channels] = 1.
+            module.running_mean.data.mul_(~pruned_channels)
+            module.running_var.data[pruned_channels] = 1.
 
         del module._buffers["pruned_input"]
         return output
