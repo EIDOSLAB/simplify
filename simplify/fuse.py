@@ -40,11 +40,12 @@ def fuse(model, bn_folding):
         preceding = get_module(model, preceding_name)
         bn = get_module(model, bn_name)
         
-        if isinstance(preceding, nn.Linear):
-            fused_module = fuse_fc_and_bn(preceding, bn)
-        if isinstance(preceding, nn.Conv2d):
-            fused_module = fuse_conv_and_bn(preceding, bn)
-        
+        if isinstance(bn, nn.BatchNorm2d):
+            if isinstance(preceding, nn.Linear):
+                fused_module = fuse_fc_and_bn(preceding, bn)
+            if isinstance(preceding, nn.Conv2d):
+                fused_module = fuse_conv_and_bn(preceding, bn)
+            
         if fused_module is not None:
             substitute_module(model, fused_module, preceding_name)
             substitute_module(model, nn.Identity(), bn_name)
