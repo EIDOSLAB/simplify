@@ -67,6 +67,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                 if isinstance(module, ConvB):
                     module = ConvExpand.from_conv(module, idxs, module.bf)
                 else:
+                    # TODO: maybe this is too much, if bf is 0 there is no need for the addition
                     module = ConvExpand.from_conv(module, idxs, torch.zeros_like(output[0]))
                 
             if isinstance(module, nn.BatchNorm2d):
