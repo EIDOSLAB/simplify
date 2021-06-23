@@ -12,6 +12,7 @@ __version__ = "1.0.0"
 
 
 def simplify(model: nn.Module, x: torch.Tensor, pinned_out: List = None, bn_folding: List = None) -> nn.Module:
+    # TODO: if pinned_out is defined via graph we cannot pass it here
     if bn_folding is None:
         bn_folding = []
     if pinned_out is None:
