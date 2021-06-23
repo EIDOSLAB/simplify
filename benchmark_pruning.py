@@ -81,8 +81,6 @@ def run_pruning(architecture, amount):
 
 
 if __name__ == '__main__':
-    utils.set_seed(3)
-    
     amount = 0.5
     
     table = []

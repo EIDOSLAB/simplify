@@ -19,8 +19,6 @@ def get_mark(passed):
 
 
 if __name__ == '__main__':
-    utils.set_seed(3)
-    
     x = torch.randint(0, 256, (1, 3, 224, 224))
     x = x.float() / 255.
     input = torch.randint(0, 256, (256, 3, 224, 224))
