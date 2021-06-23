@@ -3,7 +3,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from .layers import ConvExpand, BatchNormExpand
+from .layers import ConvExpand, BatchNormExpand, ConvB
 
 
 @torch.no_grad()
@@ -64,7 +64,10 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                     idxs.append(current)
                     current += 1
             if isinstance(module, nn.Conv2d):
-                module = ConvExpand.from_conv(module, idxs, module.bf)
+                if isinstance(module, ConvB):
+                    module = ConvExpand.from_conv(module, idxs, module.bf)
+                else:
+                    module = ConvExpand.from_conv(module, idxs, torch.zeros_like(output[0]))
                 
             if isinstance(module, nn.BatchNorm2d):
                 bf = module.bias.data.mul(~nonzero_idx)
