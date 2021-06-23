@@ -75,7 +75,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
                     module.bf.data.mul_(~pruned_channels[:, None, None])
             else:
                 if getattr(module, 'bias', None) is not None:
-                    module.bias.data.mul_(~pruned_channels[:, None, None])
+                    module.bias.data.mul_(~pruned_channels)
         
         if isinstance(module, nn.BatchNorm2d):
             output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
