@@ -92,11 +92,13 @@ if __name__ == '__main__':
     table = []
     for architecture in models:
         try:
-            p_time, s_time = run_pruning(architecture, amount)
+            d_time, p_time, s_time = run_pruning(architecture, amount)
         except Exception as e:
             d_time, p_time, s_time = [0.], [0.], [0.]
         
-        table.append([architecture.__name__, f'{np.mean(p_time):.4f}s ± {np.std(p_time):.4f}',
+        table.append([architecture.__name__,
+                      f'{np.mean(d_time):.4f}s ± {np.std(d_time):.4f}',
+                      f'{np.mean(p_time):.4f}s ± {np.std(p_time):.4f}',
                       f'{np.mean(s_time):.4f}s ± {np.std(s_time):.4f}'])
     table = tabulate(table, headers=['Architecture', 'Dense time', 'Pruned time', 'Simplified time'], tablefmt='github')
     print(table)
