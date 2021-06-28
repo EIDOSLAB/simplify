@@ -29,6 +29,7 @@ Simplification of pruned models for accelerated inference.
 [comment]: <> (- [License]&#40;#license&#41;)
 
 ## Installation
+
 Simplify can be installed using pip:
 
 ```bash
@@ -43,27 +44,69 @@ cd simplify
 pip3 install -r requirements.txt
 ```
 
-## Example usage
+## Usage
+
+*Simplify* is composed of three modules: *fuse*, *propagate* and *remove*.
+
+### Fuse
+
+The *fuse* module implements standard BatchNorm fusion procedure. It requires a list of pairs (conv, bn) representing
+the pairs of layers to fuse. This modules can be used in such order or independently from one another according to needs.
+
+It can be used as:
 
 ```python
-import torch
-from torch import nn
-from torch.nn.utils import prune
-from torchvision.models import alexnet
+from torchvision.models import resnet18
+from simplify import fuse
 
-from simplify import simplify
-
-model = alexnet(pretrained=True)
+model = resnet18()
 model.eval()
+bn_folding = ...  # List of pairs (conv, bn) to fuse in a single layer
+model = fuse(model, bn_folding)
+```
 
-for name, module in model.named_modules():
-    if isinstance(module, nn.Conv2d):
-        prune.random_structured(module, 'weight', amount=0.8, dim=0)
-        prune.remove(module, 'weight')
+### Propagate
+
+The *propagate* module is used to remove the non-zero bias from zeroed-out neurons in order to be able to remove them.
+
+````python
+import torch
+from simplify import propagate_bias
+from torchvision.models import resnet18
 
 zeros = torch.zeros(1, 3, 224, 224)
-simplify(model, zeros)
-```
+model = resnet18()
+pinned_out = ...  # List of layers for which the bias should not be propagated
+propagate_bias(model, zeros, pinned_out)
+````
+
+### Remove
+
+The *remove* module is used to remove actually remove the zeroed neurons from the model architecture.
+
+````python
+import torch
+from simplify import remove_zeroed
+from torchvision.models import resnet18
+
+zeros = torch.zeros(1, 3, 224, 224)
+model = resnet18()
+pinned_out = ...  # List of layers in which the output should not change shape
+remove_zeroed(model, zeros, pinned_out)
+````
+
+### Utilities
+
+We also provide a set of utilities used to define `bn_folding` and `pinned_out` for standard PyTorch models.
+
+````python
+from torchvision.models import resnet18
+from utils import get_bn_folding, get_pinned_out
+
+model = resnet18()
+bn_folding = get_bn_folding(model)
+pinned_out = get_pinned_out(model)
+````
 
 <details>
 <summary>
@@ -115,6 +158,7 @@ Random structured pruning amount = 50.0%
 | mnasnet0_75        | 1.9979s ± 0.0100  | 1.7071s ± 0.0166  |
 | mnasnet1_0         | 2.3457s ± 0.0484  | 2.0913s ± 0.0035  |
 | mnasnet1_3         | 3.3775s ± 0.0822  | 2.7992s ± 0.0630  |
+
 <!-- benchmark ends -->
 
 ### Status of torchvision.models
@@ -170,5 +214,6 @@ Update timestamp 22/06/2021 14:16:31
 |    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+
 <!-- table ends -->
 </details>
