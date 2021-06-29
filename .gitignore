@@ -157,4 +157,4 @@ Thumbs.db
 
 # profile/*.txt
 latex/
-training/
+#training/
