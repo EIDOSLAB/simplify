@@ -3,6 +3,7 @@ import unittest
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
+from torchvision.models import resnet18
 from torchvision.models.squeezenet import SqueezeNet
 
 import simplify
@@ -31,11 +32,11 @@ class ChannelsRemovalTest(unittest.TestCase):
                 if isinstance(module, nn.Conv2d):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
-            
-            pinned_out = utils.get_pinned_out(model)
-            
+
             bn_folding = utils.get_bn_folding(model)
             model = simplify.fuse(model, bn_folding)
+            
+            pinned_out = utils.get_pinned_out(model)
             zeros = torch.zeros(1, *x.shape[1:])
             simplify.propagate_bias(model, zeros, pinned_out)
             y_src = model(x)
