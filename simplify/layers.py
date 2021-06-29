@@ -34,6 +34,11 @@ class ConvExpand(nn.Conv2d):
         
         return x[:, self.idxs] + self.bf
 
+    def __repr__(self):
+        return f'ConvExpand({self.in_channels}, {self.out_channels}, exp={len(self.idxs)})'
+        return super().__repr__()
+
+
 
 class BatchNormExpand(nn.BatchNorm2d):
     @staticmethod

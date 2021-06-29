@@ -4,7 +4,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from .layers import ConvB
+from .layers import ConvB, ConvExpand
 
 
 @torch.no_grad()
@@ -36,7 +36,13 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             if bias_feature_maps.sum() != 0.:
                 if getattr(module, 'bias', None) is not None:
                     module.register_parameter('bias', None)
-                module = ConvB.from_conv(module, bias_feature_maps)
+
+                if not isinstance(module, ConvExpand):
+                    #print(f'Transforming {name} into ConvB')
+                    module = ConvB.from_conv(module, bias_feature_maps)
+                else:
+                    #print(f'Updating bf of {name}')
+                    module.register_parameter('bf', torch.nn.Parameter(bias_feature_maps))
         
         elif isinstance(module, nn.Linear):
             # TODO: handle missing bias

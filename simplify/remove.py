@@ -50,8 +50,20 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         # If not pinned: remove zeroed output channels
         if not isinstance(module, nn.BatchNorm2d):
             shape = module.weight.shape
-            nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
-            module.weight.data = module.weight.data[nonzero_idx]
+
+            # If module is ConvExpand, expand weights back to original
+            # adding zero where channels were pruned
+            # so that new idxs are updated accordingly
+            if isinstance(module, ConvExpand):
+                zeros = torch.zeros(1, *shape[1:])
+                expanded_weight = torch.cat((module.weight.data, zeros), dim=0)
+                expanded_weight = expanded_weight[module.idxs]
+                nonzero_idx = ~(expanded_weight.view(expanded_weight.shape[0], -1).sum(dim=1) == 0)
+                module.weight.data = expanded_weight.data[nonzero_idx]
+                
+            else:
+                nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
+                module.weight.data = module.weight.data[nonzero_idx]
         
         if name in pinned_out:
             idxs = []
@@ -64,13 +76,23 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                     idxs.append(current)
                     current += 1
             if isinstance(module, nn.Conv2d):
-                if isinstance(module, ConvB):
-                    module = ConvExpand.from_conv(module, idxs, module.bf)
-                else:
-                    if getattr(module, 'bias', None) is not None:
-                        module.bias.data = module.bias.data[nonzero_idx]
+                #print(f'Transforming {name} into ConvExpand')
+                module = ConvExpand.from_conv(module, idxs, module.bf)
+
+                #########################################################
+                ## Given that ConvExpand were expanded back to Conv2d, ##
+                ## this is no longer neeeded                           ##
+                #########################################################
+
+                #if isinstance(module, ConvB):
+                #    print(f'Transforming {name} into ConvExpand')
+                #    module = ConvExpand.from_conv(module, idxs, module.bf)
+                #else:
+                #    if getattr(module, 'bias', None) is not None:
+                #        module.bias.data = module.bias.data[nonzero_idx]
                     # TODO: maybe this is too much, if bf is 0 there is no need for the addition
-                    module = ConvExpand.from_conv(module, idxs, torch.zeros_like(output[0]))
+                #    print(f'Transforming {name} into ConvExpand (prev idxs: {len(module.idxs)}, new idxs: {len(idxs)})')
+                #    module = ConvExpand.from_conv(module, idxs, torch.zeros_like(output[0]))
                 
             if isinstance(module, nn.BatchNorm2d):
                 bf = module.bias.data.mul(~nonzero_idx)
