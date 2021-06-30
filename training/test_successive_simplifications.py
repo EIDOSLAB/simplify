@@ -1,5 +1,8 @@
 from numpy import isin
 from torchvision.models.alexnet import alexnet
+from torchvision.models.densenet import densenet121
+from torchvision.models.googlenet import googlenet
+from torchvision.models.resnet import resnet50
 from simplify.layers import ConvExpand
 import torch
 from torch import nn
@@ -14,7 +17,7 @@ from simplify import propagate_bias, remove_zeroed, fuse
 if __name__ == '__main__':
     utils.set_seed(3)
     model = resnet18(True)
-    print(model)
+    #print(model)
     for module in model.modules():
         if isinstance(module, nn.ReLU):
             module.inplace = True
@@ -22,7 +25,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
     bn_folding = utils.get_bn_folding(model)
-    model = fuse(model, bn_folding)
+    #model = fuse(model, bn_folding)
     model.eval()
     pinned_out = utils.get_pinned_out(model)
     
@@ -37,37 +40,26 @@ if __name__ == '__main__':
             prune.remove(module, 'weight')
     
 
-    times_pruned = []
-    for i in range(10):
+    """times_pruned = []
+    for i in range(2):
         start = time.perf_counter()
         y = model(x)
         y.sum().backward()
         optimizer.step()
         optimizer.zero_grad()
         length = time.perf_counter() - start
-        times_pruned.append(length)
+        times_pruned.append(length)"""
 
     for e in range(2):
         s = "Simplification #{}".format(e)
         print("#"*len(s))
         print(s)
         print("#"*len(s))
-        
-        #for module in model.modules():
-        #    if isinstance(module, ConvExpand):
-        #        module.expand()
 
-        #optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
-        y = model(x)
+        """y = model(x)
         y.sum().backward()
         optimizer.step()
-        optimizer.zero_grad()
-
-        #for module in model.modules():
-        #    if isinstance(module, ConvExpand):
-        #        module.reduce()
-        #optimizer.zero_grad()
-
+        optimizer.zero_grad()"""
 
         model.eval()
         y_src = model(x)
@@ -92,19 +84,20 @@ if __name__ == '__main__':
         print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
         print(f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
         
-        print(model)
+        #print(model)
         print("")
 
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
     times_simplified = []
-    for i in range(10):
+    """for i in range(2):
         start = time.perf_counter()
         y = model(x)
         y.sum().backward()
         optimizer.step()
         optimizer.zero_grad()
         length = time.perf_counter() - start
-        times_simplified.append(length)
+        times_simplified.append(length)"""
     
-    print('Pruned time:', np.mean(times_pruned))
-    print('Simplified time:', np.mean(times_simplified))
+    #print('Pruned time:', np.mean(times_pruned))
+    #print('Simplified time:', np.mean(times_simplified))
         

@@ -4,7 +4,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from .layers import ConvB, ConvExpand
+from .layers import BatchNormB, BatchNormExpand, ConvB, ConvExpand
 
 
 @torch.no_grad()
@@ -26,7 +26,10 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             - output: torch.Tensor
         """
         
-        # STEP 1. Fuse biases of pruned channels in the previous module into the current module
+        ###########################################################################################
+        ## STEP 1. Fuse biases of pruned channels in the previous module into the current module ##
+        ###########################################################################################
+
         input = input[0]
         bias_feature_maps = output[0].clone()
         
@@ -34,15 +37,26 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             # For a conv layer, we remove the scalar biases
             # and use bias matrices (ConvB)
             if bias_feature_maps.sum() != 0.:
+                # remove native bias
                 if getattr(module, 'bias', None) is not None:
                     module.register_parameter('bias', None)
 
                 if not isinstance(module, ConvExpand):
-                    #print(f'Transforming {name} into ConvB')
                     module = ConvB.from_conv(module, bias_feature_maps)
-                else:
-                    #print(f'Updating bf of {name}')
+                else: # if it is already ConvExpand, just update bf
                     module.register_parameter('bf', torch.nn.Parameter(bias_feature_maps))
+
+        elif isinstance(module, nn.BatchNorm2d):
+            if getattr(module, 'bias', None) is not None:
+                module.register_parameter('bias', None)
+    
+            if not isinstance(module, BatchNormExpand):
+                module = BatchNormB.from_bn(module, bias_feature_maps[:, 0, 0])
+            else:  # if it is already BatchNormExpand, just update bf
+                module.register_parameter('bf', torch.nn.Parameter(bias_feature_maps[:, 0, 0]))
+            
+            # Mark corresponding weights to be pruned
+            module.weight.data.mul_(~module.pruned_input)  
         
         elif isinstance(module, nn.Linear):
             # TODO: handle missing bias
@@ -50,16 +64,13 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             if getattr(module, 'bias', None) is not None:
                 module.bias.data = bias_feature_maps
         
-        elif isinstance(module, nn.BatchNorm2d):
-            # TODO: handle missing bias
-            if getattr(module, 'bias', None) is not None:
-                module.bias.data[module.pruned_input] = bias_feature_maps[:, 0, 0][module.pruned_input]
-            module.weight.data.mul_(~module.pruned_input)  # Mark corresponding weights to be pruned
-        
         else:
             error('Unsupported module type:', module)
         
-        # STEP 2. Propagate output to next module
+        #############################################
+        ## STEP 2. Propagate output to next module ##
+        #############################################
+
         shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
         
@@ -76,7 +87,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         
         elif isinstance(module, nn.Conv2d):
             output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
-            if isinstance(module, ConvB):
+            if isinstance(module, (ConvB, ConvExpand)):
                 if getattr(module, 'bf', None) is not None:
                     module.bf.data.mul_(~pruned_channels[:, None, None])
             else:
@@ -85,8 +96,11 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         
         if isinstance(module, nn.BatchNorm2d):
             output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
-            if getattr(module, 'bias', None) is not None:
-                module.bias.data.mul_(~pruned_channels)
+            if isinstance(module, (BatchNormB, BatchNormExpand)):
+                module.bf.data.mul_(~pruned_channels)
+            else:
+                if getattr(module, 'bias', None) is not None:
+                    module.bias.data.mul_(~pruned_channels)
             module.running_mean.data.mul_(~pruned_channels)
             module.running_var.data[pruned_channels] = 1.
 
