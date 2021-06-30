@@ -37,6 +37,17 @@ class ConvExpand(nn.Conv2d):
         return f'ConvExpand({self.in_channels}, {self.out_channels}, exp={len(self.idxs)})'
 
 
+class BatchNormB(nn.BatchNorm2d):
+    @staticmethod
+    def from_bn(module: nn.BatchNorm2d, bias, shape):
+        module.__class__ = BatchNormB
+        module.register_parameter('bf', torch.nn.Parameter(bias))
+        return module
+    
+    def forward(self, x):
+        x = super().forward(x)
+        return x + self.bf #[:, None, None].expand_as(x[0])
+
 class BatchNormExpand(nn.BatchNorm2d):
     @staticmethod
     def from_bn(module: nn.BatchNorm2d, idxs, bias, shape):
