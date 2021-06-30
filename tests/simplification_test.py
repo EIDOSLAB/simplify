@@ -36,8 +36,8 @@ class SimplificationTest(unittest.TestCase):
             zeros = torch.zeros(1, *x.shape[1:])
             
             bn_folding = utils.get_bn_folding(model)
-            pinned_out = utils.get_pinned_out(model)
-            simplify.simplify(model, zeros, pinned_out, bn_folding)
+            simplify.simplify(model, zeros, bn_folding)
+            print(model)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
