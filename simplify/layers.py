@@ -33,20 +33,8 @@ class ConvExpand(nn.Conv2d):
         
         return x[:, self.idxs] + self.bf
     
-    def expand(self):
-        zeros = torch.zeros(1, *self.weight.shape[1:])
-        expanded_weight = torch.cat((self.weight.data, zeros), dim=0)
-        expanded_weight = expanded_weight[self.idxs]
-        self.weight.data = expanded_weight.data
-
-    def reduce(self):
-        nonzero_idx = ~(self.weight.view(self.weight.shape[0], -1).sum(dim=1) == 0)
-        self.weight.data = self.weight.data[nonzero_idx]
-
     def __repr__(self):
         return f'ConvExpand({self.in_channels}, {self.out_channels}, exp={len(self.idxs)})'
-        return super().__repr__()
-
 
 
 class BatchNormExpand(nn.BatchNorm2d):
