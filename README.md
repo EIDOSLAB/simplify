@@ -101,9 +101,10 @@ pinned_out = get_pinned_out(model)
 
 <details>
 <summary>
-Benchmarks
+Tests
 </summary>
 
+#### Inference time benchmarks
 
 <!-- benchmark starts -->
 Update timestamp 28/06/2021 17:51:58
@@ -149,9 +150,10 @@ Random structured pruning amount = 50.0%
 | mnasnet0_75        | 2.0525s ± 0.0141  | 2.0401s ± 0.0169  | 1.7142s ± 0.0192  |
 | mnasnet1_0         | 2.2915s ± 0.0038  | 2.3159s ± 0.0405  | 2.0594s ± 0.0022  |
 | mnasnet1_3         | 3.2810s ± 0.0560  | 3.3705s ± 0.0670  | 2.7184s ± 0.0336  |
+
 <!-- benchmark ends -->
 
-### Status of torchvision.models
+#### Status of torchvision.models
 
 :heavy_check_mark:: all good
 
@@ -204,5 +206,6 @@ Update timestamp 22/06/2021 14:16:31
 |    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+
 <!-- table ends -->
 </details>
