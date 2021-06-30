@@ -11,7 +11,7 @@ from .layers import BatchNormB, BatchNormExpand, ConvB, ConvExpand
 def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
     def __remove_nan(module, input):
-        module.register_buffer("pruned_input", input[0][0].view(input[0][0].shape[0], -1).sum(dim=1) == 0)
+        module.register_buffer("pruned_input", ~torch.isnan(input[0][0].view(input[0][0].shape[0], -1).sum(dim=1)))
         if torch.isnan(input[0]).sum() > 0:
             input[0][torch.isnan(input[0])] = 0
         return input
