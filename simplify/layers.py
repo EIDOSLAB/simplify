@@ -12,8 +12,7 @@ class ConvB(nn.Conv2d):
     def forward(self, x):
         x = super().forward(x)
         return x + self.bf
-
-
+    
 class ConvExpand(nn.Conv2d):
     @staticmethod
     def from_conv(module: nn.Conv2d, idxs, bias):
@@ -23,7 +22,7 @@ class ConvExpand(nn.Conv2d):
         
         shape = bias.shape
         module.register_buffer('zeros', torch.zeros(1, 1, *shape[1:]))
-        
+
         return module
     
     def forward(self, x):
@@ -33,6 +32,16 @@ class ConvExpand(nn.Conv2d):
         x = torch.cat([x, zeros], dim=1)
         
         return x[:, self.idxs] + self.bf
+    
+    def expand(self):
+        zeros = torch.zeros(1, *self.weight.shape[1:])
+        expanded_weight = torch.cat((self.weight.data, zeros), dim=0)
+        expanded_weight = expanded_weight[self.idxs]
+        self.weight.data = expanded_weight.data
+
+    def reduce(self):
+        nonzero_idx = ~(self.weight.view(self.weight.shape[0], -1).sum(dim=1) == 0)
+        self.weight.data = self.weight.data[nonzero_idx]
 
     def __repr__(self):
         return f'ConvExpand({self.in_channels}, {self.out_channels}, exp={len(self.idxs)})'

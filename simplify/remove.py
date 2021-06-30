@@ -30,16 +30,16 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         
         if isinstance(module, nn.Conv2d):
             if module.groups == 1:
-                module.weight.data = module.weight.data[:, nonzero_idx]
+                module.weight = torch.nn.parameter.Parameter(module.weight[:, nonzero_idx])
                 module.in_channels = module.weight.shape[1]
             # TODO: handle when groups > 1 (if possible)
         
         elif isinstance(module, nn.Linear):
-            module.weight.data = module.weight.data[:, nonzero_idx]
+            module.weight = torch.nn.parameter.Parameter(module.weight[:, nonzero_idx])
             module.in_features = module.weight.shape[1]
         
         elif isinstance(module, nn.BatchNorm2d):
-            module.weight.data = module.weight.data[nonzero_idx]
+            module.weight = torch.nn.parameter.Parameter(module.weight[nonzero_idx])
             module.num_features = module.weight.shape[0]
         
         # Compute remaining channels indices
@@ -56,14 +56,14 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             # so that new idxs are updated accordingly
             if isinstance(module, ConvExpand):
                 zeros = torch.zeros(1, *shape[1:])
-                expanded_weight = torch.cat((module.weight.data, zeros), dim=0)
+                expanded_weight = torch.cat((module.weight, zeros), dim=0)
                 expanded_weight = expanded_weight[module.idxs]
                 nonzero_idx = ~(expanded_weight.view(expanded_weight.shape[0], -1).sum(dim=1) == 0)
-                module.weight.data = expanded_weight.data[nonzero_idx]
+                module.weight = torch.nn.parameter.Parameter(expanded_weight[nonzero_idx])
                 
             else:
                 nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
-                module.weight.data = module.weight.data[nonzero_idx]
+                module.weight = torch.nn.parameter.Parameter(module.weight[nonzero_idx])
         
         if name in pinned_out:
             idxs = []
@@ -79,6 +79,24 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                 #print(f'Transforming {name} into ConvExpand')
                 module = ConvExpand.from_conv(module, idxs, module.bf)
 
+                def hook(module, grad_input, grad_output, idxs):
+                    print('module.weight', module.weight.shape)
+                    
+                    for i, grad_in in enumerate(grad_input):
+                        print(grad_in)
+                        print(f'grad_input[{i}] shape:', grad_in.shape)
+
+                    for i, grad_out in enumerate(grad_output):
+                        print(f'grad_output[{i}]', grad_out.shape)
+
+                    max_idx = max(idxs)
+                    g_idxs = idxs != max_idx
+
+                    pruned_grads = (grad_input[0][:, g_idxs].clone(), grad_input[1][g_idxs].clone())
+                    return pruned_grads
+
+                #module.register_backward_hook(lambda g,i,o,idx=idxs: hook(g, i, o, idx))
+                
                 #########################################################
                 ## Given that ConvExpand were expanded back to Conv2d, ##
                 ## this is no longer neeeded                           ##
@@ -102,10 +120,10 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                 module = BatchNormExpand.from_bn(module, idxs, bf, output.shape)
         else:
             if getattr(module, 'bias', None) is not None:
-                module.bias.data = module.bias.data[nonzero_idx]
+                module.bias = torch.nn.parameter.Parameter(module.bias[nonzero_idx])
             
             if getattr(module, 'bf', None) is not None:
-                module.bf.data = module.bf.data[nonzero_idx]
+                module.bf = torch.nn.parameter.Parameter(module.bf[nonzero_idx])
             
             if isinstance(module, nn.BatchNorm2d):
                 module.running_mean.data = module.running_mean.data[nonzero_idx]
