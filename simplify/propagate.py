@@ -44,7 +44,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             if not isinstance(module, ConvExpand):
                 module = ConvB.from_conv(module, bias_feature_maps)
             else: # if it is already ConvExpand, just update bf
-                module.register_parameter('bf', torch.nn.Parameter(bias_feature_maps))
+                module.register_parameter('bf', nn.Parameter(bias_feature_maps))
 
         elif isinstance(module, nn.BatchNorm2d):
             bias_feature_maps = bias_feature_maps[:, 0, 0].mul(module.pruned_input) + module.bias.data.mul(~module.pruned_input)
@@ -53,7 +53,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
             if not isinstance(module, BatchNormExpand):
                 module = BatchNormB.from_bn(module, bias_feature_maps)
             else:  # if it is already BatchNormExpand, just update bf
-                module.register_parameter('bf', torch.nn.Parameter(bias_feature_maps))
+                module.register_parameter('bf', nn.Parameter(bias_feature_maps))
             
             # Mark corresponding weights to be pruned
             module.weight.data.mul_(~module.pruned_input)  
@@ -61,9 +61,10 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         elif isinstance(module, nn.Linear):
             # TODO: handle missing bias
             # For a linear layer, we can just update the scalar bias values
-            if getattr(module, 'bias', None) is not None:
-                module.bias.data = bias_feature_maps
-        
+            #if getattr(module, 'bias', None) is not None:
+            #    module.bias.data = bias_feature_maps
+            module.register_parameter('bias', nn.Parameter(bias_feature_maps))
+
         else:
             error('Unsupported module type:', module)
         

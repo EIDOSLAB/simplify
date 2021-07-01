@@ -37,17 +37,17 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
 
         if isinstance(module, nn.Conv2d):
             if module.groups == 1:
-                module.weight = torch.nn.parameter.Parameter(module.weight[:, nonzero_idx])
+                module.weight = nn.Parameter(module.weight[:, nonzero_idx])
                 module.in_channels = module.weight.shape[1]
             # TODO: handle when groups > 1 (if possible)
         
         elif isinstance(module, nn.Linear):
-            module.weight = torch.nn.parameter.Parameter(module.weight[:, nonzero_idx])
+            module.weight = nn.Parameter(module.weight[:, nonzero_idx])
             module.in_features = module.weight.shape[1]
         
         elif isinstance(module, nn.BatchNorm2d):
-            module.weight.data[~nonzero_idx].mul_(0) #= torch.nn.parameter.Parameter(module.weight[nonzero_idx])
-            #module.bf.data[~nonzero_idx].mul_(0) #= torch.nn.parameter.Parameter(module.bf[nonzero_idx])
+            module.weight.data[~nonzero_idx].mul_(0) #= nn.Parameter(module.weight[nonzero_idx])
+            #module.bf.data[~nonzero_idx].mul_(0) #= nn.Parameter(module.bf[nonzero_idx])
             module.running_mean.data.mul_(~nonzero_idx)
             module.running_var.data[~nonzero_idx] = 1.
             module.num_features = nonzero_idx.sum()
@@ -74,7 +74,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             expanded_weight = torch.cat((module.weight, zeros), dim=0)
             expanded_weight = expanded_weight[module.idxs]
             nonzero_idx = ~(expanded_weight.view(expanded_weight.shape[0], -1).sum(dim=1) == 0)
-            module.weight = torch.nn.parameter.Parameter(expanded_weight)
+            module.weight = nn.Parameter(expanded_weight)
         
         elif isinstance(module, BatchNormExpand):
             # Expand weight
@@ -82,7 +82,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             expanded_weight = torch.cat((module.weight, zeros), dim=0)
             expanded_weight = expanded_weight[module.idxs]
             nonzero_idx = ~(expanded_weight.view(expanded_weight.shape[0], -1).sum(dim=1) == 0)
-            module.weight = torch.nn.parameter.Parameter(expanded_weight)
+            module.weight = nn.Parameter(expanded_weight)
 
             # Expand running_mean
             zeros = torch.zeros(1, *module.running_mean.shape[1:])
@@ -95,7 +95,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             module.running_var = expanded_var[module.idxs]
 
         # 2. Remove weight channels
-        module.weight = torch.nn.parameter.Parameter(module.weight[nonzero_idx])
+        module.weight = nn.Parameter(module.weight[nonzero_idx])
         if isinstance(module, nn.BatchNorm2d):
             module.running_mean = module.running_mean[nonzero_idx]
             module.running_var = module.running_var[nonzero_idx]
@@ -121,10 +121,10 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                 module = BatchNormExpand.from_bn(module, idxs, module.bf, output.shape)
         else:
             if getattr(module, 'bias', None) is not None:
-                module.bias = torch.nn.parameter.Parameter(module.bias[nonzero_idx])
+                module.bias = nn.Parameter(module.bias[nonzero_idx])
             
             if getattr(module, 'bf', None) is not None:
-                module.bf = torch.nn.parameter.Parameter(module.bf[nonzero_idx])
+                module.bf = nn.Parameter(module.bf[nonzero_idx])
             
             output = torch.zeros_like(output)
             output[:, nonzero_idx] = float('nan')
