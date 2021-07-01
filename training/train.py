@@ -17,7 +17,7 @@ from torchvision.models import resnet50
 from simplify import fuse
 from simplify.utils import get_bn_folding
 from training.data_loader_imagenet import get_data_loaders
-
+from tqdm import tqdm
 
 def test(loader, model, device='cuda'):
     num_correct = 0
@@ -67,11 +67,11 @@ def main(config):
     wandb.watch(model)
     
     # Train
-    for i, (images, target) in enumerate(train_loader):
+    for i, (images, target) in enumerate(tqdm(train_loader)):
         
         model.train()
         images, target = images.to(device), target.to(device)
-        
+
         # Prune the network by 5% at each pass
         if i + 1 % prune_iteration == 0:
             print("Pruning")
