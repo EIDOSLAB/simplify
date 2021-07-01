@@ -19,14 +19,14 @@ from simplify.utils import get_bn_folding
 from training.data_loader_imagenet import get_data_loaders
 
 
-def test(loader, model):
+def test(loader, model, device='cuda'):
     num_correct = 0
     num_samples = 0
     
     with torch.no_grad():
         for data, target in loader:
-            data = data
-            target = target
+            data = data.to(device)
+            target = target.to(device)
             
             scores = model(data)
             _, predictions = scores.max(1)
