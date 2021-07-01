@@ -53,6 +53,8 @@ def main(config):
     
     train_loader, test_loader = get_data_loaders(os.path.join(config.root, "ImageNet"), 256, 256, 0, True, 8, False)
     optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
+    scaler = torch.cuda.amp.GradScaler()
+
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
     criterion = CrossEntropyLoss()
     
@@ -88,16 +90,17 @@ def main(config):
             optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
             scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3, last_epoch=i-1)
         
-        start = time.time()
-        output = model(images)
-        forward_time = time.time() - start
-        
-        loss = criterion(output, target)
-        optimizer.zero_grad()
-        
-        start = time.time()
-        loss.backward()
-        backward_time = time.time() - start
+        with torch.cuda.amp.autocast():
+            start = time.time()
+            output = model(images)
+            forward_time = time.time() - start
+            
+            loss = criterion(output, target)
+            optimizer.zero_grad()
+            
+            start = time.time()
+            scaler.scale(loss).backward()
+            backward_time = time.time() - start
         
         # Set to 0 the gradient of pruned neurons
         with torch.no_grad():
@@ -109,7 +112,8 @@ def main(config):
                         if n == "bias":
                             p.grad.mul_(module.weight_mask[:, 0, 0, 0])
         
-        optimizer.step()
+        scaler.step(optimizer)
+        scaler.update()
         scheduler.step()
         
         # Test
