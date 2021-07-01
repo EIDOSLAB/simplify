@@ -15,8 +15,9 @@ import utils
 from simplify import propagate_bias, remove_zeroed, fuse
 
 if __name__ == '__main__':
+    device = 'cuda'
     utils.set_seed(3)
-    model = resnet50(True)
+    model = resnet50(True).to(device)
     #print(model)
     for module in model.modules():
         if isinstance(module, nn.ReLU):
@@ -29,7 +30,7 @@ if __name__ == '__main__':
     model.eval()
     pinned_out = utils.get_pinned_out(model)
     
-    im = torch.randint(0, 256, (10, 3, 224, 224))
+    im = torch.randint(0, 256, (10, 3, 224, 224)).to(device)
     x = im / 255.
     
     zeros = torch.zeros(1, *im.shape[1:])
@@ -40,7 +41,7 @@ if __name__ == '__main__':
             prune.remove(module, 'weight')
     
 
-    """times_pruned = []
+    times_pruned = []
     for i in range(2):
         start = time.perf_counter()
         y = model(x)
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         optimizer.step()
         optimizer.zero_grad()
         length = time.perf_counter() - start
-        times_pruned.append(length)"""
+        times_pruned.append(length)
 
     for e in range(2):
         s = "Simplification #{}".format(e)
@@ -64,7 +65,10 @@ if __name__ == '__main__':
         model.eval()
         y_src = model(x)
         
+        model = model.cpu()
         propagate_bias(model, zeros, pinned_out)
+        model = model.to(device)
+
         model.eval()
         y_prop = model(x)
         
@@ -75,7 +79,10 @@ if __name__ == '__main__':
         
         print("")
         
+        model = model.cpu()
         remove_zeroed(model, zeros, pinned_out)
+        model = model.to(device)
+
         model.eval()
         y_prop = model(x)
         
@@ -89,15 +96,15 @@ if __name__ == '__main__':
 
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
     times_simplified = []
-    """for i in range(2):
+    for i in range(2):
         start = time.perf_counter()
         y = model(x)
         y.sum().backward()
         optimizer.step()
         optimizer.zero_grad()
         length = time.perf_counter() - start
-        times_simplified.append(length)"""
+        times_simplified.append(length)
     
-    #print('Pruned time:', np.mean(times_pruned))
-    #print('Simplified time:', np.mean(times_simplified))
+    print('Pruned time:', np.mean(times_pruned))
+    print('Simplified time:', np.mean(times_simplified))
         
