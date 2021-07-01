@@ -118,7 +118,7 @@ def main(config):
         
         # Test
         model.eval()
-        accuracy = test(test_loader, model)
+        accuracy = 0 #test(test_loader, model)
         
         to_log = {
             "Remaining neurons": (remaining_neurons / total_neurons),
