@@ -113,6 +113,7 @@ def main(config):
                 propagate.propagate_bias(model, torch.zeros(1, 3, 224, 224), pinned_out)
                 remove_zeroed(model, torch.ones(1, 3, 224, 224), pinned_out)
                 model = model.to(device)
+                torch.cuda.empty_cache()
 
             optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
             scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3, last_epoch=-1)
