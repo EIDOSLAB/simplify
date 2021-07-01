@@ -75,7 +75,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
         pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
         
-        if name in pinned_out:
+        if name in pinned_out or (isinstance(module, nn.Conv2d) and module.groups > 1):
             # No bias is propagated for pinned layers
             return output * float('nan')
         
