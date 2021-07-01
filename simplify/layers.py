@@ -63,9 +63,10 @@ class BatchNormExpand(nn.BatchNorm2d):
     def forward(self, x):
         x = super().forward(x)
         
-        zeros = torch.zeros(x.shape[0], 1, *self.bf.shape[1:], device=self.weight.device)
+        #zeros = torch.zeros(x.shape[0], 1, *self.bf.shape[1:], device=self.weight.device)
         #zeros = self.zeros.repeat(x.shape[0], 1, 1, 1)
-        x = torch.cat([x, zeros], dim=1)
+        #x = torch.cat([x, zeros], dim=1)
+        x = torch.nn.functional.pad(x, (0,0,0,0,0,1))
         x = x[:, self.idxs]
         
         return x + self.bf[:, None, None].expand_as(x[0])
