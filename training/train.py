@@ -1,7 +1,6 @@
 import random
 
 from torchvision.models.resnet import resnet18
-from simplify.remove import remove_zeroed
 import time
 from utils import get_pinned_out
 
@@ -10,6 +9,7 @@ import torch
 import wandb
 import argparse
 import os
+import simplify
 
 from torch import nn
 from torch.nn import CrossEntropyLoss
@@ -18,8 +18,7 @@ from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision.models import resnet50
 
-from simplify import fuse, propagate
-from simplify.utils import get_bn_folding
+
 from training.data_loader_imagenet import get_data_loaders
 from tqdm import tqdm
 
@@ -110,8 +109,8 @@ def main(config):
             if config.simplify:
                 print("Simplifying model")
                 model = model.to("cpu")
-                propagate.propagate_bias(model, torch.zeros(1, 3, 224, 224), pinned_out)
-                remove_zeroed(model, torch.ones(1, 3, 224, 224), pinned_out)
+                simplify.propagate_bias(model, torch.zeros(1, 3, 224, 224), pinned_out)
+                simplify.remove_zeroed(model, torch.ones(1, 3, 224, 224), pinned_out)
                 model = model.to(device)
                 torch.cuda.empty_cache()
 
