@@ -120,8 +120,8 @@ if __name__ == '__main__':
         
         current_lr = [group["lr"] for group in optimizer.param_groups]
         
-        for i, lr in enumerate(current_lr):
-            to_log[f"lr{i}"] = lr
+        for j, lr in enumerate(current_lr):
+            to_log[f"lr{j}"] = lr
         
         wandb.log(to_log)
         
