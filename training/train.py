@@ -80,7 +80,6 @@ if __name__ == '__main__':
             
             print(f"The current model has {(remaining_neurons / total_neurons) * 100} % of the original neurons")
             
-            lr = [group["lr"] for group in optimizer.param_groups]
             optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
             scheduler.optimizer = optimizer
         
@@ -112,9 +111,19 @@ if __name__ == '__main__':
         model.eval()
         accuracy = test(test_loader, model)
         
-        wandb.log({
+        to_log = {
             "Remaining neurons": (remaining_neurons / total_neurons),
             "Accuracy": accuracy,
             "Forward Time": forward_time,
             "Backward Time": backward_time
-        })
+        }
+        
+        current_lr = [group["lr"] for group in optimizer.param_groups]
+        
+        for i, lr in enumerate(current_lr):
+            to_log[f"lr{i}"] = lr
+        
+        wandb.log(to_log)
+        
+        if ((i + 1) % train_iteration) == 0:
+            break
