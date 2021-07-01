@@ -87,7 +87,7 @@ def main(config):
     # warmup
     # model(torch.randn(256, 3, 224, 224, device=device))
 
-    profiled = profile_model(model, torch.randn((1, 3, 224, 224), device=device), rows=1000)
+    profiled = profile_model(model, torch.randn((256, 3, 224, 224), device=device), rows=1000)
     with open('profile.txt', 'w') as f:
         f.write('\n\n -- THRESHOLDED --\n')
         f.write(profiled)
@@ -129,7 +129,7 @@ def main(config):
                 model.train()
                 #model = model.to(device)
 
-                profiled = profile_model(model, torch.randn((1, 3, 224, 224), device=device), rows=1000)
+                profiled = profile_model(model, torch.randn((256, 3, 224, 224), device=device), rows=1000)
                 with open('profile.txt', 'a') as f:
                     f.write(f'\n\n -- SIMPLIFIED {(remaining_neurons / total_neurons) * 100} --\n')
                     f.write(profiled)
