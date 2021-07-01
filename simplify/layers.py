@@ -28,7 +28,8 @@ class ConvExpand(nn.Conv2d):
     def forward(self, x):
         x = super().forward(x)
         
-        zeros = self.zeros.repeat(x.shape[0], 1, 1, 1)
+        #zeros = self.zeros.repeat(x.shape[0], 1, 1, 1)
+        zeros = torch.zeros(x.shape[0], 1, *self.bf.shape[1:], device=self.weight.device)
         x = torch.cat([x, zeros], dim=1)
         
         return x[:, self.idxs] + self.bf
