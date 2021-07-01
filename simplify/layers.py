@@ -17,7 +17,7 @@ class ConvExpand(nn.Conv2d):
     @staticmethod
     def from_conv(module: nn.Conv2d, idxs, bias):
         module.__class__ = ConvExpand
-        setattr(module, 'idxs', idxs)
+        setattr(module, 'idxs', torch.tensor(idxs, device=module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
         
         shape = bias.shape
