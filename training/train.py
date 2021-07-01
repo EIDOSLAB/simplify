@@ -84,7 +84,7 @@ def main(config):
             print(f"The current model has {(remaining_neurons / total_neurons) * 100} % of the original neurons")
             
             optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
-            scheduler.optimizer = optimizer
+            scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3, last_epoch=i-1)
         
         start = time.time()
         output = model(images)
