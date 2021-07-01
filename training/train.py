@@ -19,6 +19,7 @@ from simplify.utils import get_bn_folding
 from training.data_loader_imagenet import get_data_loaders
 from tqdm import tqdm
 
+
 def test(loader, model, device='cuda'):
     num_correct = 0
     num_samples = 0
@@ -50,6 +51,7 @@ def main(config):
     #model = fuse(model, bn_folding)
     train_iteration = 10000
     prune_iteration = 1000
+    test_iteration  = 1000
     
     train_loader, test_loader = get_data_loaders(os.path.join(config.root, "ImageNet"), 256, 256, 0, True, 8, False)
     optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
@@ -68,14 +70,20 @@ def main(config):
     wandb.init()
     wandb.watch(model)
     
+    # warmup
+    model(torch.randn(256, 3, 224, 224, device=device))
+
     # Train
+    num_samples = 0
+    num_correct = 0
+
     for i, (images, target) in enumerate(tqdm(train_loader)):
         
         model.train()
         images, target = images.to(device), target.to(device)
 
         # Prune the network by 5% at each pass
-        if i + 1 % prune_iteration == 0:
+        if (i + 1) % prune_iteration == 0:
             print("Pruning")
             
             remaining_neurons = 0
@@ -101,7 +109,11 @@ def main(config):
             start = time.time()
             scaler.scale(loss).backward()
             backward_time = time.time() - start
-        
+            
+            _, predictions = output.max(1)
+            num_correct += (predictions == target).sum()
+            num_samples += predictions.size(0)
+
         # Set to 0 the gradient of pruned neurons
         with torch.no_grad():
             for name, module in model.named_modules():
@@ -116,17 +128,21 @@ def main(config):
         scaler.update()
         scheduler.step()
         
-        # Test
-        model.eval()
-        accuracy = 0 #test(test_loader, model)
         
         to_log = {
             "Remaining neurons": (remaining_neurons / total_neurons),
-            "Accuracy": accuracy,
+            "Train Accuracy":  float(num_correct) / float(num_samples),
             "Forward Time": forward_time,
-            "Backward Time": backward_time
+            "Backward Time": backward_time,
+            "epoch": i
         }
         
+        if (i + 1) % test_iteration == 0:
+            # Test
+            model.eval()
+            accuracy = test(test_loader, model)
+            to_log["Test Accuracy"] = accuracy
+
         current_lr = [group["lr"] for group in optimizer.param_groups]
         
         for j, lr in enumerate(current_lr):
@@ -134,7 +150,7 @@ def main(config):
         
         wandb.log(to_log)
         
-        if ((i + 1) % train_iteration) == 0:
+        if (i + 1) % train_iteration == 0:
             break
 
 if __name__ == '__main__':
