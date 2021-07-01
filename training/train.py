@@ -4,6 +4,9 @@ import time
 import numpy
 import torch
 import wandb
+import argparse
+import os
+
 from torch import nn
 from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
@@ -33,7 +36,7 @@ def test(loader, model):
         return float(num_correct) / float(num_samples)
 
 
-if __name__ == '__main__':
+def main(config):
     random.seed(0)
     torch.manual_seed(0)
     torch.cuda.manual_seed(0)
@@ -47,7 +50,7 @@ if __name__ == '__main__':
     train_iteration = 10000
     prune_iteration = 1000
     
-    train_loader, test_loader = get_data_loaders("/data01/ImageNet", 256, 256, 0, True, 8, False)
+    train_loader, test_loader = get_data_loaders(os.path.join(config.root, "ImageNet"), 256, 256, 0, True, 8, False)
     optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
     criterion = CrossEntropyLoss()
@@ -127,3 +130,9 @@ if __name__ == '__main__':
         
         if ((i + 1) % train_iteration) == 0:
             break
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--root', type=str, default=f'{os.path.expanduser("~")}/data')
+    config = parser.parse_args()
+    main(config)
