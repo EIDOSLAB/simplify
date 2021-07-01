@@ -86,7 +86,7 @@ def main(config):
     #for i, (images, target) in enumerate(tqdm(train_loader)):
     for i in tqdm(range(train_iteration)):
         images = torch.randn((256, 3, 224, 224), device=device)
-        target = torch.randint(0, 100, 256, device=device)
+        target = torch.randint(0, 100, (256, 1), device=device)
 
         model.train()
         #images, target = images.to(device), target.to(device)
