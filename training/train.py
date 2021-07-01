@@ -54,7 +54,7 @@ def main(config):
     pinned_out = get_pinned_out(model)
 
     train_iteration = 10000
-    prune_iteration = 1000
+    prune_iteration = config.prune_every
     test_iteration  = 1000
     
     train_loader, test_loader = get_data_loaders(os.path.join(config.root, "ImageNet"), 256, 256, 0, True, 8, False)
@@ -176,6 +176,7 @@ def main(config):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=str, default=f'{os.path.expanduser("~")}/data')
+    parser.add_argument('--prune_every', type=int, default=1000)
     parser.add_argument('--simplify', action='store_true')
     config = parser.parse_args()
     main(config)
