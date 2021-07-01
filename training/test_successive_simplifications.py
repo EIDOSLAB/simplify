@@ -65,9 +65,9 @@ if __name__ == '__main__':
         model.eval()
         y_src = model(x)
         
-        model = model.cpu()
-        propagate_bias(model, zeros, pinned_out)
-        model = model.to(device)
+        #model = model.cpu()
+        propagate_bias(model, zeros.to(device), pinned_out)
+        #model = model.to(device)
 
         model.eval()
         y_prop = model(x)
