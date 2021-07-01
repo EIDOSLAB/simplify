@@ -47,9 +47,14 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
                 module.register_parameter('bf', nn.Parameter(bias_feature_maps))
 
         elif isinstance(module, nn.BatchNorm2d):
-            bias_feature_maps = bias_feature_maps[:, 0, 0].mul(module.pruned_input) + module.bias.data.mul(~module.pruned_input)
+            bias_feature_maps = bias_feature_maps[:, 0, 0].mul(module.pruned_input)
+            
             if getattr(module, 'bias', None) is not None:
+                bias_feature_maps += module.bias.data.mul(~module.pruned_input)
                 module.register_parameter('bias', None)
+            elif getattr(module, 'bf', None) is not None:
+                bias_feature_maps += module.bf
+
             if not isinstance(module, BatchNormExpand):
                 module = BatchNormB.from_bn(module, bias_feature_maps)
             else:  # if it is already BatchNormExpand, just update bf
