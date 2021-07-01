@@ -70,6 +70,7 @@ def main(config):
     for i, (images, target) in enumerate(train_loader):
         
         model.train()
+        images, target = images.to(device), target.to(device)
         
         # Prune the network by 5% at each pass
         if i + 1 % prune_iteration == 0:
