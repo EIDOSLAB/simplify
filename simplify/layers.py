@@ -21,7 +21,7 @@ class ConvExpand(nn.Conv2d):
         module.register_parameter('bf', torch.nn.Parameter(bias))
         
         shape = bias.shape
-        module.register_buffer('zeros', torch.zeros(1, 1, *shape[1:]))
+        module.register_buffer('zeros', torch.zeros(1, 1, *shape[1:], device=module.weight.device))
 
         return module
     
