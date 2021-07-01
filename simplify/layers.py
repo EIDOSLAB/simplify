@@ -31,7 +31,7 @@ class ConvExpand(nn.Conv2d):
         #zeros = self.zeros.repeat(x.shape[0], 1, 1, 1)
         #zeros = torch.zeros(x.shape[0], 1, *self.bf.shape[1:], device=self.weight.device)
         #x = torch.cat([x, zeros], dim=1)
-        return self.bf.expand_as(x)
+        return self.bf.repeat(self.idxs.shape[0], 1, 1, 1)
         x = torch.nn.functional.pad(x, (0,0,0,0,0,1))
         return x[:, self.idxs] + self.bf
     
