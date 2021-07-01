@@ -1,5 +1,7 @@
 import random
+from simplify.remove import remove_zeroed
 import time
+from utils import get_pinned_out
 
 import numpy
 import torch
@@ -14,7 +16,7 @@ from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision.models import resnet50
 
-from simplify import fuse
+from simplify import fuse, propagate
 from simplify.utils import get_bn_folding
 from training.data_loader_imagenet import get_data_loaders
 from tqdm import tqdm
@@ -49,6 +51,8 @@ def main(config):
     model = resnet50(False).to(device)
     #bn_folding = get_bn_folding(model)
     #model = fuse(model, bn_folding)
+    pinned_out = get_pinned_out(model)
+
     train_iteration = 10000
     prune_iteration = 1000
     test_iteration  = 1000
@@ -67,7 +71,7 @@ def main(config):
             total_neurons += module.weight.shape[0]
             remaining_neurons += module.weight.shape[0]
     
-    wandb.init()
+    wandb.init(config=config)
     wandb.watch(model)
     
     # warmup
@@ -92,9 +96,19 @@ def main(config):
                     prune.ln_structured(module, 'weight', amount=0.05, n=2, dim=0)
                     ch_sum = module.weight.sum(dim=(1, 2, 3))
                     remaining_neurons += ch_sum[ch_sum != 0].shape[0]
-            
+
+                    if config.simplify:
+                        prune.remove(module, 'weight')
+                    
             print(f"The current model has {(remaining_neurons / total_neurons) * 100} % of the original neurons")
             
+            if config.simplify:
+                print("Simplifying model")
+                model = model.to("cpu")
+                propagate.propagate_bias(model, torch.zeros(1, 3, 224, 224), pinned_out)
+                remove_zeroed(model, torch.ones(1, 3, 224, 224), pinned_out)
+                model = model.to(device)
+
             optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
             scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3, last_epoch=-1)
             for _ in range(i):
@@ -117,14 +131,18 @@ def main(config):
             num_samples += predictions.size(0)
 
         # Set to 0 the gradient of pruned neurons
-        with torch.no_grad():
+        """with torch.no_grad():
             for name, module in model.named_modules():
                 if isinstance(module, nn.Conv2d):
                     for n, p in module.named_parameters():
                         if n == "weight_orig":
                             p.grad.mul_(module.weight_mask)
                         if n == "bias":
-                            p.grad.mul_(module.weight_mask[:, 0, 0, 0])
+                            p.grad.mul_(module.weight_mask[:, 0, 0, 0])"""
+        
+        # what is the chance of an unpruned weight to be exactly 0?
+        for param in model.parameters():
+            param.grad.data.mul_(torch.abs(param.data) > 0)
         
         scaler.step(optimizer)
         scaler.update()
@@ -158,5 +176,6 @@ def main(config):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=str, default=f'{os.path.expanduser("~")}/data')
+    parser.add_argument('--simplify', action='store_true')
     config = parser.parse_args()
     main(config)
