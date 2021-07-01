@@ -16,7 +16,7 @@ from simplify import propagate_bias, remove_zeroed, fuse
 
 if __name__ == '__main__':
     utils.set_seed(3)
-    model = resnet18(True)
+    model = resnet50(True)
     #print(model)
     for module in model.modules():
         if isinstance(module, nn.ReLU):

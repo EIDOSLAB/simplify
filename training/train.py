@@ -1,4 +1,6 @@
 import random
+
+from torchvision.models.resnet import resnet18
 from simplify.remove import remove_zeroed
 import time
 from utils import get_pinned_out
@@ -48,7 +50,7 @@ def main(config):
     torch.backends.cudnn.benchmark = False
     device = torch.device('cuda')
 
-    model = resnet50(False).to(device)
+    model = resnet18(False).to(device)
     #bn_folding = get_bn_folding(model)
     #model = fuse(model, bn_folding)
     pinned_out = get_pinned_out(model)
@@ -81,10 +83,13 @@ def main(config):
     num_samples = 0
     num_correct = 0
 
-    for i, (images, target) in enumerate(tqdm(train_loader)):
-        
+    #for i, (images, target) in enumerate(tqdm(train_loader)):
+    for i in tqdm(range(train_iteration)):
+        images = torch.randn((256, 3, 224, 224), device=device)
+        target = torch.randint(0, 100, 256, device=device)
+
         model.train()
-        images, target = images.to(device), target.to(device)
+        #images, target = images.to(device), target.to(device)
 
         # Prune the network by 5% at each pass
         if (i + 1) % prune_iteration == 0:
