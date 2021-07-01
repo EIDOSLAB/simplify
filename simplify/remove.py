@@ -46,9 +46,8 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             module.in_features = module.weight.shape[1]
         
         elif isinstance(module, nn.BatchNorm2d):
-            module.weight.data[~nonzero_idx].mul_(0) #= torch.nn.parameter.Parameter(module.weight[nonzero_idx])
-            #module.bf.data[~nonzero_idx].mul_(0) #= torch.nn.parameter.Parameter(module.bf[nonzero_idx])
-            module.running_mean.data[~nonzero_idx].mul_(0)
+            module.weight.data.mul_(nonzero_idx)
+            module.running_mean.data.mul_(nonzero_idx)
             module.running_var.data[~nonzero_idx] = 1.
             module.num_features = nonzero_idx.sum()
         
