@@ -59,6 +59,10 @@ def main(config):
     device = torch.device('cuda')
 
     model = resnet18(False).to(device)
+    for module in model.modules():
+        if isinstance(module, nn.ReLU):
+            module.inplace = False
+            
     bn_folding = simplify.utils.get_bn_folding(model)
     model = simplify.fuse(model, bn_folding)
     pinned_out = get_pinned_out(model)
