@@ -49,14 +49,14 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         elif isinstance(module, nn.BatchNorm2d):
             pruned_input = module.pruned_input
             if isinstance(module, BatchNormExpand):
-                ones = torch.ones(1).bool()
+                ones = torch.ones(1, device=module.weight.device).bool()
                 expanded_pruned_input = torch.cat((module.pruned_input, ones), dim=0)
                 expanded_pruned_input = expanded_pruned_input[module.idxs]
                 module.pruned_input = expanded_pruned_input
 
-            if module.pruned_input.shape[0] != bias_feature_maps.shape[0]:
-                print(module)
-                print(bias_feature_maps.shape, module.pruned_input.shape)
+            #if module.pruned_input.shape[0] != bias_feature_maps.shape[0]:
+            #    print(module)
+            #    print(bias_feature_maps.shape, module.pruned_input.shape)
             bias_feature_maps = bias_feature_maps[:, 0, 0].mul(module.pruned_input)
             
             if getattr(module, 'bias', None) is not None:
