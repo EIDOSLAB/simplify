@@ -88,7 +88,7 @@ def main(config):
     # model(torch.randn(256, 3, 224, 224, device=device))
 
     profiled = profile_model(model, torch.randn((1, 3, 224, 224), device=device), rows=1000)
-    with open('profile.txt', 'a') as f:
+    with open('profile.txt', 'w') as f:
         f.write('\n\n -- THRESHOLDED --\n')
         f.write(profiled)
         
@@ -123,8 +123,10 @@ def main(config):
             if config.simplify:
                 print("Simplifying model")
                 #model = model.to("cpu")
+                model.eval()
                 simplify.propagate_bias(model, torch.zeros(1, 3, 224, 224, device=device), pinned_out)
                 simplify.remove_zeroed(model, torch.ones(1, 3, 224, 224, device=device), pinned_out)
+                model.train()
                 #model = model.to(device)
 
                 profiled = profile_model(model, torch.randn((1, 3, 224, 224), device=device), rows=1000)
