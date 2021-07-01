@@ -43,8 +43,9 @@ def main(config):
     numpy.random.seed(0)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+    device = torch.device('cuda')
 
-    model = resnet50(False)
+    model = resnet50(False).to(device)
     #bn_folding = get_bn_folding(model)
     #model = fuse(model, bn_folding)
     train_iteration = 10000
