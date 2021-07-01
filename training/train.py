@@ -71,7 +71,7 @@ def main(config):
     wandb.watch(model)
     
     # warmup
-    model(torch.randn(256, 3, 224, 224, device=device))
+    # model(torch.randn(256, 3, 224, 224, device=device))
 
     # Train
     num_samples = 0
