@@ -21,6 +21,15 @@ from torchvision.models import resnet50
 
 from training.data_loader_imagenet import get_data_loaders
 from tqdm import tqdm
+from torch.autograd import profiler
+
+
+def profile_model(model, input, rows=10, cuda=False):
+    with profiler.profile(profile_memory=True, record_shapes=True, use_cuda=cuda) as prof:
+        with profiler.record_function("model_inference"):
+            model(input)
+    
+    return str(prof.key_averages().table(sort_by="cpu_time_total", row_limit=rows))
 
 
 def test(loader, model, device='cuda'):
@@ -78,6 +87,11 @@ def main(config):
     # warmup
     # model(torch.randn(256, 3, 224, 224, device=device))
 
+    profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
+    with open('profile.txt', 'a') as f:
+        f.write('\n\n -- THRESHOLDED --\n')
+        f.write(profiled)
+        
     # Train
     num_samples = 0
     num_correct = 0
@@ -112,6 +126,11 @@ def main(config):
                 simplify.propagate_bias(model, torch.zeros(1, 3, 224, 224, device=device), pinned_out)
                 simplify.remove_zeroed(model, torch.ones(1, 3, 224, 224, device=device), pinned_out)
                 #model = model.to(device)
+
+                profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
+                with open('profile.txt', 'a') as f:
+                    f.write(f'\n\n -- SIMPLIFIED {(remaining_neurons / total_neurons) * 100} --\n')
+                    f.write(profiled)
                 torch.cuda.empty_cache()
 
             optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
