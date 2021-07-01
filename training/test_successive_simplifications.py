@@ -42,11 +42,11 @@ if __name__ == '__main__':
     
 
     times_pruned = []
-    for i in range(2):
+    for i in range(10):
         start = time.perf_counter()
         y = model(x)
         y.sum().backward()
-        optimizer.step()
+        #optimizer.step()
         optimizer.zero_grad()
         length = time.perf_counter() - start
         times_pruned.append(length)
@@ -96,11 +96,11 @@ if __name__ == '__main__':
 
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
     times_simplified = []
-    for i in range(2):
+    for i in range(10):
         start = time.perf_counter()
         y = model(x)
         y.sum().backward()
-        optimizer.step()
+        #optimizer.step()
         optimizer.zero_grad()
         length = time.perf_counter() - start
         times_simplified.append(length)
