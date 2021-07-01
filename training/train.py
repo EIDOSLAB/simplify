@@ -43,10 +43,10 @@ def main(config):
     numpy.random.seed(0)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    
+
     model = resnet50(False)
-    bn_folding = get_bn_folding(model)
-    model = fuse(model, bn_folding)
+    #bn_folding = get_bn_folding(model)
+    #model = fuse(model, bn_folding)
     train_iteration = 10000
     prune_iteration = 1000
     
