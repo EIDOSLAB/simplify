@@ -166,7 +166,10 @@ def main(config):
             optimizer.zero_grad()
 
             start = time.time()
-            scaler.scale(loss).backward()
+            if amp:
+                scaler.scale(loss).backward()
+            else:
+                loss.backward()
             backward_time = time.time() - start
 
             _, predictions = output.max(1)
