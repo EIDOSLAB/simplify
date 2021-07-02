@@ -1,4 +1,5 @@
 import time
+import wandb
 
 import numpy as np
 import torch
@@ -13,6 +14,8 @@ from simplify import propagate, remove_zeroed
 from simplify.utils import get_pinned_out
 
 if __name__ == '__main__':
+    wandb.init()
+
     model = resnet18(True)
     device = torch.device("cuda")
     fake_input = torch.randint(0, 256, (256, 3, 224, 224))
@@ -77,6 +80,13 @@ if __name__ == '__main__':
         pruned_y_forward_std.append(np.std(forward_time))
         pruned_y_backward.append(np.mean(backward_time))
         pruned_y_backward_std.append(np.std(backward_time))
+
+        wandb.log({
+            'pruned.forward': np.mean(forward_time),
+            'pruned.forward_std': np.std(forward_time),
+            'pruned.backward': np.mean(backward_time),
+            'pruned.backward_std': np.std(backward_time)
+        }, commit=False)
         
         # SIMPLIFIED
         pinned_out = get_pinned_out(model)
@@ -100,6 +110,14 @@ if __name__ == '__main__':
         simplified_y_forward_std.append(np.std(forward_time))
         simplified_y_backward.append(np.mean(backward_time))
         simplified_y_backward_std.append(np.std(backward_time))
+
+        wandb.log({
+            'pruned.forward': np.mean(forward_time),
+            'pruned.forward_std': np.std(forward_time),
+            'pruned.backward': np.mean(backward_time),
+            'pruned.backward_std': np.std(backward_time),
+            'remaining_neurons:': x[-1]
+        })
         
         amount += 0.05
     
