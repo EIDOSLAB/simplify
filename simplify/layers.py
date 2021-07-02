@@ -19,7 +19,7 @@ class ConvExpand(nn.Conv2d):
     @staticmethod
     def from_conv(module: nn.Conv2d, idxs, bias):
         module.__class__ = ConvExpand
-        
+
         module.register_buffer('idxs', torch.tensor(idxs, device=module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
         shape = bias.shape
@@ -30,7 +30,7 @@ class ConvExpand(nn.Conv2d):
     def forward(self, x):
         x = super().forward(x)
         
-        zeros = torch.zeros(x.shape[0], *self.bf.shape).to(x.device)
+        zeros = torch.zeros(x.shape[0], *self.bf.shape, device=self.weight.device)
         index = self.idxs[None, :, None, None].expand_as(x)
         expanded = torch.scatter(zeros, 1, index, x)
         
@@ -66,7 +66,7 @@ class BatchNormExpand(nn.BatchNorm2d):
     def forward(self, x):
         x = super().forward(x)
         
-        zeros = torch.zeros(x.shape[0], self.bf.shape[0], *x.shape[2:]).to(x.device)
+        zeros = torch.zeros(x.shape[0], self.bf.shape[0], *x.shape[2:], device=self.weight.device)
         index = self.idxs[None, :, None, None].expand_as(x)
         expanded = torch.scatter(zeros, 1, index, x)
         
