@@ -57,7 +57,7 @@ def main(config):
     numpy.random.seed(0)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    device = torch.device('cpu')
+    device = torch.device('cuda')
 
     model = resnet18(False).to(device)
     for module in model.modules():
