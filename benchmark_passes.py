@@ -112,10 +112,10 @@ if __name__ == '__main__':
         simplified_y_backward_std.append(np.std(backward_time))
 
         wandb.log({
-            'pruned.forward': np.mean(forward_time),
-            'pruned.forward_std': np.std(forward_time),
-            'pruned.backward': np.mean(backward_time),
-            'pruned.backward_std': np.std(backward_time),
+            'simplified.forward': np.mean(forward_time),
+            'simplified.forward_std': np.std(forward_time),
+            'simplified.backward': np.mean(backward_time),
+            'simplified.backward_std': np.std(backward_time),
             'remaining_neurons:': x[-1]
         })
         
