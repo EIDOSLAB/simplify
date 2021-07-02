@@ -18,7 +18,7 @@ class ChannelsRemovalTest(unittest.TestCase):
     
     def test_zeroed_removal(self):
         @torch.no_grad()
-        def test_arch(arch, x, pretrained=False):
+        def test_arch(arch, x, pretrained=False, fuse_bn=True):
             if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
                 
@@ -33,8 +33,9 @@ class ChannelsRemovalTest(unittest.TestCase):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
 
-            bn_folding = utils.get_bn_folding(model)
-            model = simplify.fuse(model, bn_folding)
+            if fuse_bn:
+                bn_folding = utils.get_bn_folding(model)
+                model = simplify.fuse(model, bn_folding)
             
             pinned_out = utils.get_pinned_out(model)
             zeros = torch.zeros(1, *x.shape[1:])
@@ -42,6 +43,7 @@ class ChannelsRemovalTest(unittest.TestCase):
             y_src = model(x)
             
             model = simplify.remove_zeroed(model, zeros, pinned_out)
+            print(model)
             y_prop = model(x)
             
             print(f'------ {self.__class__.__name__, arch.__name__} ------')
@@ -56,5 +58,8 @@ class ChannelsRemovalTest(unittest.TestCase):
         x = im / 255.
         
         for architecture in models:
-            with self.subTest(arch=architecture, pretrained=True):
-                self.assertTrue(test_arch(architecture, x, True))
+            with self.subTest(arch=architecture, pretrained=True, fuse_bn=True):
+                self.assertTrue(test_arch(architecture, x, True, True))
+            
+            with self.subTest(arch=architecture, pretrained=True, fuse_bn=False):
+                self.assertTrue(test_arch(architecture, x, True, False))

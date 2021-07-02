@@ -17,7 +17,7 @@ class BiasPropagationTest(unittest.TestCase):
     
     def test_bias_propagation(self):
         @torch.no_grad()
-        def test_arch(arch, x, pretrained=False):
+        def test_arch(arch, x, pretrained=False, fuse_bn=True):
             if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
                 
@@ -32,8 +32,9 @@ class BiasPropagationTest(unittest.TestCase):
                     prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
             
-            bn_folding = utils.get_bn_folding(model)
-            model = simplify.fuse(model, bn_folding)
+            if fuse_bn:
+                bn_folding = utils.get_bn_folding(model)
+                model = simplify.fuse(model, bn_folding)
             y_src = model(x)
             
             zeros = torch.zeros(1, *x.shape[1:])
@@ -53,5 +54,8 @@ class BiasPropagationTest(unittest.TestCase):
         x = x.float() / 255.
         
         for architecture in models:
-            with self.subTest(arch=architecture, pretrained=True):
-                self.assertTrue(test_arch(architecture, x, True))
+            with self.subTest(arch=architecture, pretrained=True, fuse_bn=True):
+                self.assertTrue(test_arch(architecture, x, pretrained=True, fuse_bn=True))
+            
+            with self.subTest(arch=architecture, pretrained=True, fuse_bn=False):
+                self.assertTrue(test_arch(architecture, x, pretrained=True, fuse_bn=False))
