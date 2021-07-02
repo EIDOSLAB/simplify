@@ -1,4 +1,6 @@
 import time
+
+from torchvision.models.resnet import resnet101
 import wandb
 
 import numpy as np
@@ -50,7 +52,7 @@ if __name__ == '__main__':
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-        model = resnet18(True)
+        model = resnet101(True)
         
         # First loop is the full model
         if i > 0:
