@@ -20,24 +20,17 @@ class ConvExpand(nn.Conv2d):
     def from_conv(module: nn.Conv2d, idxs, bias):
         module.__class__ = ConvExpand
 
-        module.register_buffer(
-            'idxs', torch.tensor(
-                idxs, device=module.weight.device))
+        module.register_buffer('idxs', torch.tensor(idxs, device=module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
-        shape = bias.shape
-        module.register_buffer('zeros', torch.zeros(
-            1, 1, *shape[1:], device=module.weight.device))
+        module.register_buffer('zeros', torch.zeros(1, *bias.shape, device=module.weight.device))
 
         return module
 
     def forward(self, x):
         x = super().forward(x)
 
-        zeros = torch.zeros(
-            x.shape[0],
-            *self.bf.shape,
-            dtype=x.dtype,
-            device=self.weight.device)
+        #zeros = torch.zeros(x.shape[0], *self.bf.shape, dtype=x.dtype, device=self.weight.device)
+        zeros = self.zeros.expand(x.shape[0], *self.zeros.shape[1:])
         index = self.idxs[None, :, None, None].expand_as(x)
         expanded = torch.scatter(zeros, 1, index, x)
 
