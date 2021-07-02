@@ -26,7 +26,7 @@ if __name__ == '__main__':
     
     criterion = CrossEntropyLoss()
     
-    iterations = 2
+    iterations = 500
     
     total_neurons = 0
     remaining_neurons = 0
