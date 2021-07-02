@@ -71,7 +71,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
         if isinstance(module, ConvExpand):
             zeros = torch.zeros(1, *shape[1:], device=module.weight.device)
             expanded_weight = torch.cat((module.weight, zeros), dim=0)
-            expanded_weight = expanded_weight[module.idxs]
+            expanded_weight = expanded_weight[module.expansion_idxs]
             nonzero_idx = ~(expanded_weight.view(
                 expanded_weight.shape[0], -1).sum(dim=1) == 0)
             module.weight = nn.Parameter(expanded_weight)
@@ -80,7 +80,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
             # Expand weight
             zeros = torch.zeros(1, *shape[1:], device=module.weight.device)
             expanded_weight = torch.cat((module.weight, zeros), dim=0)
-            expanded_weight = expanded_weight[module.idxs]
+            expanded_weight = expanded_weight[module.expansion_idxs]
             nonzero_idx = ~(expanded_weight.view(
                 expanded_weight.shape[0], -1).sum(dim=1) == 0)
             module.weight = nn.Parameter(expanded_weight)
@@ -90,14 +90,14 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
                                 *module.running_mean.shape[1:],
                                 device=module.weight.device)
             expanded_mean = torch.cat((module.running_mean, zeros), dim=0)
-            module.running_mean = expanded_mean[module.idxs]
+            module.running_mean = expanded_mean[module.expansion_idxs]
 
             # Expand running_var
             ones = torch.ones(1,
                               *module.running_var.shape[1:],
                               device=module.weight.device)
             expanded_var = torch.cat((module.running_var, ones), dim=0)
-            module.running_var = expanded_var[module.idxs]
+            module.running_var = expanded_var[module.expansion_idxs]
 
         # 2. Remove weight channels
         module.weight = nn.Parameter(module.weight[nonzero_idx])

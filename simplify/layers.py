@@ -24,6 +24,20 @@ class ConvExpand(nn.Conv2d):
         module.register_parameter('bf', torch.nn.Parameter(bias))
         module.register_buffer('zeros', torch.zeros(1, *bias.shape, dtype=bias.dtype, device=module.weight.device))
         
+        # idx: indices of non-zero weights in original module
+        # -> non consecutive values must map to zero (added channel in remove)
+        expansion_indices = []
+        if idxs.shape[0] > 0:
+            last_idx = idxs[0].item()
+
+            for idx in idxs:
+                if idx.item() != last_idx+1:
+                    expansion_indices.extend([idxs.shape[0]]*(idx.item()-last_idx-1))
+                expansion_indices.append(idx.item())
+                last_idx = idx.item()
+        
+        setattr(module, 'expansion_idxs', expansion_indices)
+
         return module
     
     def forward(self, x):
