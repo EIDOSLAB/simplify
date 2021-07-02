@@ -107,49 +107,49 @@ Tests
 #### Inference time benchmarks
 
 <!-- benchmark starts -->
-Update timestamp 01/07/2021 15:19:34
+Update timestamp 02/07/2021 14:12:39
 
 Random structured pruning amount = 50.0%
 
 | Architecture       | Dense time        | Pruned time       | Simplified time   |
 |--------------------|-------------------|-------------------|-------------------|
-| alexnet            | 0.2545s ± 0.0102  | 0.2460s ± 0.0033  | 0.1103s ± 0.0039  |
-| vgg11              | 2.8058s ± 0.0051  | 2.8157s ± 0.1149  | 1.2167s ± 0.0062  |
-| vgg11_bn           | 3.7297s ± 0.0190  | 3.6972s ± 0.0104  | 1.2141s ± 0.0121  |
-| vgg13              | 4.2333s ± 0.0073  | 4.2162s ± 0.0544  | 1.8771s ± 0.0034  |
-| vgg13_bn           | 5.7763s ± 0.0160  | 5.7112s ± 0.0207  | 1.8721s ± 0.0070  |
-| vgg16              | 5.2540s ± 0.0148  | 5.2638s ± 0.1229  | 2.2055s ± 0.0111  |
-| vgg16_bn           | 6.9439s ± 0.0177  | 6.8820s ± 0.0085  | 2.2065s ± 0.0060  |
-| vgg19              | 6.3616s ± 0.1144  | 6.3080s ± 0.0054  | 2.5464s ± 0.0168  |
-| vgg19_bn           | 8.1254s ± 0.0156  | 8.0577s ± 0.0218  | 2.5385s ± 0.0046  |
-| resnet18           | 1.0742s ± 0.0161  | 1.0641s ± 0.0088  | 0.6485s ± 0.0046  |
-| resnet34           | 1.7053s ± 0.0176  | 1.7012s ± 0.0220  | 0.9584s ± 0.0035  |
-| resnet50           | 4.1101s ± 0.0121  | 4.1019s ± 0.0331  | 2.5838s ± 0.0037  |
-| resnet101          | 6.2384s ± 0.0186  | 6.2269s ± 0.0151  | 3.8213s ± 0.0062  |
-| resnet152          | 8.7623s ± 0.0339  | 8.7725s ± 0.0207  | 5.3389s ± 0.0046  |
-| squeezenet1_0      | 1.0829s ± 0.0052  | 1.0507s ± 0.0049  | 1.1250s ± 0.0120  |
-| squeezenet1_1      | 0.6039s ± 0.0041  | 0.5814s ± 0.0019  | 0.6173s ± 0.0065  |
-| densenet121        | 4.6214s ± 0.0130  | 4.6042s ± 0.0098  | 4.7011s ± 0.0284  |
-| densenet161        | 9.1962s ± 0.0789  | 9.1201s ± 0.0423  | 8.5322s ± 0.1125  |
-| densenet169        | 4.9701s ± 0.0545  | 4.9325s ± 0.0091  | 5.1915s ± 0.0287  |
-| densenet201        | 6.4126s ± 0.0179  | 6.3933s ± 0.0143  | 6.9536s ± 0.0311  |
-| inception_v3       | 1.9772s ± 0.0087  | 1.9460s ± 0.0067  | 1.1785s ± 0.0068  |
-| googlenet          | 1.4573s ± 0.0305  | 1.3629s ± 0.0044  | 0.5483s ± 0.0101  |
-| shufflenet_v2_x0_5 | 0.3908s ± 0.0026  | 0.3854s ± 0.0029  | 0.3755s ± 0.0054  |
-| shufflenet_v2_x1_0 | 0.4965s ± 0.0059  | 0.4897s ± 0.0026  | 0.4770s ± 0.0033  |
-| shufflenet_v2_x1_5 | 0.7343s ± 0.0092  | 0.7265s ± 0.0021  | 0.6970s ± 0.0039  |
-| shufflenet_v2_x2_0 | 1.0390s ± 0.0075  | 1.0301s ± 0.0036  | 0.9711s ± 0.0048  |
-| mobilenet_v2       | 2.5646s ± 0.0211  | 2.6259s ± 0.0421  | 2.1950s ± 0.0118  |
-| mobilenet_v3_small | 0.6707s ± 0.0076  | 0.6804s ± 0.0012  | 0.6513s ± 0.0116  |
-| mobilenet_v3_large | 1.8021s ± 0.0211  | 1.7928s ± 0.0090  | 1.6201s ± 0.0203  |
-| resnext50_32x4d    | 4.8371s ± 0.0162  | 4.8366s ± 0.0455  | 3.6868s ± 0.0071  |
-| resnext101_32x8d   | 11.8295s ± 0.0205 | 11.8021s ± 0.0425 | 8.7308s ± 0.0104  |
-| wide_resnet50_2    | 6.3901s ± 0.0896  | 6.3137s ± 0.0111  | 3.1445s ± 0.0219  |
-| wide_resnet101_2   | 10.6236s ± 0.0380 | 10.5310s ± 0.0359 | 4.4830s ± 0.0211  |
-| mnasnet0_5         | 1.2606s ± 0.0296  | 1.2623s ± 0.0166  | 1.1916s ± 0.0087  |
-| mnasnet0_75        | 2.0221s ± 0.0347  | 2.0291s ± 0.0261  | 1.8622s ± 0.0131  |
-| mnasnet1_0         | 2.4041s ± 0.0379  | 2.4090s ± 0.0365  | 2.1125s ± 0.0305  |
-| mnasnet1_3         | 3.4027s ± 0.0776  | 3.3037s ± 0.0676  | 3.0261s ± 0.0116  |
+| alexnet            | 0.2541s ± 0.0105  | 0.2457s ± 0.0033  | 0.1114s ± 0.0028  |
+| vgg11              | 2.8115s ± 0.0270  | 2.7708s ± 0.0072  | 1.2147s ± 0.0082  |
+| vgg11_bn           | 3.7360s ± 0.0390  | 3.7012s ± 0.0077  | 1.2138s ± 0.0043  |
+| vgg13              | 4.2442s ± 0.0054  | 4.2092s ± 0.0106  | 1.8750s ± 0.0044  |
+| vgg13_bn           | 5.7653s ± 0.0091  | 5.7342s ± 0.0106  | 1.8787s ± 0.0087  |
+| vgg16              | 5.2710s ± 0.0143  | 5.2519s ± 0.0060  | 2.2150s ± 0.0176  |
+| vgg16_bn           | 6.9713s ± 0.0282  | 6.8915s ± 0.0264  | 2.2289s ± 0.0724  |
+| vgg19              | 6.3143s ± 0.0450  | 6.3027s ± 0.0038  | 2.5350s ± 0.0090  |
+| vgg19_bn           | 8.0637s ± 0.0083  | 8.0679s ± 0.0191  | 2.5396s ± 0.0126  |
+| resnet18           | 1.1364s ± 0.1062  | 1.0868s ± 0.0075  | 0.7186s ± 0.0030  |
+| resnet34           | 1.8281s ± 0.0591  | 1.7880s ± 0.0102  | 1.0856s ± 0.0027  |
+| resnet50           | 4.0952s ± 0.0078  | 4.1012s ± 0.0370  | 3.0019s ± 0.0042  |
+| resnet101          | 6.2443s ± 0.0137  | 6.2832s ± 0.0760  | 4.5807s ± 0.0081  |
+| resnet152          | 8.8325s ± 0.1453  | 8.8212s ± 0.0768  | 6.4051s ± 0.0053  |
+| squeezenet1_0      | 1.0912s ± 0.0298  | 1.0505s ± 0.0034  | 1.2466s ± 0.0038  |
+| squeezenet1_1      | 0.6031s ± 0.0030  | 0.5828s ± 0.0032  | 0.6849s ± 0.0041  |
+| densenet121        | 4.5933s ± 0.0279  | 4.5877s ± 0.0441  | 4.9396s ± 0.0133  |
+| densenet161        | 9.1743s ± 0.0391  | 9.1517s ± 0.0713  | 9.4493s ± 0.0485  |
+| densenet169        | 5.2091s ± 0.0689  | 5.1649s ± 0.0149  | 5.8039s ± 0.0133  |
+| densenet201        | 6.7510s ± 0.0166  | 6.7363s ± 0.0214  | 7.6527s ± 0.0303  |
+| inception_v3       | 2.0370s ± 0.0086  | 1.9996s ± 0.0026  | 1.2830s ± 0.0073  |
+| googlenet          | 1.5790s ± 0.0176  | 1.4870s ± 0.0097  | 0.5660s ± 0.0149  |
+| shufflenet_v2_x0_5 | 0.3875s ± 0.0014  | 0.3806s ± 0.0037  | 0.4094s ± 0.0023  |
+| shufflenet_v2_x1_0 | 0.4957s ± 0.0032  | 0.4915s ± 0.0019  | 0.5379s ± 0.0025  |
+| shufflenet_v2_x1_5 | 0.7417s ± 0.0090  | 0.7353s ± 0.0033  | 0.7897s ± 0.0040  |
+| shufflenet_v2_x2_0 | 1.1501s ± 0.0200  | 1.1464s ± 0.0044  | 1.1498s ± 0.0054  |
+| mobilenet_v2       | 2.6127s ± 0.0453  | 2.6065s ± 0.0353  | 2.4583s ± 0.0307  |
+| mobilenet_v3_small | 0.6765s ± 0.0040  | 0.6761s ± 0.0023  | 0.6969s ± 0.0100  |
+| mobilenet_v3_large | 1.8596s ± 0.0428  | 1.8149s ± 0.0073  | 1.7527s ± 0.0074  |
+| resnext50_32x4d    | 5.0396s ± 0.0337  | 5.0199s ± 0.0108  | 4.4090s ± 0.0100  |
+| resnext101_32x8d   | 12.3411s ± 0.0514 | 12.3163s ± 0.1183 | 10.4645s ± 0.0116 |
+| wide_resnet50_2    | 6.5117s ± 0.0405  | 6.4444s ± 0.0086  | 3.6526s ± 0.0063  |
+| wide_resnet101_2   | 10.4351s ± 0.0752 | 10.8512s ± 0.0108 | 5.2682s ± 0.0236  |
+| mnasnet0_5         | 1.2658s ± 0.0213  | 1.2897s ± 0.0219  | 1.2825s ± 0.0319  |
+| mnasnet0_75        | 2.1257s ± 0.0086  | 2.1124s ± 0.0113  | 2.0052s ± 0.0417  |
+| mnasnet1_0         | 2.3901s ± 0.0488  | 2.4365s ± 0.0391  | 2.3462s ± 0.0382  |
+| mnasnet1_3         | 3.2735s ± 0.0650  | 3.2876s ± 0.0669  | 3.1677s ± 0.0657  |
 <!-- benchmark ends -->
 
 #### Status of torchvision.models
@@ -164,7 +164,7 @@ Random structured pruning amount = 50.0%
 
 
 <!-- table starts -->
-Update timestamp 02/07/2021 12:21:41
+Update timestamp 02/07/2021 13:00:59
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |
 |--------------------|---------------------|--------------------|--------------------|
@@ -190,20 +190,20 @@ Update timestamp 02/07/2021 12:21:41
 |    densenet201     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     googlenet      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-|    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-| mobilenet_v3_small | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-| mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
+| shufflenet_v2_x0_5 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| shufflenet_v2_x1_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| shufflenet_v2_x1_5 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|    mobilenet_v2    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| mobilenet_v3_small | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  resnext50_32x4d   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  resnext101_32x8d  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  wide_resnet50_2   | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-|     mnasnet0_5     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-|    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
-|     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: |   :cursing_face:   |
+|     mnasnet0_5     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 <!-- table ends -->
 </details>
