@@ -33,12 +33,13 @@ class ConvExpand(nn.Conv2d):
         x = super().forward(x)
         
         zeros = self.zero_cache
-        index = self.idxs
+        index = self.idxs_cache
 
         if zeros.shape[0] != x.shape[0]:
             zeros = self.zeros.expand(x.shape[0], *self.zeros.shape[1:])
             index = self.idxs[None, :, None, None].expand_as(x)
             self.zero_cache = zeros
+            self.idxs_cache = index
 
         expanded = torch.scatter(zeros, 1, index, x)
         
@@ -69,18 +70,21 @@ class BatchNormExpand(nn.BatchNorm2d):
         module.register_parameter('bf', torch.nn.Parameter(bias))
         module.register_buffer('zeros', torch.zeros(1, 1, *shape[2:], dtype=bias.dtype, device=module.weight.device))
         setattr(module, 'zero_cache', module.zeros)
-
+        setattr(module, 'idxs_cache', module.idxs)
+        
         return module
     
     def forward(self, x):
         x = super().forward(x)
         
         zeros = self.zero_cache
-        index = self.idxs
+        index = self.idxs_cache
+
         if zeros.shape[0] != x.shape[0]: 
             zeros = self.zeros.expand(x.shape[0], self.bf.shape[0], *self.zeros.shape[2:])
             index = self.idxs[None, :, None, None].expand_as(x)
             self.zero_cache = zeros
+            self.idxs_cache = index
             
         expanded = torch.scatter(zeros, 1, index, x)
         
