@@ -71,7 +71,7 @@ if __name__ == '__main__':
         forward_time = []
         backward_time = []
         model.to(device)
-        for j in tqdm(range(10), desc="Pruned test"):
+        for j in tqdm(range(11), desc="Pruned test"):
             start = time.perf_counter()
             output = model(fake_input)
             forward_time.append(time.perf_counter() - start)
@@ -80,7 +80,9 @@ if __name__ == '__main__':
             start = time.perf_counter()
             loss.backward()
             backward_time.append(time.perf_counter() - start)
-        
+        forward_time = forward_time[1:]
+        backward_time = backward_time[1:]
+
         pruned_y_forward.append(np.mean(forward_time))
         pruned_y_forward_std.append(np.std(forward_time))
         pruned_y_backward.append(np.mean(backward_time))
@@ -101,7 +103,7 @@ if __name__ == '__main__':
         forward_time = []
         backward_time = []
         model.to(device)
-        for j in tqdm(range(10), desc="Simplified test"):
+        for j in tqdm(range(11), desc="Simplified test"):
             start = time.perf_counter()
             output = model(fake_input)
             forward_time.append(time.perf_counter() - start)
@@ -110,6 +112,8 @@ if __name__ == '__main__':
             start = time.perf_counter()
             loss.backward()
             backward_time.append(time.perf_counter() - start)
+        forward_time = forward_time[1:]
+        backward_time = backward_time[1:]
         
         simplified_y_forward.append(np.mean(forward_time))
         simplified_y_forward_std.append(np.std(forward_time))
