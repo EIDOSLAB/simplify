@@ -111,7 +111,9 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
                 else:
                     idxs.append(current)
                     current += 1
-
+            
+            # TODO improve this, is just for testing purposes
+            idxs = torch.where(torch.tensor(idxs) != torch.tensor(idxs).max())[0]
             # Keep bias (bf) full size
             if isinstance(module, nn.Conv2d):
                 module = ConvExpand.from_conv(module, idxs, module.bf)
