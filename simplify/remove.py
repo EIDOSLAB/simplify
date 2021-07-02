@@ -71,7 +71,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
         if isinstance(module, ConvExpand):
             #zeros = module.zeros.expand(module.bf.shape[0], *module.weight.shape[1:])
             zeros = torch.zeros_like(module.weight)
-            index = module.idxs[None, :, None, None].expand_as(module.weight)
+            index = module.idxs[:, None, None, None].expand_as(module.weight)
             expanded_weight = torch.scatter(zeros, 1, index, module.weight)
 
             #zeros = torch.zeros(1, *shape[1:], device=module.weight.device)
