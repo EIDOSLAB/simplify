@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     model = resnet18(True)
     device = torch.device("cuda")
-    fake_input = torch.randint(0, 256, (256, 3, 224, 224))
+    fake_input = torch.randint(0, 256, (128, 3, 224, 224))
     fake_input = fake_input.float() / 255.
     fake_target = torch.randint(0, 1000, (256,)).long()
     
@@ -124,6 +124,8 @@ if __name__ == '__main__':
         })
         
         amount += 0.05
+        del model
+        torch.cuda.empty_cache()
     
     plt.errorbar(x, pruned_y_forward, pruned_y_forward_std, label="pruned")
     plt.errorbar(x, simplified_y_forward, simplified_y_forward_std, label="simplified")
