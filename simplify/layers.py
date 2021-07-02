@@ -20,7 +20,7 @@ class ConvExpand(nn.Conv2d):
     def from_conv(module: nn.Conv2d, idxs, bias):
         module.__class__ = ConvExpand
         
-        module.register_buffer('idxs', torch.tensor(idxs, device=module.weight.device))
+        module.register_buffer('idxs', idxs.to(module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
         module.register_buffer('zeros', torch.zeros(1, *bias.shape, dtype=bias.dtype, device=module.weight.device))
         
@@ -57,7 +57,7 @@ class BatchNormExpand(nn.BatchNorm2d):
     def from_bn(module: nn.BatchNorm2d, idxs, bias, shape):
         module.__class__ = BatchNormExpand
         
-        module.register_buffer('idxs', torch.tensor(idxs, device=module.weight.device))
+        module.register_buffer('idxs', idxs.to(module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
         module.register_buffer('zeros', torch.zeros(1, 1, *shape[2:], dtype=bias.dtype, device=module.weight.device))
         
