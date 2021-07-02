@@ -48,6 +48,8 @@ if __name__ == '__main__':
     
     amount = 0.
     for i in tqdm(range(iterations), desc="Benchmark"):
+        if amount > 1.:
+            break
         model = resnet18(True)
         
         # First loop is the full model
@@ -116,7 +118,7 @@ if __name__ == '__main__':
             'simplified.forward_std': np.std(forward_time),
             'simplified.backward': np.mean(backward_time),
             'simplified.backward_std': np.std(backward_time),
-            'remaining_neurons:': x[-1]
+            'remaining_neurons': 100.-x[-1]
         })
         
         amount += 0.05
