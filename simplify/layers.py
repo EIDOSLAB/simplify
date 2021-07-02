@@ -30,7 +30,7 @@ class ConvExpand(nn.Conv2d):
         if idxs.shape[0] > 0:
             last_idx = idxs[0].item()
 
-            for idx in idxs:
+            for idx in idxs[1:]:
                 if idx.item() != last_idx+1:
                     expansion_indices.extend([idxs.shape[0]]*(idx.item()-last_idx-1))
                 expansion_indices.append(idx.item())
