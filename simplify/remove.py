@@ -69,7 +69,8 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
         # adding zero where channels were pruned
         # so that new idxs are updated accordingly
         if isinstance(module, ConvExpand):
-            zeros = module.zeros.expand(module.bf.shape[0], *module.weight.shape[1:])
+            #zeros = module.zeros.expand(module.bf.shape[0], *module.weight.shape[1:])
+            zeros = torch.zeros_like(module.weight)
             index = module.idxs[None, :, None, None].expand_as(module.weight)
             expanded_weight = torch.scatter(zeros, 1, index, module.weight)
 
