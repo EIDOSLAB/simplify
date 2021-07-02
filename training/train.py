@@ -103,6 +103,8 @@ def main(config):
     num_samples = 0
     num_correct = 0
 
+    amp = False
+
     # for i, (images, target) in enumerate(tqdm(train_loader)):
     for i in tqdm(range(train_iteration)):
         images = torch.randn((256, 3, 224, 224), device=device)
@@ -155,7 +157,7 @@ def main(config):
             for _ in range(i):
                 scheduler.step()
 
-        with torch.cuda.amp.autocast():
+        with torch.cuda.amp.autocast(amp):
             start = time.time()
             output = model(images)
             forward_time = time.time() - start
@@ -185,9 +187,13 @@ def main(config):
         for param in model.parameters():
             param.grad.data.mul_(torch.abs(param.data) > 0)
 
-        scaler.step(optimizer)
-        scaler.update()
-        scheduler.step()
+        if amp:
+            scaler.step(optimizer)
+            scaler.update()
+            scheduler.step()
+        else:
+            optimizer.step()
+        optimizer.zero_grad()
 
         to_log = {
             "Remaining neurons": (remaining_neurons / total_neurons),
