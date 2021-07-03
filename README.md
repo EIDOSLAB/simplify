@@ -164,7 +164,7 @@ Random structured pruning amount = 50.0%
 
 
 <!-- table starts -->
-Update timestamp 02/07/2021 13:00:59
+Update timestamp 03/07/2021 15:10:26
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |
 |--------------------|---------------------|--------------------|--------------------|
