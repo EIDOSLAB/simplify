@@ -71,7 +71,7 @@ class ConvExpandTest(unittest.TestCase):
                 idxs.append(current)
                 current += 1
         module = ConvExpand.from_conv(
-            module, idxs, torch.zeros_like(y_post)[0])
+            module, torch.Tensor(idxs), torch.zeros_like(y_post)[0])
 
         y_post = module(x)
         self.assertTrue(torch.equal(y_src, y_post))

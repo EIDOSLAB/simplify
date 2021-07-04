@@ -44,7 +44,7 @@ class ConvExpandTest(unittest.TestCase):
     def test_expansion(self):
         module = nn.Conv2d(3, 64, 3, 1, padding=1, bias=False)
         optimizer = torch.optim.SGD(module.parameters(), lr=0.1)
-        print(module)
+        #print(module)
 
         x = torch.randn((57, 3, 128, 128))
 
@@ -75,10 +75,10 @@ class ConvExpandTest(unittest.TestCase):
                 idxs.append(current)
                 current += 1
 
-        module = ConvExpand.from_conv(module, idxs, torch.zeros_like(y_src)[0])
+        module = ConvExpand.from_conv(module, torch.Tensor(idxs), torch.zeros_like(y_src)[0])
         module.out_channels = module.weight.shape[0]
 
-        print(module)
+        #print(module)
 
         for i in range(2):
             with torch.enable_grad():
@@ -87,6 +87,6 @@ class ConvExpandTest(unittest.TestCase):
                 optimizer.step()
                 optimizer.zero_grad()
 
-        print(module.weight.grad.shape)
-        print(module.weight.shape)
+        #print(module.weight.grad.shape)
+        #print(module.weight.shape)
         assert(module.weight.grad.shape == module.weight.shape)
