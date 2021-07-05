@@ -1,6 +1,6 @@
 import time
 
-from torchvision.models.resnet import resnet101
+from torchvision.models.resnet import resnet101, resnet50
 import wandb
 
 import numpy as np
@@ -18,7 +18,7 @@ from simplify.utils import get_pinned_out
 if __name__ == '__main__':
     wandb.init()
 
-    model = resnet101(True)
+    model = resnet50(True)
     device = torch.device("cuda")
     batch_size = 256
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
