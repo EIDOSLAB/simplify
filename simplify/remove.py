@@ -126,14 +126,14 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
                 module = BatchNormExpand.from_bn(
                     module, idxs, module.bf, output.shape)
         else:
-            if getattr(module, 'bias', None) is not None:
-                module.bias = nn.Parameter(module.bias[nonzero_idx])
-
             if getattr(module, 'bf', None) is not None:
                 module.bf = nn.Parameter(module.bf[nonzero_idx])
 
             output = torch.zeros_like(output)
             output[:, nonzero_idx] = float('nan')
+
+        if getattr(module, 'bias', None) is not None:
+            module.bias = nn.Parameter(module.bias[nonzero_idx])
 
         if isinstance(module, nn.Conv2d):
             module.out_channels = module.weight.shape[0]
