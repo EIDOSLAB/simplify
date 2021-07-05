@@ -18,7 +18,8 @@ from simplify.utils import get_pinned_out
 if __name__ == '__main__':
     wandb.init()
 
-    model = resnet18(True)
+    network = resnet50
+    model = network(True)
     device = torch.device("cuda")
     batch_size = 256
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-        model = resnet101(True)
+        model = network(True)
         
         # First loop is the full model
         if i > 0:
