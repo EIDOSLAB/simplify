@@ -39,15 +39,14 @@ class SimplificationTest(unittest.TestCase):
 
             bn_folding = utils.get_bn_folding(model)
             simplify.simplify(model, zeros, bn_folding)
-            print(model)
             y_prop = model(x)
 
-            print(f'------ {self.__class__.__name__, arch.__name__} ------')
-            print("Max abs diff: ", (y_src - y_prop).abs().max().item())
-            print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
-            print(
-                f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
-            print()
+            #print(f'------ {self.__class__.__name__, arch.__name__} ------')
+            #print("Max abs diff: ", (y_src - y_prop).abs().max().item())
+            #print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
+            #print(
+            #    f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
+            #print()
 
             return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
