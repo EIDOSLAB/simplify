@@ -115,7 +115,11 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
             idxs = torch.where(nonzero_idx)[0]
             # Keep bias (bf) full size
             if isinstance(module, nn.Conv2d):
-                module = ConvExpand.from_conv(module, idxs, module.bf)
+                module_bf = getattr(module, 'bf', None)
+                if module_bf is None:
+                    module_bf = torch.zeros_like(output[0])
+                    
+                module = ConvExpand.from_conv(module, idxs, module_bf)
 
             if isinstance(module, nn.BatchNorm2d):
                 module = BatchNormExpand.from_bn(

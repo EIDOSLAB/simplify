@@ -38,16 +38,16 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
         if isinstance(module, nn.Conv2d):
             # For a conv layer, we remove the scalar biases
             # and use bias matrices (ConvB)
-            # if bias_feature_maps.abs().sum() != 0.:
-            # remove native bias
-            if getattr(module, 'bias', None) is not None:
-                module.register_parameter('bias', None)
-
-            if not isinstance(module, ConvExpand):
-                module = ConvB.from_conv(module, bias_feature_maps)
-            else:  # if it is already ConvExpand, just update bf
-                module.register_parameter(
-                    'bf', nn.Parameter(bias_feature_maps))
+            if bias_feature_maps.abs().sum() != 0.:
+                # remove native bias
+                if getattr(module, 'bias', None) is not None:
+                    module.register_parameter('bias', None)
+    
+                if not isinstance(module, ConvExpand):
+                    module = ConvB.from_conv(module, bias_feature_maps)
+                else:  # if it is already ConvExpand, just update bf
+                    module.register_parameter(
+                        'bf', nn.Parameter(bias_feature_maps))
 
         elif isinstance(module, nn.BatchNorm2d):
             pruned_input = module.pruned_input
