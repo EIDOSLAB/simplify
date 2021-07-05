@@ -113,6 +113,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
         # BatchNormExpand
         if name in pinned_out:
             idxs = torch.where(nonzero_idx)[0]
+            
             # Keep bias (bf) full size
             if isinstance(module, nn.Conv2d):
                 module_bf = getattr(module, 'bf', None)
