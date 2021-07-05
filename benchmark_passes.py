@@ -18,7 +18,7 @@ from simplify.utils import get_pinned_out
 if __name__ == '__main__':
     wandb.init()
 
-    model = resnet50(True)
+    model = resnet18(True)
     device = torch.device("cuda")
     batch_size = 256
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
