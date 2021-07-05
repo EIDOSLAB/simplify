@@ -64,8 +64,8 @@ def main(config):
         if isinstance(module, nn.ReLU):
             module.inplace = False
 
-    bn_folding = simplify.utils.get_bn_folding(model)
-    model = simplify.fuse(model, bn_folding)
+    #bn_folding = simplify.utils.get_bn_folding(model)
+    #model = simplify.fuse(model, bn_folding)
     pinned_out = get_pinned_out(model)
 
     train_iteration = 10000
@@ -135,16 +135,12 @@ def main(config):
                 print("Simplifying model")
                 #model = model.to("cpu")
                 model.eval()
-                simplify.propagate_bias(model, torch.zeros(
-                    1, 3, 224, 224, device=device), pinned_out)
-                simplify.remove_zeroed(
-                    model, torch.ones(
-                        1, 3, 224, 224, device=device), pinned_out)
+                simplify.propagate_bias(model, torch.zeros(1, 3, 224, 224, device=device), pinned_out)
+                simplify.remove_zeroed(model, torch.ones(1, 3, 224, 224, device=device), pinned_out)
                 model.train()
                 #model = model.to(device)
 
-                profiled = profile_model(model, torch.randn(
-                    (256, 3, 224, 224), device=device), rows=1000)
+                profiled = profile_model(model, torch.randn((256, 3, 224, 224), device=device), rows=1000)
                 with open('profile.txt', 'a') as f:
                     f.write(
                         f'\n\n -- SIMPLIFIED {(remaining_neurons / total_neurons) * 100} --\n')
