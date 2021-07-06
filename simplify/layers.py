@@ -46,19 +46,19 @@ class ConvExpand(nn.Conv2d):
     
     def forward(self, x):
         x = super().forward(x)
-        x = pad(x, (0, 0, 0, 0, 0, 1))
+        # x = pad(x, (0, 0, 0, 0, 0, 1))
         
-        # zeros = self.zero_cache
-        # index = self.idxs_cache
+        zeros = self.zero_cache
+        index = self.idxs_cache
         
-        # if zeros.shape[0] != x.shape[0]:
-        #     zeros = self.zeros.expand(x.shape[0], *self.zeros.shape[1:])
-        #     index = self.idxs[None, :, None, None].expand_as(x)
-        #     self.zero_cache = zeros
-        #     self.idxs_cache = index
+        if zeros.shape[0] != x.shape[0]:
+            zeros = self.zeros.expand(x.shape[0], *self.zeros.shape[1:])
+            index = self.idxs[None, :, None, None].expand_as(x)
+            self.zero_cache = zeros
+            self.idxs_cache = index
         
-        # expanded = torch.scatter(zeros, 1, index, x)
-        expanded = torch.index_select(x, 1, self.select_idxs)
+        expanded = torch.scatter(zeros, 1, index, x)
+        # expanded = torch.index_select(x, 1, self.select_idxs)
         
         return expanded + self.bf if self.use_bf else expanded
     
@@ -104,18 +104,18 @@ class BatchNormExpand(nn.BatchNorm2d):
     
     def forward(self, x):
         x = super().forward(x)
-        x = pad(x, (0, 0, 0, 0, 0, 1))
+        # x = pad(x, (0, 0, 0, 0, 0, 1))
         
-        # zeros = self.zero_cache
-        # index = self.idxs_cache
+        zeros = self.zero_cache
+        index = self.idxs_cache
         
-        # if zeros.shape[0] != x.shape[0]:
-        #     zeros = self.zeros.expand(x.shape[0], self.bf.shape[0], *self.zeros.shape[2:])
-        #     index = self.idxs[None, :, None, None].expand_as(x)
-        #     self.zero_cache = zeros
-        #     self.idxs_cache = index
+        if zeros.shape[0] != x.shape[0]:
+            zeros = self.zeros.expand(x.shape[0], self.bf.shape[0], *self.zeros.shape[2:])
+            index = self.idxs[None, :, None, None].expand_as(x)
+            self.zero_cache = zeros
+            self.idxs_cache = index
         
-        # expanded = torch.scatter(zeros, 1, index, x)
-        expanded = torch.index_select(x, 1, self.select_idxs)
+        expanded = torch.scatter(zeros, 1, index, x)
+        # expanded = torch.index_select(x, 1, self.select_idxs)
         
         return expanded + self.bf[:, None, None].expand_as(expanded)
