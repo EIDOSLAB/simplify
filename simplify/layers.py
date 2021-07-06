@@ -23,18 +23,18 @@ class ConvExpand(nn.Conv2d):
     def from_conv(module: nn.Conv2d, idxs: torch.Tensor, bias):
         module.__class__ = ConvExpand
 
-        select_idxs = []
-        current = 0
-        for i in range(bias.shape[0]):
-            if i in idxs:
-                select_idxs.append(current)
-                current += 1
-            else:
-                select_idxs.append(module.weight.shape[0])
-        select_idxs = torch.tensor(select_idxs)
+        # select_idxs = []
+        # current = 0
+        # for i in range(bias.shape[0]):
+        #     if i in idxs:
+        #         select_idxs.append(current)
+        #         current += 1
+        #     else:
+        #         select_idxs.append(module.weight.shape[0])
+        # select_idxs = torch.tensor(select_idxs)
         
         module.register_buffer('idxs', idxs.to(module.weight.device))
-        module.register_buffer('select_idxs', select_idxs.to(module.weight.device))
+        # module.register_buffer('select_idxs', select_idxs.to(module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
         module.register_buffer('zeros', torch.zeros(1, *bias.shape, dtype=bias.dtype, device=module.weight.device))
         setattr(module, "use_bf", bias.abs().sum() != 0)
@@ -83,18 +83,18 @@ class BatchNormExpand(nn.BatchNorm2d):
     def from_bn(module: nn.BatchNorm2d, idxs: torch.Tensor, bias, shape):
         module.__class__ = BatchNormExpand
 
-        select_idxs = []
-        current = 0
-        for i in range(bias.shape[0]):
-            if i in idxs:
-                select_idxs.append(current)
-                current += 1
-            else:
-                select_idxs.append(module.weight.shape[0])
-        select_idxs = torch.tensor(select_idxs)
+        # select_idxs = []
+        # current = 0
+        # for i in range(bias.shape[0]):
+        #     if i in idxs:
+        #         select_idxs.append(current)
+        #         current += 1
+        #     else:
+        #         select_idxs.append(module.weight.shape[0])
+        # select_idxs = torch.tensor(select_idxs)
         
         module.register_buffer('idxs', idxs.to(module.weight.device))
-        module.register_buffer('select_idxs', select_idxs.to(module.weight.device))
+        # module.register_buffer('select_idxs', select_idxs.to(module.weight.device))
         module.register_parameter('bf', torch.nn.Parameter(bias))
         module.register_buffer('zeros', torch.zeros(1, 1, *shape[2:], dtype=bias.dtype, device=module.weight.device))
         setattr(module, 'zero_cache', module.zeros)
