@@ -8,11 +8,21 @@ import torch.nn.utils.prune as prune
 from tabulate import tabulate
 from torchvision.models.squeezenet import SqueezeNet
 
-import profile
 import simplify
 import utils
 from simplify import fuse
 from tests.benchmark_models import models
+
+from torch.autograd import profiler
+
+
+def profile_model(model, input, rows=10, cuda=False):
+    with profiler.profile(profile_memory=True, record_shapes=True, use_cuda=cuda) as prof:
+        with profiler.record_function("model_inference"):
+            model(input)
+
+    return str(prof.key_averages().table(
+        sort_by="cpu_time_total", row_limit=rows))
 
 device = 'cpu'
 
@@ -53,7 +63,7 @@ def run_pruning(architecture, amount):
             y_src = model(x)
         pruned_time.append(time.perf_counter() - start)
 
-    profiled = profile.profile_model(
+    profiled = profile_model(
         model, torch.randn(
             (1, 3, 224, 224)), rows=1000)
     with open(f'profile/{architecture.__name__}.txt', 'w') as f:
@@ -78,7 +88,7 @@ def run_pruning(architecture, amount):
             y_simplified = model(x)
         simplified_time.append(time.perf_counter() - start)
 
-    profiled = profile.profile_model(
+    profiled = profile_model(
         model, torch.randn(
             (1, 3, 224, 224)), rows=1000)
     with open(f'profile/{architecture.__name__}.txt', 'a') as f:
@@ -109,6 +119,7 @@ if __name__ == '__main__':
         try:
             d_time, p_time, s_time = run_pruning(architecture, amount)
         except Exception as e:
+            raise e
             d_time, p_time, s_time = [0.], [0.], [0.]
 
         table.append([architecture.__name__,
