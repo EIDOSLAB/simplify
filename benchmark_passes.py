@@ -106,10 +106,10 @@ if __name__ == '__main__':
         model.to(device)
         for j in tqdm(range(11), desc="Simplified test"):
             start = time.perf_counter()
-            output = model(fake_input)
+            output2 = model(fake_input)
             forward_time.append(time.perf_counter() - start)
             
-            loss = criterion(output, fake_target)
+            loss = criterion(output2, fake_target)
             start = time.perf_counter()
             loss.backward()
             backward_time.append(time.perf_counter() - start)
@@ -120,6 +120,8 @@ if __name__ == '__main__':
         simplified_y_forward_std.append(np.std(forward_time))
         simplified_y_backward.append(np.mean(backward_time))
         simplified_y_backward_std.append(np.std(backward_time))
+
+        assert torch.equal(output.argmax(dim=1), output2.argmax(dim=1))
 
         wandb.log({
             'simplified.forward': np.mean(forward_time),
