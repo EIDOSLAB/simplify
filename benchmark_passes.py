@@ -121,6 +121,7 @@ if __name__ == '__main__':
         simplified_y_backward.append(np.mean(backward_time))
         simplified_y_backward_std.append(np.std(backward_time))
 
+        print(torch.equal(output.argmax(dim=1), output2.argmax(dim=1)))
         assert torch.equal(output.argmax(dim=1), output2.argmax(dim=1))
 
         wandb.log({
