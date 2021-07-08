@@ -2,11 +2,11 @@ import random
 import time
 
 import torch
-import wandb
 from torch import nn
 from torch.nn.functional import pad
 from tqdm import tqdm
 
+import wandb
 from utils import set_seed
 
 
@@ -16,7 +16,7 @@ def measure_base(conv_module, x):
         starter.record()
     else:
         start = time.perf_counter()
-        
+    
     x = conv_module(x)
     
     if device == "cuda":
@@ -148,6 +148,40 @@ def measure_indexing(conv_module, x, idx, target_ch, conv_bias):
     return starter.elapsed_time(ender) if device == "cuda" else end - start
 
 
+def measure_gather(conv_module, x, idx, target_ch, conv_bias):
+    # Preallocate
+    idxs = []
+    current = 0
+    for i in range(target_ch):
+        if i in idx:
+            idxs.append(current)
+            current += 1
+        else:
+            idxs.append(conv_module.weight.shape[0])
+    idxs = torch.tensor(idxs, device=x.device)
+    
+    # Measure time
+    if device == "cuda":
+        starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+        starter.record()
+    else:
+        start = time.perf_counter()
+    
+    x = conv_module(x)
+    x = pad(x, (0, 0, 0, 0, 0, 1))
+    idxs = idxs[None, :, None, None].expand(x.shape[0], idxs.shape[0], *x.shape[2:])
+    expanded_x = torch.gather(x, dim=1, index=idxs)
+    expanded_x += conv_bias
+    
+    if device == "cuda":
+        ender.record()
+        torch.cuda.synchronize()
+    else:
+        end = time.perf_counter()
+    
+    return starter.elapsed_time(ender) if device == "cuda" else end - start
+
+
 if __name__ == '__main__':
     set_seed(0)
     total_ch = 256
@@ -174,6 +208,7 @@ if __name__ == '__main__':
             scatter_time = []
             select_time = []
             indexing_time = []
+            gather_time = []
             
             for bs in tqdm(range(1, tot_batches)):
                 # torch.cuda.empty_cache()
@@ -235,6 +270,12 @@ if __name__ == '__main__':
                 
                 indexing_time.append(measure_indexing(base_conv, x, idx, total_ch, conv_bias))
                 
+                ##########
+                # GATHER #
+                ##########
+                
+                gather_time.append(measure_gather(base_conv, x, idx, total_ch, conv_bias))
+                
                 # skip first iteration just in case
                 if bs > 1:
                     wandb.log({
@@ -243,6 +284,7 @@ if __name__ == '__main__':
                         'scatter':  scatter_time[bs - 1],
                         'select':   select_time[bs - 1],
                         'indexing': indexing_time[bs - 1],
+                        'gather': gather_time[bs - 1],
                     })
             
             wandb.finish()
