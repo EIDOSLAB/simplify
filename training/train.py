@@ -66,7 +66,7 @@ def main(config):
     model = resnet50(False).to(device)
     bn_folding = simplify.utils.get_bn_folding(model)
     simplify.fuse(model, bn_folding)
-    
+
     for module in model.modules():
         if isinstance(module, nn.ReLU):
             module.inplace = False
@@ -83,10 +83,6 @@ def main(config):
             remaining_neurons += module.weight.shape[0]
 
     wandb.init(config=config)
-    # wandb.watch(model)
-
-    # warmup
-    # model(torch.randn(batch_size, 3, 224, 224, device=device))
 
     profiled = profile_model(model, torch.randn((batch_size, 3, 224, 224), device=device), rows=1000)
     with open('profile.txt', 'w') as f:
