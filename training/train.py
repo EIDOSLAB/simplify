@@ -105,7 +105,7 @@ def main(config):
             remaining_neurons = 0
             for module in model.modules():
                 if isinstance(module, nn.Conv2d):
-                    prune.ln_structured(module, 'weight', amount=0.05, n=2, dim=0)
+                    prune.ln_structured(module, 'weight', amount=0.10, n=2, dim=0)
                     w = module.weight.clone().reshape(module.weight.shape[0], -1).sum(dim=1)
                     remaining_neurons += (w != 0).sum()
                     #ch_sum = module.weight.sum(dim=(1, 2, 3))
