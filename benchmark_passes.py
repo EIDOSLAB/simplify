@@ -14,8 +14,6 @@ from simplify import propagate, remove_zeroed
 from simplify.utils import get_pinned_out
 
 if __name__ == '__main__':
-    # wandb.init()
-    
     network = resnet101
     model = network(True)
     device = torch.device("cuda")
@@ -49,6 +47,8 @@ if __name__ == '__main__':
     simplified_y_backward_std = []
     
     amount = 0.
+    
+    wandb.init()
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
