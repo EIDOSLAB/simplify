@@ -17,7 +17,7 @@ class SimplificationTest(unittest.TestCase):
 
     def test_simplification(self):
         @torch.no_grad()
-        def test_arch(arch, x, pretrained=False):
+        def test_arch(arch, x, pretrained=False, fuse_bn=True):
             if architecture.__name__ in [
                     "shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
@@ -37,8 +37,7 @@ class SimplificationTest(unittest.TestCase):
             y_src = model(x)
             zeros = torch.zeros(1, *x.shape[1:])
 
-            bn_folding = utils.get_bn_folding(model)
-            simplify.simplify(model, zeros, bn_folding)
+            simplify.simplify(model, zeros, fuse_bn=fuse_bn)
             y_prop = model(x)
 
             #print(f'------ {self.__class__.__name__, arch.__name__} ------')
@@ -54,5 +53,9 @@ class SimplificationTest(unittest.TestCase):
         x = im / 255.
 
         for architecture in models:
-            with self.subTest(arch=architecture, pretrained=True):
-                self.assertTrue(test_arch(architecture, x, True))
+            with self.subTest(arch=architecture.__name__, pretrained=True, fuse_bn=True):
+                self.assertTrue(test_arch(architecture, x, True, True))
+            
+            with self.subTest(arch=architecture.__name__, pretrained=True, fuse_bn=False):
+                self.assertTrue(test_arch(architecture, x, True, False))
+
