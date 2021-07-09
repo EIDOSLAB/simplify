@@ -55,7 +55,7 @@ def get_bn_folding(model):
 
     try:
         patterns = [(torch.nn.Conv2d, torch.nn.BatchNorm2d)]
-        fx_model = fx.symbolic_trace(copy.deepcopy(model))
+        fx_model = fx.symbolic_trace(model)
         modules = dict(fx_model.named_modules())
 
         for pattern in patterns:
