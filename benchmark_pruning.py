@@ -57,7 +57,7 @@ def run_pruning(architecture, amount):
             prune.random_structured(module, 'weight', amount=amount, dim=0)
             prune.remove(module, 'weight')
 
-    for i in range(10):
+    for i in range(100):
         with torch.no_grad():
             start = time.perf_counter()
             y_src = model(x)
@@ -82,7 +82,7 @@ def run_pruning(architecture, amount):
         (1, 3, 224, 224)), bn_folding=bn_folding)
     model = model.to(device)
 
-    for i in range(10):
+    for i in range(100):
         with torch.no_grad():
             start = time.perf_counter()
             y_simplified = model(x)
