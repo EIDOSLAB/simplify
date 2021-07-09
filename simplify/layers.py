@@ -48,10 +48,10 @@ class ConvExpand(nn.Conv2d):
     def forward(self, x):
         x = super().forward(x)
         x = pad(x, (0, 0, 0, 0, 0, 1))
-        expanded = x[:, self.select_idxs]
+        # expanded = x[:, self.select_idxs]
 
-        # idxs = self.select_idxs[None, :, None, None].expand(x.shape[0], self.select_idxs.shape[0], *x.shape[2:])
-        # expanded = torch.gather(x, dim=1, index=idxs)
+        idxs = self.select_idxs[None, :, None, None].expand(x.shape[0], self.select_idxs.shape[0], *x.shape[2:])
+        expanded = torch.gather(x, dim=1, index=idxs)
         
         # zeros = self.zero_cache
         # index = self.idxs_cache
@@ -110,10 +110,10 @@ class BatchNormExpand(nn.BatchNorm2d):
     def forward(self, x):
         x = super().forward(x)
         x = pad(x, (0, 0, 0, 0, 0, 1))
-        expanded = x[:, self.select_idxs]
+        # expanded = x[:, self.select_idxs]
 
-        # idxs = self.select_idxs[None, :, None, None].expand(x.shape[0], self.select_idxs.shape[0], *x.shape[2:])
-        # expanded = torch.gather(x, dim=1, index=idxs)
+        idxs = self.select_idxs[None, :, None, None].expand(x.shape[0], self.select_idxs.shape[0], *x.shape[2:])
+        expanded = torch.gather(x, dim=1, index=idxs)
         
         # zeros = self.zero_cache
         # index = self.idxs_cache

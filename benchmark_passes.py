@@ -48,7 +48,7 @@ if __name__ == '__main__':
     
     amount = 0.
     
-    wandb.init()
+    wandb.init(group="benchmark_passes")
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
