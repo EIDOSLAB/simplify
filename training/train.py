@@ -64,14 +64,14 @@ def main(config):
     prune_iteration = config.prune_every
 
     model = resnet50(False).to(device)
-    bn_folding = simplify.utils.get_bn_folding(model)
-    simplify.fuse(model, bn_folding)
+    #bn_folding = simplify.utils.get_bn_folding(model)
+    #simplify.fuse(model, bn_folding)
 
-    for module in model.modules():
-        if isinstance(module, nn.ReLU):
-            module.inplace = False
+    #for module in model.modules():
+    #    if isinstance(module, nn.ReLU):
+    #        module.inplace = False
 
-    optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
+    optimizer = SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
     criterion = CrossEntropyLoss()
 
