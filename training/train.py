@@ -59,10 +59,14 @@ def main(config):
     torch.backends.cudnn.benchmark = False
     device = torch.device('cuda')
 
+    batch_size = 128
     train_iteration = 10000
     prune_iteration = config.prune_every
 
     model = resnet50(False).to(device)
+    bn_folding = simplify.utils.get_bn_folding(model)
+    simplify.fuse(model, bn_folding)
+    
     for module in model.modules():
         if isinstance(module, nn.ReLU):
             module.inplace = False
@@ -82,9 +86,9 @@ def main(config):
     # wandb.watch(model)
 
     # warmup
-    # model(torch.randn(256, 3, 224, 224, device=device))
+    # model(torch.randn(batch_size, 3, 224, 224, device=device))
 
-    profiled = profile_model(model, torch.randn((256, 3, 224, 224), device=device), rows=1000)
+    profiled = profile_model(model, torch.randn((batch_size, 3, 224, 224), device=device), rows=1000)
     with open('profile.txt', 'w') as f:
         f.write('\n\n -- THRESHOLDED --\n')
         f.write(profiled)
@@ -94,8 +98,8 @@ def main(config):
     num_correct = 0
 
     for i in tqdm(range(train_iteration)):
-        images = torch.randn((256, 3, 224, 224), device=device)
-        target = torch.randint(0, 100, (256,), device=device)
+        images = torch.randn((batch_size, 3, 224, 224), device=device)
+        target = torch.randint(0, 1000, (batch_size,), device=device)
 
         # Prune the network by 5% at each pass
         if (i + 1) % prune_iteration == 0:
@@ -121,7 +125,7 @@ def main(config):
                 simplify.remove_zeroed(model, torch.ones(1, 3, 224, 224, device=device), pinned_out)
                 model.train()
 
-                profiled = profile_model(model, torch.randn((256, 3, 224, 224), device=device), rows=1000)
+                profiled = profile_model(model, torch.randn((batch_size, 3, 224, 224), device=device), rows=1000)
                 with open('profile.txt', 'a') as f:
                     f.write(f'\n\n -- SIMPLIFIED {(remaining_neurons / total_neurons) * 100} --\n')
                     f.write(profiled)
