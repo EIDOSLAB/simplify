@@ -7,9 +7,9 @@ from torchvision.models import resnet18
 from torchvision.models.squeezenet import SqueezeNet
 
 import simplify
-import utils
+import simplify.utils as utils
 from tests.benchmark_models import models
-from utils import set_seed
+from simplify.utils import set_seed
 
 
 class ChannelsRemovalTest(unittest.TestCase):

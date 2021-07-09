@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.utils.prune as prune
 
 from simplify.layers import ConvB, ConvExpand
-from utils import set_seed
+from simplify.utils import set_seed
 
 
 @unittest.skip

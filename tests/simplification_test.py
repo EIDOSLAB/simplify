@@ -6,9 +6,9 @@ import torch.nn.utils.prune as prune
 from torchvision.models.squeezenet import SqueezeNet
 
 import simplify
-import utils
+import simplify.utils as utils
 from tests.benchmark_models import models
-from utils import set_seed
+from simplify.utils import set_seed
 
 
 class SimplificationTest(unittest.TestCase):
