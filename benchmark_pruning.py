@@ -36,7 +36,7 @@ def run_pruning(architecture, amount):
                                  "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
         pretrained = False
 
-    im = torch.randint(0, 256, (100, 3, 224, 224))
+    im = torch.randint(0, 256, (1, 3, 224, 224))
     x = (im / 255.).to(device)
 
     dense_time, pruned_time, simplified_time = [], [], []
