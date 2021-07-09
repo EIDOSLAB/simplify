@@ -64,8 +64,8 @@ def main(config):
     prune_iteration = config.prune_every
 
     model = resnet50(False).to(device)
-    #bn_folding = simplify.utils.get_bn_folding(model)
-    #simplify.fuse(model, bn_folding)
+    bn_folding = simplify.utils.get_bn_folding(model)
+    simplify.fuse(model, bn_folding)
 
     #for module in model.modules():
     #    if isinstance(module, nn.ReLU):
