@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch import fx
 from torch.fx._experimental.fuser import matches_module_pattern
 from torchvision.models.densenet import _DenseLayer
-
+import copy
 
 def get_previous_layer(node, modules):
     # print("get_previous_layer")
@@ -19,7 +19,7 @@ def get_previous_layer(node, modules):
 def get_pinned_out(model):
     pinned_out = []
     try:
-        fx_model = fx.symbolic_trace(model)
+        fx_model = fx.symbolic_trace(copy.deepcopy(model))
         modules = dict(fx_model.named_modules())
 
         last_module = None
