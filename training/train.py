@@ -2,7 +2,7 @@ import random
 
 from torchvision.models.resnet import resnet18
 import time
-from utils import get_pinned_out
+from simplify.utils import get_pinned_out
 
 import numpy
 import torch
