@@ -5,6 +5,21 @@ from torch.fx._experimental.fuser import matches_module_pattern
 from torchvision.models.densenet import _DenseLayer
 import copy
 
+import random
+import os
+import numpy as np
+import torch
+
+def set_seed(seed):
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    torch.manual_seed(seed)
+
 def get_previous_layer(node, modules):
     # print("get_previous_layer")
     for input_node in node.all_input_nodes:

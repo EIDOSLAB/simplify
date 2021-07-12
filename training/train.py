@@ -18,7 +18,7 @@ from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchvision.models import resnet50
 
-
+from simplify.utils import set_seed
 from training.data_loader_imagenet import get_data_loaders
 from tqdm import tqdm
 from torch.autograd import profiler
@@ -34,12 +34,7 @@ def profile_model(model, input, rows=10, cuda=False):
 
 
 def main(config):
-    random.seed(0)
-    torch.manual_seed(0)
-    torch.cuda.manual_seed(0)
-    numpy.random.seed(0)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    set_seed(0)
     device = torch.device('cuda')
 
     batch_size = 128
@@ -47,8 +42,6 @@ def main(config):
     prune_iteration = config.prune_every
 
     model = resnet50(False).to(device)
-    bn_folding = simplify.utils.get_bn_folding(model)
-    simplify.fuse(model, bn_folding)
 
     optimizer = SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
@@ -56,7 +49,6 @@ def main(config):
 
     total_neurons = 0
     remaining_neurons = 0
-
     for module in model.modules():
         if isinstance(module, nn.Conv2d):
             total_neurons += module.weight.shape[0]
@@ -64,6 +56,7 @@ def main(config):
 
     wandb.init(config=config)
 
+    model.eval()
     profiled = profile_model(model, torch.randn((batch_size, 3, 224, 224), device=device), rows=1000)
     with open('profile.txt', 'w') as f:
         f.write('\n\n -- THRESHOLDED --\n')
