@@ -32,6 +32,22 @@ def profile_model(model, input, rows=10, cuda=False):
     return str(prof.key_averages().table(
         sort_by="cpu_time_total", row_limit=rows))
 
+def prune_model(model, amount, remove=False):
+    print("=> Pruning")
+
+    remaining_neurons = 0.
+
+    for module in model.modules():
+        if isinstance(module, nn.Conv2d):
+            prune.ln_structured(module, 'weight', amount=amount, n=2, dim=0)
+            w = module.weight.clone().reshape(module.weight.shape[0], -1).abs().sum(dim=1)
+            remaining_neurons += (w != 0).sum()
+
+            if remove:
+                prune.remove(module, 'weight')
+
+    return remaining_neurons
+
 
 def main(config):
     set_seed(0)
@@ -72,20 +88,7 @@ def main(config):
 
         # Prune the network by 5% at each pass
         if (i + 1) % prune_iteration == 0:
-            print("Pruning")
-
-            remaining_neurons = 0
-            for module in model.modules():
-                if isinstance(module, nn.Conv2d):
-                    prune.ln_structured(module, 'weight', amount=0.10, n=2, dim=0)
-                    w = module.weight.clone().reshape(module.weight.shape[0], -1).abs().sum(dim=1)
-                    remaining_neurons += (w != 0).sum()
-                    #ch_sum = module.weight.sum(dim=(1, 2, 3))
-                    #remaining_neurons += ch_sum[ch_sum != 0].shape[0]
-
-                    if config.simplify:
-                        prune.remove(module, 'weight')
-
+            remaining_neurons = prune_model(model, amount=0.10, remove=config.simplify)
             print(f"The current model has {(remaining_neurons / total_neurons) * 100} % of the original neurons")
 
             if config.simplify:
