@@ -14,6 +14,7 @@ import wandb
 from tests.benchmark_models import models
 
 def main(network):
+    print('=> Benchmarking', network.__name__)
     model = network(True)
 
     device = torch.device("cuda")
@@ -26,7 +27,8 @@ def main(network):
     
     criterion = CrossEntropyLoss()
     
-    iterations = 500
+    prune_step = 0.05
+    iterations = int(1./prune_step)
     
     total_neurons = 0
     remaining_neurons = 0
@@ -75,7 +77,7 @@ def main(network):
         forward_time = []
         backward_time = []
         model.to(device)
-        for j in tqdm(range(10), desc="Pruned test"):
+        for j in range(10): #tqdm(range(10), desc="Pruned test"):
             if device == torch.device("cuda"):
                 starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
                 starter.record()
@@ -133,7 +135,7 @@ def main(network):
         forward_time = []
         backward_time = []
         model.to(device)
-        for j in tqdm(range(10), desc="Simplified test"):
+        for j in range(10): #tqdm(range(10), desc="Simplified test"):
             if device == torch.device("cuda"):
                 starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
                 starter.record()
@@ -187,7 +189,7 @@ def main(network):
             'remaining_neurons':       100. - x[-1]
         })
         
-        amount += 0.05
+        amount += prune_step
         del model
         torch.cuda.empty_cache()
     
