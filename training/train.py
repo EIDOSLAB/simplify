@@ -59,7 +59,7 @@ def main(config):
 
     model = resnet50(False).to(device)
     simplify.fuse(model, simplify.utils.get_bn_folding(model))
-    
+
     optimizer = SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
     criterion = CrossEntropyLoss()
@@ -102,7 +102,7 @@ def main(config):
                 with open('profile.txt', 'a') as f:
                     f.write(f'\n\n -- SIMPLIFIED {(remaining_neurons / total_neurons) * 100} --\n')
                     f.write(profiled)
-                torch.cuda.empty_cache()
+                #torch.cuda.empty_cache()
 
                 # Re-init optimizer and scheduler
                 optimizer = SGD(model.parameters(), lr=0.1, weight_decay=1e-4)
