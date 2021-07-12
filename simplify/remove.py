@@ -60,9 +60,9 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
         if isinstance(module, nn.Conv2d) and module.groups > 1:
             return output
 
-        if name in pinned_out:
-            return output
-            
+        #if name in pinned_out:
+        #    return output
+
         shape = module.weight.shape
 
         # 1. Compute remaining channels indices
