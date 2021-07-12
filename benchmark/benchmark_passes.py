@@ -17,7 +17,7 @@ from simplify.utils import get_pinned_out
 if __name__ == '__main__':
     network = resnet101
     model = network(True)
-    simplify.fuse(model, simplify.utils.get_bn_folding(model))
+    #simplify.fuse(model, simplify.utils.get_bn_folding(model))
     device = torch.device("cuda")
     batch_size = 128
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         if amount > 1.:
             break
         model = network(True)
-        simplify.fuse(model, simplify.utils.get_bn_folding(model))
+        #simplify.fuse(model, simplify.utils.get_bn_folding(model))
 
         # First loop is the full model
         if i > 0:
@@ -124,9 +124,9 @@ if __name__ == '__main__':
         }, commit=False)
         
         # SIMPLIFIED
-        pinned_out = get_pinned_out(model)
-        propagate.propagate_bias(model, torch.zeros(1, 3, 224, 224).to(device), pinned_out)
-        remove_zeroed(model, torch.zeros(1, 3, 224, 224).to(device), pinned_out)
+        model.eval()
+        simplify.simplify(model, torch.zeros(1, 3, 224, 224).to(device), fuse_bn=False, training=True)
+        model.train()
         
         forward_time = []
         backward_time = []
