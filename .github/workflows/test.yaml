@@ -17,4 +17,4 @@ jobs:
         run: pip3 install -r requirements.txt
 
       - name: run tests
-        run: python3 -m unittest tests/*.py
+        run: python3 -m unittest tests.simplification_test.py
