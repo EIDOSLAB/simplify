@@ -3,6 +3,8 @@ import unittest
 import torch
 import torch.nn as nn
 import torch.nn.utils.prune as prune
+import torchvision
+import simplify
 
 from simplify.layers import ConvB, ConvExpand
 from utils import set_seed
@@ -74,3 +76,26 @@ class ConvExpandTest(unittest.TestCase):
                 optimizer.zero_grad()
 
         assert(module.weight.grad.shape == module.weight.shape)
+
+    def test_model(self):
+        model = torchvision.models.resnet50(True)
+        x = torch.randn((57, 3, 128, 128)) 
+
+        for name, module in model.named_modules():
+            if isinstance(module, nn.Conv2d):
+                prune.random_structured(module, 'weight', amount=0.8, dim=0)
+                prune.remove(module, 'weight')
+
+    
+        zeros = torch.zeros(1, *x.shape[1:])
+        model.eval()
+        simplify.simplify(model, zeros, fuse_bn=False)
+        model.train()
+        
+        with torch.enable_grad():
+            y = model(x)
+            y.sum().backward()
+
+        for p in model.parameters():
+            self.assertIsNotNone(p.weight.grad)
+            self.assertTrue(p.weight.shape == p.weight.grad.shape)
