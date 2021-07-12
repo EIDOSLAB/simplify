@@ -18,20 +18,18 @@ class SimplificationTest(unittest.TestCase):
     def test_simplification(self):
         @torch.no_grad()
         def test_arch(arch, x, pretrained=False, fuse_bn=True):
-            if architecture.__name__ in [
-                    "shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
+            if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
 
             model = arch(pretrained, progress=False)
             model.eval()
-
+            
             for name, module in model.named_modules():
                 if isinstance(model, SqueezeNet) and 'classifier.1' in name:
                     continue
 
                 if isinstance(module, nn.Conv2d):
-                    prune.random_structured(
-                        module, 'weight', amount=0.8, dim=0)
+                    prune.random_structured(module, 'weight', amount=0.8, dim=0)
                     prune.remove(module, 'weight')
 
             y_src = model(x)
@@ -39,13 +37,6 @@ class SimplificationTest(unittest.TestCase):
 
             simplify.simplify(model, zeros, fuse_bn=fuse_bn)
             y_prop = model(x)
-
-            #print(f'------ {self.__class__.__name__, arch.__name__} ------')
-            #print("Max abs diff: ", (y_src - y_prop).abs().max().item())
-            #print("MSE diff: ", nn.MSELoss()(y_src, y_prop).item())
-            #print(
-            #    f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_prop.argmax(dim=1)).sum()}/{y_prop.shape[0]}')
-            #print()
 
             return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
 
