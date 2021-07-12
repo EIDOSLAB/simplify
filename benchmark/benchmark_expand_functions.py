@@ -5,8 +5,6 @@ import torch
 from torch.nn.functional import pad
 from tqdm import tqdm
 
-from utils import set_seed
-
 
 def measure_matmul(x, idx, target_ch):
     # Preallocate
@@ -64,7 +62,6 @@ def measure_select(x, idx, target_ch):
 
 if __name__ == '__main__':
     # plot()
-    set_seed(0)
     times = []
     target_ch = 256
     simplified_ch = target_ch // 2
