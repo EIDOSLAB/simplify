@@ -33,23 +33,6 @@ def profile_model(model, input, rows=10, cuda=False):
         sort_by="cpu_time_total", row_limit=rows))
 
 
-def test(loader, model, device='cuda'):
-    num_correct = 0
-    num_samples = 0
-
-    with torch.no_grad():
-        for data, target in loader:
-            data = data.to(device)
-            target = target.to(device)
-
-            scores = model(data)
-            _, predictions = scores.max(1)
-            num_correct += (predictions == target).sum()
-            num_samples += predictions.size(0)
-
-        return float(num_correct) / float(num_samples)
-
-
 def main(config):
     random.seed(0)
     torch.manual_seed(0)
@@ -66,10 +49,6 @@ def main(config):
     model = resnet50(False).to(device)
     bn_folding = simplify.utils.get_bn_folding(model)
     simplify.fuse(model, bn_folding)
-
-    #for module in model.modules():
-    #    if isinstance(module, nn.ReLU):
-    #        module.inplace = False
 
     optimizer = SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
@@ -119,9 +98,7 @@ def main(config):
             if config.simplify:
                 print("Simplifying model")
                 model.eval()
-                pinned_out = get_pinned_out(model)
-                simplify.propagate_bias(model, torch.zeros(1, 3, 224, 224, device=device), pinned_out)
-                simplify.remove_zeroed(model, torch.ones(1, 3, 224, 224, device=device), pinned_out)
+                simplify.simplify(model, torch.zeros(1, 3, 224, 224, device=device), fuse_bn=False)
                 model.train()
 
                 profiled = profile_model(model, torch.randn((batch_size, 3, 224, 224), device=device), rows=1000)
