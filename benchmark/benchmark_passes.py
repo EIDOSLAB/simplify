@@ -8,6 +8,7 @@ from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
 from torchvision.models.resnet import resnet101
 from tqdm import tqdm
+import simplify
 
 import wandb
 from simplify import propagate, remove_zeroed
@@ -16,6 +17,7 @@ from simplify.utils import get_pinned_out
 if __name__ == '__main__':
     network = resnet101
     model = network(True)
+    simplify.fuse(model, simplify.utils.get_bn_folding(model))
     device = torch.device("cuda")
     batch_size = 128
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
@@ -53,7 +55,8 @@ if __name__ == '__main__':
         if amount > 1.:
             break
         model = network(True)
-        
+        simplify.fuse(model, simplify.utils.get_bn_folding(model))
+
         # First loop is the full model
         if i > 0:
             remaining_neurons = 0
