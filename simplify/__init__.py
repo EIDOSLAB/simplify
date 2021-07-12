@@ -16,7 +16,7 @@ def simplify(model: nn.Module, x: torch.Tensor, fuse_bn=True, bn_folding: List =
     
     if fuse_bn:
         if bn_folding is None:
-            bn_folding = []
+            bn_folding = utils.get_bn_folding(model)
         
         fuse(model, bn_folding)
 
