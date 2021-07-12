@@ -91,11 +91,11 @@ class ConvExpandTest(unittest.TestCase):
         model.eval()
         simplify.simplify(model, zeros, fuse_bn=False)
         model.train()
-        
+
         with torch.enable_grad():
             y = model(x)
             y.sum().backward()
 
         for p in model.parameters():
-            self.assertIsNotNone(p.weight.grad)
-            self.assertTrue(p.weight.shape == p.weight.grad.shape)
+            self.assertIsNotNone(p.grad)
+            self.assertTrue(p.shape == p.grad.shape)
