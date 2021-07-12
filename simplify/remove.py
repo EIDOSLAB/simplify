@@ -69,17 +69,12 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
         nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
 
         # If module is ConvExpand or BatchNormExpand, expand weights back to original
-        # adding zero where channels were pruned
-        # so that new idxs are updated accordingly
+        # adding zero where channels were pruned so that new idxs are updated accordingly
         if isinstance(module, ConvExpand):
-            #zeros = module.zeros.expand(module.bf.shape[0], *module.weight.shape[1:])
             zeros = torch.zeros(module.bf.shape[0], *module.weight.shape[1:], device=module.weight.device)
             index = module.idxs[:, None, None, None].expand_as(module.weight)
             expanded_weight = torch.scatter(zeros, 0, index, module.weight)
 
-            #zeros = torch.zeros(1, *shape[1:], device=module.weight.device)
-            #expanded_weight = torch.cat((module.weight, zeros), dim=0)
-            #expanded_weight = expanded_weight[module.expansion_idxs]
             nonzero_idx = ~(expanded_weight.view(expanded_weight.shape[0], -1).sum(dim=1) == 0)
             module.weight = nn.Parameter(expanded_weight)
 
@@ -93,16 +88,12 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
             module.weight = nn.Parameter(expanded_weight)
 
             # Expand running_mean
-            zeros = torch.zeros(1,
-                                *module.running_mean.shape[1:],
-                                device=module.weight.device)
+            zeros = torch.zeros(1, *module.running_mean.shape[1:], device=module.weight.device)
             expanded_mean = torch.cat((module.running_mean, zeros), dim=0)
             module.running_mean = expanded_mean[module.expansion_idxs]
 
             # Expand running_var
-            ones = torch.ones(1,
-                              *module.running_var.shape[1:],
-                              device=module.weight.device)
+            ones = torch.ones(1, *module.running_var.shape[1:], device=module.weight.device)
             expanded_var = torch.cat((module.running_var, ones), dim=0)
             module.running_var = expanded_var[module.expansion_idxs]
 
@@ -112,8 +103,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor,
             module.running_mean = module.running_mean[nonzero_idx]
             module.running_var = module.running_var[nonzero_idx]
 
-        # 3. If it is a pinned layer, convert it into ConvExpand or
-        # BatchNormExpand
+        # 3. If it is a pinned layer, convert it into ConvExpand or BatchNormExpand
         if name in pinned_out:
             idxs = torch.where(nonzero_idx)[0]
             
