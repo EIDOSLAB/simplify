@@ -6,18 +6,16 @@ from matplotlib import pyplot as plt
 from torch import nn
 from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
-from torchvision.models.resnet import resnet101
 from tqdm import tqdm
+
 import simplify
-
+import argparse
 import wandb
-from simplify import propagate, remove_zeroed
-from simplify.utils import get_pinned_out
+from tests.benchmark_models import models
 
-if __name__ == '__main__':
-    network = resnet101
+def main(network):
     model = network(True)
-    #simplify.fuse(model, simplify.utils.get_bn_folding(model))
+
     device = torch.device("cuda")
     batch_size = 128
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
@@ -50,7 +48,11 @@ if __name__ == '__main__':
     
     amount = 0.
     
-    wandb.init(group="benchmark_passes")
+    wandb.init(
+        config={'arch': network.__name__},
+        group="benchmark_passes"
+    )
+
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
@@ -189,20 +191,8 @@ if __name__ == '__main__':
         del model
         torch.cuda.empty_cache()
     
-    # plt.errorbar(x, pruned_y_forward, pruned_y_forward_std, label="pruned")
-    # plt.errorbar(x, simplified_y_forward, simplified_y_forward_std, label="simplified")
-    # plt.title("Forward")
-    # plt.xlabel("Pruning (%)")
-    # plt.ylabel("Time (s)")
-    # plt.legend()
-    # plt.savefig("Forward.png", dpi=300)
-    # plt.clf()
-    #
-    # plt.errorbar(x, pruned_y_backward, pruned_y_backward_std, label="pruned")
-    # plt.errorbar(x, simplified_y_backward, simplified_y_backward_std, label="simplified")
-    # plt.title("Backward")
-    # plt.xlabel("Pruning (%)")
-    # plt.ylabel("Time (s)")
-    # plt.legend()
-    # plt.savefig("Backward.png", dpi=300)
-    # plt.clf()
+    wandb.finish()
+
+if __name__ == '__main__':
+    for arch in models:
+        main(arch)
