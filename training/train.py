@@ -88,7 +88,7 @@ def main(config):
             if config.simplify:
                 print("Simplifying model")
                 model.eval()
-                simplify.simplify(model, torch.zeros(1, 3, 224, 224, device=device), fuse_bn=False)
+                simplify.simplify(model, torch.zeros(1, 3, 224, 224, device=device), fuse_bn=False, train=True)
                 model.train()
                 
                 profiled = profile_model(model, torch.randn((batch_size, 3, 224, 224), device=device), rows=1000)
