@@ -58,7 +58,8 @@ def main(config):
     prune_iteration = config.prune_every
 
     model = resnet50(False).to(device)
-
+    simplify.fuse(model, simplify.utils.get_bn_folding(model))
+    
     optimizer = SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
     scheduler = CosineAnnealingLR(optimizer, train_iteration, 1e-3)
     criterion = CrossEntropyLoss()
