@@ -38,7 +38,7 @@ def time_model(model, x, y):
         
         forward_time.append(starter.elapsed_time(ender) if device == torch.device("cuda") else end - start)
         
-        loss = F.binary_cross_entropy_with_logits(output, y)
+        loss = F.cross_entropy(output, y)
         
         if device == torch.device("cuda"):
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
@@ -69,7 +69,7 @@ def main(network):
     batch_size = 128
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
     fake_input = fake_input.float() / 255.
-    fake_target = torch.randint(0, 1000, (batch_size, 1)).long()
+    fake_target = torch.randint(0, 1000, (batch_size,)).long()
     
     fake_input, fake_target = fake_input.to(device), fake_target.to(device)
     
