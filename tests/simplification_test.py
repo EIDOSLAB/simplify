@@ -35,7 +35,7 @@ class SimplificationTest(unittest.TestCase):
             y_src = model(x)
             zeros = torch.zeros(1, *x.shape[1:])
 
-            simplify.simplify(model, zeros, fuse_bn=fuse_bn)
+            simplify.simplify(model, zeros, fuse_bn=fuse_bn, training=True)
             y_prop = model(x)
 
             return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
