@@ -23,7 +23,15 @@ def simplify(model: nn.Module, x: torch.Tensor, fuse_bn: bool = True, bn_folding
     pinned_out = utils.get_pinned_out(model)
     
     if training:
-        pinned_out = list(set([item for sublist in bn_folding for item in sublist] + pinned_out))
+        new_pinned_out = []
+        for pinned in pinned_out:
+            new_pinned_out.append(pinned)
+            for conv_bn in bn_folding:
+                if pinned in conv_bn:
+                    new_pinned_out.append(conv_bn[1])
+                    break
+                    
+        pinned_out = new_pinned_out
         
     propagate_bias(model, x, pinned_out)
     remove_zeroed(model, x, pinned_out, training=training)
