@@ -28,7 +28,7 @@ def simplify(model: nn.Module, x: torch.Tensor, fuse_bn: bool = True, bn_folding
             new_pinned_out.append(pinned)
             for conv_bn in bn_folding:
                 if pinned in conv_bn:
-                    new_pinned_out.append(conv_bn[1])
+                    new_pinned_out.append(conv_bn[1] if fuse_bn else conv_bn[0])
                     break
                     
         pinned_out = new_pinned_out
