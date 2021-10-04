@@ -4,12 +4,10 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet
+from torchvision.models import SqueezeNet, alexnet
 
 import simplify
-import utils
 from simplify.utils import get_bn_folding, get_pinned_out
-from tests import models
 
 
 def get_mark(passed):
@@ -28,7 +26,7 @@ if __name__ == '__main__':
     
     with torch.no_grad():
         table = []
-        for architecture in models:
+        for architecture in [alexnet]:
             print(architecture.__name__)
             if architecture.__name__ in [
                 "shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
@@ -126,7 +124,7 @@ if __name__ == '__main__':
     import pathlib
     import re
     
-    root = pathlib.Path(__file__).parent.resolve()
+    root = pathlib.Path(__file__).parent.parent.resolve()
     
     index_re = re.compile(
         r"<!\-\- table starts \-\->.*<!\-\- table ends \-\->",
