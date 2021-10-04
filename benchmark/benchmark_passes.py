@@ -9,10 +9,11 @@ from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
 from tqdm import tqdm
 
+import os
 import simplify
 from tests.benchmark_models import models
 
-device = torch.device("cuda")
+device = torch.device(os.environ.get('DEVICE', 'cuda'))
 
 
 def time_model(model, x, y):
