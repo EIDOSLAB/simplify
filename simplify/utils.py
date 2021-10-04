@@ -6,7 +6,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import fx
-from torch.fx.experimental.optimization import matches_module_pattern
+# from torch.fx.experimental.optimization import matches_module_pattern
+from torch.fx._experimental.fuser import matches_module_pattern
+
 from torchvision.models.densenet import _DenseLayer
 
 
