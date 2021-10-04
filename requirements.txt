@@ -1,6 +1,7 @@
-numpy
-Pillow
-tabulate
-torch
-torchvision
-typing-extensions
+matplotlib==3.4.3
+wandb==0.12.3
+numpy==1.21.2
+torchvision==0.10.1
+torch==1.9.1
+tqdm==4.62.3
+tabulate==0.8.9
