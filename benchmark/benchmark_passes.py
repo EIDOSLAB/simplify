@@ -105,7 +105,7 @@ def main(network):
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-        model = network(False)
+        model = network(True)
         # simplify.fuse(model, simplify.utils.get_bn_folding(model))
         
         # First loop is the full model
