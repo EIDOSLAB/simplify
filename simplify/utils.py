@@ -6,8 +6,25 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import fx
-from torch.fx.experimental.optimization import matches_module_pattern
 from torchvision.models.densenet import _DenseLayer
+
+
+def matches_module_pattern(pattern, node, modules):
+    if len(node.args) == 0:
+        return False
+    nodes = (node.args[0], node)
+    for expected_type, current_node in zip(pattern, nodes):
+        if not isinstance(current_node, fx.Node):
+            return False
+        if current_node.op != 'call_module':
+            return False
+        if not isinstance(current_node.target, str):
+            return False
+        if current_node.target not in modules:
+            return False
+        if type(modules[current_node.target]) is not expected_type:
+            return False
+    return True
 
 
 def set_seed(seed):
