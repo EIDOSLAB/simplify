@@ -8,6 +8,7 @@ from torchvision.models import SqueezeNet
 
 import simplify
 import utils
+from simplify.utils import get_bn_folding, get_pinned_out
 from tests import models
 
 
@@ -50,8 +51,8 @@ if __name__ == '__main__':
             
             print("BatchNorm Folding")
             try:
-                # bn_folding = utils.get_bn_folding(model)
-                # model = simplify.fuse(model, bn_folding)
+                bn_folding = get_bn_folding(model)
+                model = simplify.fuse(model, bn_folding)
                 model.eval()
                 exception = None
                 y_dest = model(input)
@@ -69,7 +70,7 @@ if __name__ == '__main__':
             
             if isinstance(passed_bf, bool) and passed_bf:
                 
-                pinned_out = utils.get_pinned_out(model)
+                pinned_out = get_pinned_out(model)
                 
                 print("Bias Propagation")
                 try:
