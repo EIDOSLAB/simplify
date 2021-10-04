@@ -18,7 +18,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
     
     @torch.no_grad()
     def __remove_zeroed_channels_hook(module, input, output, name):
-        print('\n', name, module)
+        # print('\n', name, module)
         """
         Parameters:
             input: idx of previously remaining channels (0 if channel is pruned, 1 if channel is not pruned)
@@ -32,7 +32,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
         
         # Compute non-zero input channels indices
         nonzero_idx = ~(input.view(input.shape[0], -1).sum(dim=1) == 0)
-        print('input:', input.shape)
+        # print('input:', input.shape)
         
         if isinstance(module, nn.Conv2d):
             if module.groups == 1:
@@ -135,7 +135,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
         elif isinstance(module, nn.BatchNorm2d):
             module.num_features = module.weight.shape[0]
         
-        print(f"layer shape {module.weight.shape}")
+        # print(f"layer shape {module.weight.shape}")
         return output
     
     handles = []
