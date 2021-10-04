@@ -24,5 +24,7 @@ models = [
     # resnext50_32x4d, resnext101_32x8d,
     # wide_resnet50_2, wide_resnet101_2,
     # mnasnet0_5, mnasnet0_75, mnasnet1_0, mnasnet1_3
-    alexnet, densenet121, googlenet, inception_v3, mnasnet1_0, mobilenet_v3_large, resnet50, resnext101_32x8d, shufflenet_v2_x2_0, squeezenet1_1, vgg19_bn, wide_resnet101_2
+    # alexnet, densenet121, googlenet, 
+    # mnasnet1_0, mobilenet_v3_large, resnet50, resnext101_32x8d, 
+    shufflenet_v2_x2_0, squeezenet1_1, vgg19_bn, wide_resnet101_2
 ]

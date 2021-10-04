@@ -62,7 +62,7 @@ def time_model(model, x, y):
 
 def main(network):
     print('=> Benchmarking', network.__name__)
-    model = network(True)
+    model = network(False)
     
     batch_size = 128
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
@@ -104,7 +104,7 @@ def main(network):
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-        model = network(True)
+        model = network(False)
         # simplify.fuse(model, simplify.utils.get_bn_folding(model))
         
         # First loop is the full model
