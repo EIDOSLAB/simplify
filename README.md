@@ -165,13 +165,14 @@ Random structured pruning amount = 50.0%
 
 
 <!-- table starts -->
-Update timestamp 04/10/2021 11:58:05
+Update timestamp 04/10/2021 12:39:20
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |
 |--------------------|---------------------|--------------------|--------------------|
 |      alexnet       | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |    densenet121     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     googlenet      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 | mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |      resnet50      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
