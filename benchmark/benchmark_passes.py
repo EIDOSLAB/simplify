@@ -12,7 +12,7 @@ from tqdm import tqdm
 import simplify
 from tests.benchmark_models import models
 
-device = torch.device("cpu")
+device = torch.device("cuda")
 
 
 def time_model(model, x, y):
