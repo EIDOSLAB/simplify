@@ -83,8 +83,9 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
             # Mark corresponding weights to be pruned
             module.weight.data.mul_(~module.pruned_input)
         
-        if getattr(module, 'bias', None) is not None and module.bias.abs().sum() == 0:
-            module.register_parameter('bias', None)
+        # TODO this can be smart to do but atm it breaks everything
+        # if getattr(module, 'bias', None) is not None and module.bias.abs().sum() == 0:
+        #     module.register_parameter('bias', None)
         
         elif isinstance(module, nn.Linear):
             # TODO: handle missing bias

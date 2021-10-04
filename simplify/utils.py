@@ -42,8 +42,7 @@ def get_previous_layer(node, modules):
     # print("get_previous_layer")
     for input_node in node.all_input_nodes:
         # print(input_node.name)
-        if input_node.target in modules and isinstance(
-                modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
+        if input_node.target in modules and isinstance(modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
             return input_node.target
         else:
             return get_previous_layer(input_node, modules)
@@ -58,23 +57,20 @@ def get_pinned_out(model):
         last_module = None
         
         for i, node in enumerate(fx_model.graph.nodes):
-            if node.target in modules and isinstance(
-                    modules[node.target], nn.Conv2d):
+            if node.target in modules and isinstance(modules[node.target], nn.Conv2d):
                 if modules[node.target].groups > 1 and last_module is not None:
                     if last_module.target is not None and last_module.target not in pinned_out:
                         pinned_out.append(last_module.target)
                 last_module = node
             
-            if i > 0 and (len(node.all_input_nodes) >
-                          1 or len(node.users) > 1):
+            if i > 0 and (len(node.all_input_nodes) > 1 or len(node.users) > 1):
                 for input_node in node.all_input_nodes:
                     if input_node.target in modules and isinstance(modules[input_node.target],
                                                                    (nn.Conv2d, nn.BatchNorm2d)):
                         if input_node.target is not None and input_node.target not in pinned_out:
                             pinned_out.append(input_node.target)
                     else:
-                        previous_layer = get_previous_layer(
-                            input_node, modules)
+                        previous_layer = get_previous_layer(input_node, modules)
                         if previous_layer is not None and previous_layer not in pinned_out:
                             pinned_out.append(previous_layer)
     except Exception as e:
