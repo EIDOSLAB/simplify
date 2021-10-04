@@ -20,6 +20,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
     
     @torch.no_grad()
     def __propagate_biases_hook(module, input, output, name=None):
+        # print('\n', name, module)
         """
         Parameters:
             - module: nn.module
@@ -61,8 +62,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
             # if module.pruned_input.shape[0] != bias_feature_maps.shape[0]:
             #    print(module)
             #    print(bias_feature_maps.shape, module.pruned_input.shape)
-            bias_feature_maps = bias_feature_maps[:, 0, 0].mul(
-                module.pruned_input)
+            bias_feature_maps = bias_feature_maps[:, 0, 0].mul(module.pruned_input)
             
             if getattr(module, 'bias', None) is not None:
                 bias_feature_maps += module.bias.data.mul(~module.pruned_input)

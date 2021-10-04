@@ -18,7 +18,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
     
     @torch.no_grad()
     def __remove_zeroed_channels_hook(module, input, output, name):
-        # print('\n', name, module)
+        print('\n', name, module)
         """
         Parameters:
             input: idx of previously remaining channels (0 if channel is pruned, 1 if channel is not pruned)
@@ -32,7 +32,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
         
         # Compute non-zero input channels indices
         nonzero_idx = ~(input.view(input.shape[0], -1).sum(dim=1) == 0)
-        # print('input:', input.shape)
+        print('input:', input.shape)
         
         if isinstance(module, nn.Conv2d):
             if module.groups == 1:
@@ -82,8 +82,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
             zeros = torch.zeros(1, *shape[1:], device=module.weight.device)
             expanded_weight = torch.cat((module.weight, zeros), dim=0)
             expanded_weight = expanded_weight[module.expansion_idxs]
-            nonzero_idx = ~(expanded_weight.view(
-                expanded_weight.shape[0], -1).sum(dim=1) == 0)
+            nonzero_idx = ~(expanded_weight.view(expanded_weight.shape[0], -1).sum(dim=1) == 0)
             module.weight = nn.Parameter(expanded_weight)
             
             # Expand running_mean
@@ -115,8 +114,10 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
                 module = ConvExpand.from_conv(module, idxs, module_bf)
             
             if isinstance(module, BatchNormB):
-                module = BatchNormExpand.from_bn(
-                    module, idxs, module.bf, output.shape)
+                module = BatchNormExpand.from_bn(module, idxs, module.bf, output.shape)
+            elif isinstance(module, nn.BatchNorm2d):
+                module = BatchNormExpand.from_bn(module, idxs, module.bias, output.shape)
+                module.register_parameter("bias", None)
         else:
             if getattr(module, 'bf', None) is not None:
                 module.bf = nn.Parameter(module.bf[nonzero_idx])
@@ -134,6 +135,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
         elif isinstance(module, nn.BatchNorm2d):
             module.num_features = module.weight.shape[0]
         
+        print(f"layer shape {module.weight.shape}")
         return output
     
     handles = []
