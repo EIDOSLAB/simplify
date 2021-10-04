@@ -3,6 +3,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
 .vscode/
+plots/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
