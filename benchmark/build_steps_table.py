@@ -88,19 +88,19 @@ if __name__ == '__main__':
                 if isinstance(passed_bp, bool) and passed_bp:
                     
                     print("Simplification")
-                    # try:
-                    simplify.remove_zeroed(model, x, pinned_out)
-                    model.eval()
-                    exception = None
-                    y_dest = model(input)
-                    passed_simp = torch.equal(y_src.argmax(dim=1), y_dest.argmax(dim=1))
-                    print(
-                        f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_dest.argmax(dim=1)).sum()}/{y_dest.shape[0]}')
-                    # except Exception as e:
-                    #     print("Simplification")
-                    #     print(architecture.__name__)
-                    #     print(e)
-                    #     passed_simp = "exception"
+                    try:
+                        simplify.remove_zeroed(model, x, pinned_out)
+                        model.eval()
+                        exception = None
+                        y_dest = model(input)
+                        passed_simp = torch.equal(y_src.argmax(dim=1), y_dest.argmax(dim=1))
+                        print(
+                            f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_dest.argmax(dim=1)).sum()}/{y_dest.shape[0]}')
+                    except Exception as e:
+                        print("Simplification")
+                        print(architecture.__name__)
+                        print(e)
+                        passed_simp = "exception"
                 else:
                     passed_simp = "skipped"
             else:
