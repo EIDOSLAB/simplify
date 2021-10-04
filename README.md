@@ -150,6 +150,7 @@ Random structured pruning amount = 50.0%
 | mnasnet0_75        | 0.0810s ± 0.0004 | 0.0813s ± 0.0003 | 0.0796s ± 0.0004  |
 | mnasnet1_0         | 0.1016s ± 0.0004 | 0.1016s ± 0.0004 | 0.1012s ± 0.0005  |
 | mnasnet1_3         | 0.1344s ± 0.0006 | 0.1345s ± 0.0004 | 0.1313s ± 0.0005  |
+
 <!-- benchmark ends -->
 
 #### Status of torchvision.models
@@ -205,5 +206,6 @@ Update timestamp 03/07/2021 15:10:26
 |    mnasnet0_75     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |     mnasnet1_3     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+
 <!-- table ends -->
 </details>

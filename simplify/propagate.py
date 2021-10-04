@@ -75,14 +75,14 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
             module.pruned_input = pruned_input
             
             if not isinstance(module, BatchNormExpand):
-                #module = BatchNormB.from_bn(module, bias_feature_maps)
+                # module = BatchNormB.from_bn(module, bias_feature_maps)
                 module.bias = torch.nn.parameter.Parameter(bias_feature_maps)
             else:  # if it is already BatchNormExpand, just update bf
                 module.register_parameter('bf', nn.Parameter(bias_feature_maps))
             
             # Mark corresponding weights to be pruned
             module.weight.data.mul_(~module.pruned_input)
-
+        
         if getattr(module, 'bias', None) is not None and module.bias.abs().sum() == 0:
             module.register_parameter('bias', None)
         

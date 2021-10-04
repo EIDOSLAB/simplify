@@ -119,7 +119,7 @@ def main(config):
                 torch.cuda.synchronize()
             else:
                 end = time.perf_counter()
-
+            
             forward_time = starter.elapsed_time(ender) if device == torch.device("cuda") else end - start
             
             loss = criterion(output, target)
@@ -130,7 +130,7 @@ def main(config):
                 starter.record()
             else:
                 start = time.perf_counter()
-                
+            
             loss.backward()  # BACKWARD PASS
             
             if device == torch.device("cuda"):
@@ -138,7 +138,7 @@ def main(config):
                 torch.cuda.synchronize()
             else:
                 end = time.perf_counter()
-
+            
             backward_time = starter.elapsed_time(ender) if device == torch.device("cuda") else end - start
         
         for param in model.parameters():

@@ -6,4 +6,5 @@ def benchmark(func):
         start = time.perf_counter()
         func(*args, kwargs)
         return time.perf_counter() - start
+    
     return wrapper

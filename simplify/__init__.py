@@ -30,9 +30,9 @@ def simplify(model: nn.Module, x: torch.Tensor, fuse_bn: bool = True, bn_folding
                 if pinned in conv_bn:
                     new_pinned_out.append(conv_bn[1] if fuse_bn else conv_bn[0])
                     break
-                    
-        pinned_out = new_pinned_out
         
+        pinned_out = new_pinned_out
+    
     propagate_bias(model, x, pinned_out)
     remove_zeroed(model, x, pinned_out, training=training)
     

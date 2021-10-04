@@ -2,11 +2,11 @@ import random
 import time
 
 import torch
+import wandb
 from torch import nn
 from torch.nn.functional import pad
 from tqdm import tqdm
 
-import wandb
 from utils import set_seed
 
 
@@ -284,7 +284,7 @@ if __name__ == '__main__':
                         'scatter':  scatter_time[bs - 1],
                         'select':   select_time[bs - 1],
                         'indexing': indexing_time[bs - 1],
-                        'gather': gather_time[bs - 1],
+                        'gather':   gather_time[bs - 1],
                     })
             
             wandb.finish()

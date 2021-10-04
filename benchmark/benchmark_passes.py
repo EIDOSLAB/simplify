@@ -3,15 +3,13 @@ import time
 import numpy as np
 import torch
 import torch.nn.functional as F
-from matplotlib import pyplot as plt
+import wandb
 from torch import nn
 from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
 from tqdm import tqdm
 
 import simplify
-import argparse
-import wandb
 from tests.benchmark_models import models
 
 device = torch.device("cuda")
@@ -21,7 +19,7 @@ def time_model(model, x, y):
     forward_time = []
     backward_time = []
     model.to(device)
-    for j in range(10): #tqdm(range(10), desc="Pruned test"):
+    for j in range(10):  # tqdm(range(10), desc="Pruned test"):
         if device == torch.device("cuda"):
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
@@ -58,14 +56,14 @@ def time_model(model, x, y):
     
     forward_time = forward_time[1:]
     backward_time = backward_time[1:]
-
+    
     return forward_time, backward_time
-        
+
 
 def main(network):
     print('=> Benchmarking', network.__name__)
     model = network(True)
-
+    
     batch_size = 128
     fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
     fake_input = fake_input.float() / 255.
@@ -76,7 +74,7 @@ def main(network):
     criterion = CrossEntropyLoss()
     
     prune_step = 0.05
-    iterations = int(1./prune_step)
+    iterations = int(1. / prune_step)
     
     total_neurons = 0
     remaining_neurons = 0
@@ -102,13 +100,13 @@ def main(network):
         config={'arch': network.__name__},
         group="benchmark_passes"
     )
-
+    
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
         model = network(True)
-        #simplify.fuse(model, simplify.utils.get_bn_folding(model))
-
+        # simplify.fuse(model, simplify.utils.get_bn_folding(model))
+        
         # First loop is the full model
         if i > 0:
             remaining_neurons = 0
@@ -161,6 +159,7 @@ def main(network):
         torch.cuda.empty_cache()
     
     wandb.finish()
+
 
 if __name__ == '__main__':
     for arch in models:
