@@ -4,7 +4,7 @@ import torch
 from tabulate import tabulate
 from torch import nn
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet, alexnet
+from torchvision.models import SqueezeNet
 
 import simplify
 from simplify.utils import get_bn_folding, get_pinned_out
@@ -29,12 +29,14 @@ if __name__ == '__main__':
         table = []
         for architecture in models:
             print(architecture.__name__)
-            if architecture.__name__ in [
-                "shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
+            if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
                 pretrained = False
             else:
                 pretrained = True
-            model = architecture(pretrained)
+            if architecture.__name__ in ["inception_v3", "googlenet"]:
+                model = architecture(pretrained, transform_input=False)
+            else:
+                model = architecture(pretrained)
             model.eval()
             
             for name, module in model.named_modules():
