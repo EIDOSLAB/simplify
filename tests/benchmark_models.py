@@ -1,9 +1,4 @@
-from torchvision.models import resnext101_32x8d, wide_resnet101_2, alexnet, densenet121
-from torchvision.models.googlenet import googlenet
-from torchvision.models.inception import inception_v3
-from torchvision.models.mnasnet import mnasnet1_0
-from torchvision.models.mobilenet import mobilenet_v3_large
-from torchvision.models.resnet import resnet50
+from torchvision.models import wide_resnet101_2, resnet50, resnext101_32x8d, mobilenet_v3_large, mnasnet1_0
 from torchvision.models.shufflenetv2 import shufflenet_v2_x2_0
 from torchvision.models.squeezenet import squeezenet1_1
 from torchvision.models.vgg import vgg19_bn
@@ -20,10 +15,10 @@ models = [
     # mobilenet_v2, mobilenet_v3_small, mobilenet_v3_large,
     # resnext50_32x4d, resnext101_32x8d,
     # wide_resnet50_2, wide_resnet101_2,
-    # mnasnet0_5, mnasnet0_75, mnasnet1_0, mnasnet1_3,
+    # mnasnet0_5, mnasnet0_75, mnasnet1_0, nascent1_3,
     
-    alexnet, densenet121, googlenet,
-    inception_v3, mnasnet1_0, mobilenet_v3_large, resnet50, resnext101_32x8d,
+    # alexnet, densenet121, googlenet, inception_v3,
+    mnasnet1_0, mobilenet_v3_large, resnet50, resnext101_32x8d,
     shufflenet_v2_x2_0, squeezenet1_1,
     vgg19_bn, wide_resnet101_2
 ]
