@@ -168,5 +168,5 @@ def main(network):
 
 
 if __name__ == '__main__':
-    for arch in [inception_v3]:
+    for arch in models:
         main(arch)
