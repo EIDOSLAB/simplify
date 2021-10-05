@@ -64,7 +64,8 @@ def time_model(model, x, y):
 
 def main(network):
     print('=> Benchmarking', network.__name__)
-    model = network(True)
+    if network.__name__ == "inception_v3":
+        model = network(False, aux_logits=False)
     
     batch_size = 128
     h, w = 224, 224
@@ -110,7 +111,8 @@ def main(network):
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-        model = network(True)
+        if network.__name__ == "inception_v3":
+            model = network(False, aux_logits=False)
         # simplify.fuse(model, simplify.utils.get_bn_folding(model))
         
         # First loop is the full model

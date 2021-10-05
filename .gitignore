@@ -159,3 +159,5 @@ Thumbs.db
 # profile/*.txt
 latex/
 training/profile*.txt
+wandb/
+benchmark/wandb/
