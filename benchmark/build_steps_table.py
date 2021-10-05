@@ -34,7 +34,7 @@ if __name__ == '__main__':
             else:
                 pretrained = True
             if architecture.__name__ in ["inception_v3", "googlenet"]:
-                model = architecture(pretrained, transform_input=False)
+                model = architecture(pretrained, transform_input=False, aux_logits=False)
             else:
                 model = architecture(pretrained)
             model.eval()

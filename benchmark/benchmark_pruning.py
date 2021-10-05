@@ -10,8 +10,8 @@ from torch.autograd import profiler
 from torchvision.models.squeezenet import SqueezeNet
 
 import simplify
-import utils
 from simplify import fuse
+from simplify.utils import get_bn_folding
 from tests.benchmark_models import models
 
 
@@ -31,16 +31,21 @@ device = 'cpu'
 def run_pruning(architecture, amount):
     print('\n----', architecture.__name__, '----')
     
-    pretrained = True
-    if architecture.__name__ in ["shufflenet_v2_x1_5",
-                                 "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
-        pretrained = False
-    
     im = torch.randint(0, 256, (1, 3, 224, 224))
     x = (im / 255.).to(device)
     
     dense_time, pruned_time, simplified_time = [], [], []
-    model = architecture(pretrained=pretrained).to(device)
+    print(architecture.__name__)
+    if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
+        pretrained = False
+    else:
+        pretrained = True
+    if architecture.__name__ in ["inception_v3", "googlenet"]:
+        model = architecture(pretrained, transform_input=False, aux_logits=False)
+    else:
+        model = architecture(pretrained)
+        
+    model.to(device)
     model.eval()
     
     for i in range(10):
@@ -76,10 +81,9 @@ def run_pruning(architecture, amount):
         np.std(pruned_time))
     
     model = model.to('cpu')
-    bn_folding = utils.get_bn_folding(model)
+    bn_folding = get_bn_folding(model)
     model = fuse(model, bn_folding)
-    model = simplify.simplify(model, torch.zeros(
-        (1, 3, 224, 224)), bn_folding=bn_folding)
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), bn_folding=bn_folding)
     model = model.to(device)
     
     for i in range(100):
