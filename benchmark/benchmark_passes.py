@@ -7,6 +7,7 @@ import wandb
 from torch import nn
 from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
+from torchvision.models import inception, inception_v3
 from tqdm import tqdm
 
 import os
@@ -63,10 +64,14 @@ def time_model(model, x, y):
 
 def main(network):
     print('=> Benchmarking', network.__name__)
-    model = network(False)
+    model = network(True)
     
     batch_size = 128
-    fake_input = torch.randint(0, 256, (batch_size, 3, 224, 224))
+    h, w = 224, 224
+    if network.__name__ == "inception_v3":
+        h, w = 299, 299
+        
+    fake_input = torch.randint(0, 256, (batch_size, 3, h, w))
     fake_input = fake_input.float() / 255.
     fake_target = torch.randint(0, 1000, (batch_size,)).long()
     
@@ -137,7 +142,7 @@ def main(network):
         
         # SIMPLIFIED
         model.eval()
-        simplify.simplify(model, torch.zeros(1, 3, 224, 224).to(device), fuse_bn=False, training=True)
+        simplify.simplify(model, torch.zeros(1, 3, h, w).to(device), fuse_bn=False, training=True)
         model.train()
         
         forward_time, backward_time = time_model(model, fake_input, fake_target)
@@ -163,5 +168,5 @@ def main(network):
 
 
 if __name__ == '__main__':
-    for arch in models:
+    for arch in [inception_v3]:
         main(arch)
