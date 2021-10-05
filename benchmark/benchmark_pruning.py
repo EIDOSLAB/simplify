@@ -143,7 +143,7 @@ if __name__ == '__main__':
     import pathlib
     import re
     
-    root = pathlib.Path(__file__).parent.resolve()
+    root = pathlib.Path(__file__).parent.parent.resolve()
     
     index_re = re.compile(
         r"<!\-\- benchmark starts \-\->.*<!\-\- benchmark ends \-\->",
