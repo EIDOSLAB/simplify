@@ -113,12 +113,14 @@ def main(network):
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
+
         if network.__name__ == "inception_v3":
             model = network(False, aux_logits=False)
         else:
             model = network(False)
-        # simplify.fuse(model, simplify.utils.get_bn_folding(model))
         
+        _, _ = time_model(model, fake_input, fake_target)
+
         # First loop is the full model
         if i > 0:
             remaining_neurons = 0
