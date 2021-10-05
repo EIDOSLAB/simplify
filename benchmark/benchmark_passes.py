@@ -7,7 +7,7 @@ import wandb
 from torch import nn
 from torch.nn import CrossEntropyLoss
 from torch.nn.utils import prune
-from torchvision.models import inception, inception_v3
+from torchvision.models import inception, inception_v3, SqueezeNet
 from tqdm import tqdm
 
 import os
@@ -123,6 +123,8 @@ def main(network):
         if i > 0:
             remaining_neurons = 0
             for name, module in model.named_modules():
+                if isinstance(model, SqueezeNet) and 'classifier.1' in name:
+                    continue
                 if isinstance(module, nn.Conv2d):
                     prune.ln_structured(module, 'weight', amount=amount, n=2, dim=0)
                     ch_sum = module.weight.sum(dim=(1, 2, 3))
