@@ -64,7 +64,7 @@ def time_model(model, x, y):
 
 def main(network):
     print('=> Benchmarking', network.__name__)
-    if network.__name__ == "inception_v3":
+    if network.__name__ in ["inception_v3", "googlenet"]:
         model = network(False, aux_logits=False)
     else:
         model = network(False)
@@ -113,8 +113,7 @@ def main(network):
     for i in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-
-        if network.__name__ == "inception_v3":
+        if network.__name__ in ["inception_v3", "googlenet"]:
             model = network(False, aux_logits=False)
         else:
             model = network(False)
