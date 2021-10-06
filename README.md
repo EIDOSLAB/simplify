@@ -105,6 +105,7 @@ Tests
 </summary>
 
 #### Inference time benchmarks
+
 Evaluation mode (fuses BatchNorm)
 
 <!-- benchmark starts -->
@@ -126,9 +127,10 @@ Random structured pruning amount = 50.0%
 | squeezenet1_1      | 0.0364s ± 0.0015 | 0.0335s ± 0.0006 | 0.0285s ± 0.0005  |
 | vgg19_bn           | 0.1141s ± 0.0046 | 0.1110s ± 0.0066 | 0.0487s ± 0.0023  |
 | wide_resnet101_2   | 0.7690s ± 0.0133 | 0.7474s ± 0.0149 | 0.2902s ± 0.0109  |
+
 <!-- benchmark ends -->
 
-Training mode (leaves BatchNorm)
+Training mode (keeps BatchNorm)
 
 <!-- benchmark starts -->
 Update timestamp 06/10/2021 09:17:52
@@ -149,6 +151,7 @@ Random structured pruning amount = 50.0%
 | squeezenet1_1      | 0.0362s ± 0.0013 | 0.0350s ± 0.0003 | 0.0356s ± 0.0012  |
 | vgg19_bn           | 0.1137s ± 0.0022 | 0.1004s ± 0.0017 | 0.0469s ± 0.0021  |
 | wide_resnet101_2   | 0.7587s ± 0.0107 | 0.8054s ± 0.0613 | 0.3695s ± 0.0168  |
+
 <!-- benchmark ends -->
 
 #### Status of torchvision.models
@@ -161,6 +164,7 @@ Random structured pruning amount = 50.0%
 
 :man_shrugging:: test skipped due to failing of the previous one
 
+Fuse BatchNorm
 
 <!-- table fuse starts -->
 Update timestamp 06/10/2021 20:26:15
@@ -179,7 +183,10 @@ Update timestamp 06/10/2021 20:26:15
 |   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |      vgg19_bn      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+
 <!-- table fuse ends -->
+
+Keep BatchNorm
 
 <!-- table no fuse starts -->
 Update timestamp 06/10/2021 20:36:11
@@ -198,5 +205,6 @@ Update timestamp 06/10/2021 20:36:11
 |   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |      vgg19_bn      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+
 <!-- table no fuse ends -->
 </details>
