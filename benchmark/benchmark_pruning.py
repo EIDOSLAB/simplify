@@ -10,8 +10,6 @@ from torch.autograd import profiler
 from torchvision.models.squeezenet import SqueezeNet
 
 import simplify
-from simplify import fuse
-from simplify.utils import get_bn_folding
 from tests.benchmark_models import models
 
 
@@ -28,7 +26,7 @@ device = 'cpu'
 
 
 @torch.no_grad()
-def run_pruning(architecture, amount):
+def run_pruning(architecture, amount, mode):
     print('\n----', architecture.__name__, '----')
     
     im = torch.randint(0, 256, (1, 3, 224, 224))
@@ -62,6 +60,8 @@ def run_pruning(architecture, amount):
             prune.random_structured(module, 'weight', amount=amount, dim=0)
             prune.remove(module, 'weight')
     
+    model.train(mode == "train")
+    
     for i in range(100):
         with torch.no_grad():
             start = time.perf_counter()
@@ -81,10 +81,13 @@ def run_pruning(architecture, amount):
         '=> Full model inference time:',
         np.mean(pruned_time),
         np.std(pruned_time))
-    
+
+    model.eval()
     model = model.to('cpu')
-    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=True)
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=mode == "train")
     model = model.to(device)
+
+    model.train(mode == "train")
     
     for i in range(100):
         with torch.no_grad():
@@ -116,48 +119,47 @@ def run_pruning(architecture, amount):
 if __name__ == '__main__':
     amount = 0.5
     
-    table = []
-    for architecture in models:
-        try:
-            d_time, p_time, s_time = run_pruning(architecture, amount)
-        except Exception as e:
-            raise e
-            d_time, p_time, s_time = [0.], [0.], [0.]
+    for mode in ["train", "eval"]:
+        table = []
+        for architecture in models:
+            try:
+                d_time, p_time, s_time = run_pruning(architecture, amount, mode)
+            except Exception as e:
+                raise e
+                d_time, p_time, s_time = [0.], [0.], [0.]
+            
+            table.append([architecture.__name__,
+                          f'{np.mean(d_time):.4f}s ± {np.std(d_time):.4f}',
+                          f'{np.mean(p_time):.4f}s ± {np.std(p_time):.4f}',
+                          f'{np.mean(s_time):.4f}s ± {np.std(s_time):.4f}'])
+        table = tabulate(
+            table,
+            headers=[
+                'Architecture',
+                'Dense time',
+                'Pruned time',
+                'Simplified time'],
+            tablefmt='github')
+        print(table)
         
-        table.append([architecture.__name__,
-                      f'{np.mean(d_time):.4f}s ± {np.std(d_time):.4f}',
-                      f'{np.mean(p_time):.4f}s ± {np.std(p_time):.4f}',
-                      f'{np.mean(s_time):.4f}s ± {np.std(s_time):.4f}'])
-    table = tabulate(
-        table,
-        headers=[
-            'Architecture',
-            'Dense time',
-            'Pruned time',
-            'Simplified time'],
-        tablefmt='github')
-    print(table)
-    
-    import pathlib
-    import re
-    
-    root = pathlib.Path(__file__).parent.parent.resolve()
-    
-    index_re = re.compile(
-        r"<!\-\- benchmark starts \-\->.*<!\-\- benchmark ends \-\->",
-        re.DOTALL)
-    
-    updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"
-    pruning_perc = "Random structured pruning amount = " + \
-                   str(amount * 100) + "%\n"
-    
-    index = [
-        "<!-- benchmark starts -->",
-        updated,
-        pruning_perc,
-        table,
-        "<!-- benchmark ends -->"]
-    readme = root / "README.md"
-    index_txt = "\n".join(index).strip()
-    readme_contents = readme.open().read()
-    readme.open("w").write(index_re.sub(index_txt, readme_contents))
+        import pathlib
+        import re
+        
+        root = pathlib.Path(__file__).parent.parent.resolve()
+        
+        index_re = re.compile(rf"<!\-\- benchmark {mode} starts \-\->.*<!\-\- benchmark {mode} ends \-\->", re.DOTALL)
+        
+        updated = "Update timestamp " + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "\n"
+        pruning_perc = "Random structured pruning amount = " + \
+                       str(amount * 100) + "%\n"
+        
+        index = [
+            "<!-- benchmark starts -->",
+            updated,
+            pruning_perc,
+            table,
+            "<!-- benchmark ends -->"]
+        readme = root / "README.md"
+        index_txt = "\n".join(index).strip()
+        readme_contents = readme.open().read()
+        readme.open("w").write(index_re.sub(index_txt, readme_contents))
