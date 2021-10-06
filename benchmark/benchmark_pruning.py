@@ -52,6 +52,10 @@ def run_pruning(architecture, amount, mode):
             y_src = model(x)
         dense_time.append(time.perf_counter() - start)
     
+    print('=> Dense model inference time:',
+          np.mean(pruned_time),
+          np.std(pruned_time))
+    
     for name, module in model.named_modules():
         if isinstance(model, SqueezeNet) and 'classifier.1' in name:
             continue
@@ -77,14 +81,13 @@ def run_pruning(architecture, amount, mode):
     # except:
     #     pass
     
-    print(
-        '=> Full model inference time:',
-        np.mean(pruned_time),
-        np.std(pruned_time))
+    print('=> Pruned model inference time:',
+          np.mean(pruned_time),
+          np.std(pruned_time))
     
     model.eval()
     model = model.to('cpu')
-    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=mode == "train")
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=False)
     model = model.to(device)
     
     model.train(mode == "train")
@@ -107,6 +110,7 @@ def run_pruning(architecture, amount, mode):
     print('=> Simplified model inference time:',
           np.mean(simplified_time),
           np.std(simplified_time))
+    
     print('Allclose logits:', torch.allclose(y_src, y_simplified))
     print('Equal predictions:', torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
     print(f'Correct predictions: '
