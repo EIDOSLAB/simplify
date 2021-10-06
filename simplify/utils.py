@@ -114,7 +114,7 @@ def get_previous_layer_2(connections, module):
     for k in connections:
         if any([c == module for c in connections[k]["next"]]):
             if not isinstance(connections[k]["class"], (nn.Conv2d, nn.BatchNorm2d)):
-                return get_previous_layer(connections, k)
+                return get_previous_layer_2(connections, k)
             else:
                 return k
 
