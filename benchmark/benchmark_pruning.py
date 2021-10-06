@@ -130,11 +130,12 @@ if __name__ == '__main__':
         print(f"\nMODE: {mode}\n")
         table = []
         for architecture in models:
-            try:
-                d_time, p_time, s_time = run_pruning(architecture, amount, mode)
-            except Exception as e:
-                raise e
-                d_time, p_time, s_time = [0.], [0.], [0.]
+            d_time, p_time, s_time = run_pruning(architecture, amount, mode)
+            # try:
+            #     d_time, p_time, s_time = run_pruning(architecture, amount, mode)
+            # except Exception as e:
+            #     raise e
+            #     d_time, p_time, s_time = [0.], [0.], [0.]
             
             table.append([architecture.__name__,
                           f'{np.mean(d_time):.4f}s ± {np.std(d_time):.4f}',
