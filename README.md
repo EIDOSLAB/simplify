@@ -105,8 +105,9 @@ Tests
 </summary>
 
 #### Inference time benchmarks
+Evaluation mode (fuses BatchNorm)
 
-<!-- benchmark starts -->
+<!-- benchmark eval starts -->
 Update timestamp 05/10/2021 12:06:08
 
 Random structured pruning amount = 50.0%
@@ -125,7 +126,30 @@ Random structured pruning amount = 50.0%
 | squeezenet1_1      | 0.0392s ± 0.0019 | 0.0370s ± 0.0007 | 0.0284s ± 0.0010  |
 | vgg19_bn           | 0.1194s ± 0.0079 | 0.1139s ± 0.0135 | 0.0552s ± 0.0059  |
 | wide_resnet101_2   | 0.8139s ± 0.0444 | 0.7770s ± 0.0455 | 0.2899s ± 0.0425  |
-<!-- benchmark ends -->
+<!-- benchmark eval ends -->
+
+Training mode (leaves BatchNorm)
+
+<!-- benchmark train starts -->
+Update timestamp 05/10/2021 12:06:08
+
+Random structured pruning amount = 50.0%
+
+| Architecture       | Dense time       | Pruned time      | Simplified time   |
+|--------------------|------------------|------------------|-------------------|
+| alexnet            | 0.0231s ± 0.0138 | 0.0179s ± 0.0058 | 0.0165s ± 0.0093  |
+| densenet121        | 0.1791s ± 0.0030 | 0.1859s ± 0.0103 | 0.1182s ± 0.0086  |
+| googlenet          | 0.1070s ± 0.0069 | 0.0943s ± 0.0078 | 0.0473s ± 0.0018  |
+| inception_v3       | 0.1550s ± 0.0052 | 0.1405s ± 0.0062 | 0.0995s ± 0.0161  |
+| mnasnet1_0         | 0.2155s ± 0.0025 | 0.2147s ± 0.0027 | 0.2251s ± 0.0216  |
+| mobilenet_v3_large | 0.1261s ± 0.0014 | 0.1277s ± 0.0019 | 0.1211s ± 0.0021  |
+| resnet50           | 0.2046s ± 0.0041 | 0.2111s ± 0.0074 | 0.1087s ± 0.0128  |
+| resnext101_32x8d   | 1.4459s ± 0.1557 | 1.3544s ± 0.0512 | 0.7514s ± 0.1190  |
+| shufflenet_v2_x2_0 | 0.0872s ± 0.0044 | 0.0791s ± 0.0036 | 0.0522s ± 0.0038  |
+| squeezenet1_1      | 0.0392s ± 0.0019 | 0.0370s ± 0.0007 | 0.0284s ± 0.0010  |
+| vgg19_bn           | 0.1194s ± 0.0079 | 0.1139s ± 0.0135 | 0.0552s ± 0.0059  |
+| wide_resnet101_2   | 0.8139s ± 0.0444 | 0.7770s ± 0.0455 | 0.2899s ± 0.0425  |
+<!-- benchmark train ends -->
 
 #### Status of torchvision.models
 
