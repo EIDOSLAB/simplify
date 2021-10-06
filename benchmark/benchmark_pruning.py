@@ -46,11 +46,13 @@ def run_pruning(architecture, amount, mode):
     model.to(device)
     model.train(mode == "train")
     
-    for i in range(10):
+    for i in range(101):
         with torch.no_grad():
             start = time.perf_counter()
             y_src = model(x)
-        dense_time.append(time.perf_counter() - start)
+            end = time.perf_counter()
+        if i > 0:
+            dense_time.append(end - start)
     
     print('=> Dense model inference time:',
           np.mean(dense_time),
@@ -66,11 +68,13 @@ def run_pruning(architecture, amount, mode):
     
     model.train(mode == "train")
     
-    for i in range(100):
+    for i in range(101):
         with torch.no_grad():
             start = time.perf_counter()
             y_src = model(x)
-        pruned_time.append(time.perf_counter() - start)
+            end = time.perf_counter()
+        if i > 0:
+            pruned_time.append(end - start)
     
     # profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     
@@ -92,11 +96,13 @@ def run_pruning(architecture, amount, mode):
     
     model.train(mode == "train")
     
-    for i in range(100):
+    for i in range(101):
         with torch.no_grad():
             start = time.perf_counter()
             y_simplified = model(x)
-        simplified_time.append(time.perf_counter() - start)
+            end = time.perf_counter()
+        if i > 0:
+            simplified_time.append(end - start)
     
     # profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     
