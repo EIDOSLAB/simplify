@@ -13,7 +13,7 @@ __version__ = "1.0.1"
 
 
 def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn: bool = True,
-             training: bool = False) -> nn.Module:
+             training: bool = False, pinned_out: List = None) -> nn.Module:
     if training and fuse_bn:
         print("Cannot fuse BatchNorm in training mode")
         fuse_bn = False
@@ -22,9 +22,9 @@ def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn
         if bn_folding is None:
             bn_folding = utils.get_bn_folding(model)
         fuse(model, bn_folding)
-    
-    pinned_out = utils.get_pinned_out(model)
-    pinned_out = []
+
+    if pinned_out is None:    
+        pinned_out = utils.get_pinned_out(model)
     
     # if training:
     #     new_pinned_out = []
