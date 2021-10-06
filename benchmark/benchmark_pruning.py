@@ -53,8 +53,8 @@ def run_pruning(architecture, amount, mode):
         dense_time.append(time.perf_counter() - start)
     
     print('=> Dense model inference time:',
-          np.mean(pruned_time),
-          np.std(pruned_time))
+          np.mean(dense_time),
+          np.std(dense_time))
     
     for name, module in model.named_modules():
         if isinstance(model, SqueezeNet) and 'classifier.1' in name:
