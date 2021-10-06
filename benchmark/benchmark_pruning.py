@@ -68,25 +68,25 @@ def run_pruning(architecture, amount, mode):
             y_src = model(x)
         pruned_time.append(time.perf_counter() - start)
     
-    profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
+    # profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     
-    try:
-        with open(f'profile/{architecture.__name__}.txt', 'w') as f:
-            f.write('-- THRESHOLDED --\n')
-            f.write(profiled)
-    except:
-        pass
+    # try:
+    #     with open(f'profile/{architecture.__name__}.txt', 'w') as f:
+    #         f.write('-- THRESHOLDED --\n')
+    #         f.write(profiled)
+    # except:
+    #     pass
     
     print(
         '=> Full model inference time:',
         np.mean(pruned_time),
         np.std(pruned_time))
-
+    
     model.eval()
     model = model.to('cpu')
     model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=mode == "train")
     model = model.to(device)
-
+    
     model.train(mode == "train")
     
     for i in range(100):
@@ -95,23 +95,22 @@ def run_pruning(architecture, amount, mode):
             y_simplified = model(x)
         simplified_time.append(time.perf_counter() - start)
     
-    profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
-    with open(f'profile/{architecture.__name__}.txt', 'a') as f:
-        f.write('\n\n -- SIMPLIFIED --\n')
-        f.write(profiled)
+    # profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     
-    print(
-        '=> Simplified model inference time:',
-        np.mean(simplified_time),
-        np.std(simplified_time))
+    # try:
+    #     with open(f'profile/{architecture.__name__}.txt', 'w') as f:
+    #         f.write('-- SIMPLIFIED --\n')
+    #         f.write(profiled)
+    # except:
+    #     pass
+    
+    print('=> Simplified model inference time:',
+          np.mean(simplified_time),
+          np.std(simplified_time))
     print('Allclose logits:', torch.allclose(y_src, y_simplified))
-    print(
-        'Equal predictions:', torch.equal(
-            y_src.argmax(
-                dim=1), y_simplified.argmax(
-                dim=1)))
-    print(
-        f'Correct predictions: {torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
+    print('Equal predictions:', torch.equal(y_src.argmax(dim=1), y_simplified.argmax(dim=1)))
+    print(f'Correct predictions: '
+          f'{torch.eq(y_src.argmax(dim=1), y_simplified.argmax(dim=1)).sum()}/{y_simplified.shape[0]}')
     
     return dense_time, pruned_time, simplified_time
 
