@@ -145,6 +145,14 @@ def get_pinned(model):
     
     same_next = set([item for sublist in same_next for item in sublist])
     
+    # Add input node of CONV with grouping
+    for i, node in enumerate(fx_model.graph.nodes):
+        name = node.name.replace("_", ".")
+        if name in modules:
+            module = modules[name]
+            if isinstance(module, nn.Conv2d) and module.groups > 1:
+                same_next.add(str(node.prev))
+    
     # For each node not CONV nor BN recover the closest previous CONV or BN
     to_pin = []
     for m in same_next:
@@ -153,4 +161,4 @@ def get_pinned(model):
         else:
             to_pin.append(m)
     
-    return list(set(to_pin))
+    return [n.replace("_", ".") for n in list(set(to_pin))]

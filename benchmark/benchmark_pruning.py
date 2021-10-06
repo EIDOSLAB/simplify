@@ -162,11 +162,11 @@ if __name__ == '__main__':
                        str(amount * 100) + "%\n"
         
         index = [
-            "<!-- benchmark starts -->",
+            f"<!-- benchmark {mode} starts -->",
             updated,
             pruning_perc,
             table,
-            "<!-- benchmark ends -->"]
+            f"<!-- benchmark {mode} ends -->"]
         readme = root / "README.md"
         index_txt = "\n".join(index).strip()
         readme_contents = readme.open().read()

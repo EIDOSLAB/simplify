@@ -4,6 +4,8 @@ from torchvision.models.shufflenetv2 import shufflenet_v2_x2_0
 from torchvision.models.squeezenet import squeezenet1_1
 from torchvision.models.vgg import vgg19_bn
 
+from simplify.utils import get_pinned
+
 models = [
     # alexnet,
     # vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19, vgg19_bn,
@@ -32,3 +34,8 @@ models = [
     vgg19_bn,
     wide_resnet101_2
 ]
+
+if __name__ == '__main__':
+    model = resnext101_32x8d()
+    pinned = get_pinned(model)
+    print()

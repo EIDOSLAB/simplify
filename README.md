@@ -162,7 +162,7 @@ Random structured pruning amount = 50.0%
 :man_shrugging:: test skipped due to failing of the previous one
 
 
-<!-- table starts -->
+<!-- table fuse starts -->
 Update timestamp 05/10/2021 11:38:19
 
 |    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |
@@ -179,5 +179,24 @@ Update timestamp 05/10/2021 11:38:19
 |   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |      vgg19_bn      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
 |  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
-<!-- table ends -->
+<!-- table fuse ends -->
+
+<!-- table no fuse starts -->
+Update timestamp 05/10/2021 11:38:19
+
+|    Architecture    |  BatchNorm Folding  |  Bias Propagation  |   Simplification   |
+|--------------------|---------------------|--------------------|--------------------|
+|      alexnet       | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|    densenet121     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|     googlenet      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|    inception_v3    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|     mnasnet1_0     | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| mobilenet_v3_large | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|      resnet50      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|  resnext101_32x8d  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+| shufflenet_v2_x2_0 | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|   squeezenet1_1    | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|      vgg19_bn      | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+|  wide_resnet101_2  | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: |
+<!-- table no fuse ends -->
 </details>
