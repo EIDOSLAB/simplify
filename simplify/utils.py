@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import fx
-from torchvision.models import MNASNet, MobileNetV3
+from torchvision.models import MNASNet, MobileNetV3, ShuffleNetV2
 from torchvision.models.densenet import _DenseLayer
 
 
@@ -149,7 +149,8 @@ def get_pinned(model):
     # Add input node of CONV with grouping, layer.6 for MNASNet and fc2 for MobileNetV3
     for i, node in enumerate(fx_model.graph.nodes):
         if (isinstance(model, MNASNet) and node.name == "layers_6") or \
-                (isinstance(model, MobileNetV3) and "fc2" in node.name):
+                (isinstance(model, MobileNetV3) and "fc2" in node.name) or \
+                (isinstance(model, ShuffleNetV2) and node.name == "conv1_0"):
             same_next.add(str(node.name))
         name = node.name.replace("_", ".")
         if name in modules:
