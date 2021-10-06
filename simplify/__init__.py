@@ -24,7 +24,7 @@ def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn
         fuse(model, bn_folding)
 
     if pinned_out is None:    
-        pinned_out = utils.get_pinned_out(model)
+        pinned_out = utils.get_pinned(model)
     
     # if training:
     #     new_pinned_out = []
