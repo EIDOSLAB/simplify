@@ -151,7 +151,11 @@ def main(network):
         
         # SIMPLIFIED
         model.eval()
-        simplify.simplify(model, torch.zeros(1, 3, h, w).to(device), fuse_bn=False, training=True)
+        pinned_out = None
+        if 'densenet' in network.__name__:
+            pinned_out = [] 
+        simplify.simplify(model, torch.zeros(1, 3, h, w).to(device), 
+                          fuse_bn=False, training=True, pinned_out=pinned_out)
         model.train()
         
         forward_time, backward_time = time_model(model, fake_input, fake_target)
