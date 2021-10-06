@@ -120,7 +120,7 @@ if __name__ == '__main__':
     amount = 0.5
     
     for mode in ["train", "eval"]:
-        print(f"MODE: {mode}")
+        print(f"\nMODE: {mode}\n")
         table = []
         for architecture in models:
             try:
