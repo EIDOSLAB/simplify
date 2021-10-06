@@ -57,6 +57,7 @@ def get_pinned_out(model):
         last_module = None
         
         for i, node in enumerate(fx_model.graph.nodes):
+            print(node.name)
             if node.target in modules and isinstance(modules[node.target], nn.Conv2d):
                 if modules[node.target].groups > 1 and last_module is not None:
                     if last_module.target is not None and last_module.target not in pinned_out:
@@ -107,3 +108,49 @@ def get_bn_folding(model):
                     bn_folding.append([last_module[0], name])
     
     return bn_folding
+
+
+def get_previous_layer_2(connections, module):
+    for k in connections:
+        if any([c == module for c in connections[k]["next"]]):
+            if not isinstance(connections[k]["class"], (nn.Conv2d, nn.BatchNorm2d)):
+                return get_previous_layer(connections, k)
+            else:
+                return k
+
+
+def get_pinned(model):
+    fx_model = fx.symbolic_trace(copy.deepcopy(model))
+    modules = dict(fx_model.named_modules())
+    
+    connections = {}
+    
+    # Build dictionary node -> list of connected nodes
+    for i, node in enumerate(fx_model.graph.nodes):
+        # print(f"{node.name}->{[str(user) for user in node.users]}")
+        if node.target in modules:
+            module = modules[node.target]
+        else:
+            module = None
+        
+        connections[node.name] = {"next": [str(user) for user in node.users], "class": module}
+    
+    # Remove duplicates and build list of "to-pin" nodes (may contain nodes not CONV nor BN)
+    same_next = []
+    for k in connections:
+        for k2 in connections:
+            if k != k2:
+                if "add" in str(set(connections[k]["next"]) & set(connections[k2]["next"])):
+                    same_next.append([k, k2])
+    
+    same_next = set([item for sublist in same_next for item in sublist])
+    
+    # For each node not CONV nor BN recover the closest previous CONV or BN
+    to_pin = []
+    for m in same_next:
+        if not isinstance(connections[m]["class"], (nn.Conv2d, nn.BatchNorm2d)):
+            to_pin.append(get_previous_layer_2(connections, m))
+        else:
+            to_pin.append(m)
+    
+    return list(set(to_pin))

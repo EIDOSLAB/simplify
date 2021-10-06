@@ -90,7 +90,7 @@ def run_pruning(architecture, amount, mode):
     
     model.eval()
     model = model.to('cpu')
-    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=mode == "train", fuse_bn=False)
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=mode == "train")
     model = model.to(device)
     
     model.train(mode == "train")
