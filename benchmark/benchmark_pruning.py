@@ -76,13 +76,13 @@ def run_pruning(architecture, amount, mode):
         if i > 0:
             pruned_time.append(end - start)
     
-    try:
-        profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
-        with open(f'profile/{architecture.__name__}_{mode}.txt', 'w') as f:
-            f.write('-- PRUNED --\n')
-            f.write(profiled)
-    except:
-        pass
+    # try:
+    #     profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
+    #     with open(f'profile/{architecture.__name__}_{mode}.txt', 'w') as f:
+    #         f.write('-- PRUNED --\n')
+    #         f.write(profiled)
+    # except:
+    #     pass
     
     print('=> Pruned model inference time:',
           np.mean(pruned_time),
@@ -103,13 +103,13 @@ def run_pruning(architecture, amount, mode):
         if i > 0:
             simplified_time.append(end - start)
     
-    try:
-        profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
-        with open(f'profile/{architecture.__name__}_{mode}.txt', 'w') as f:
-            f.write('-- SIMPLIFIED --\n')
-            f.write(profiled)
-    except:
-        pass
+    # try:
+    #     profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
+    #     with open(f'profile/{architecture.__name__}_{mode}.txt', 'w') as f:
+    #         f.write('-- SIMPLIFIED --\n')
+    #         f.write(profiled)
+    # except:
+    #     pass
     
     print('=> Simplified model inference time:',
           np.mean(simplified_time),
