@@ -14,7 +14,7 @@ import os
 import simplify
 from tests.benchmark_models import models
 
-device = torch.device(os.environ.get('DEVICE', 'cuda'))
+device = os.environ.get('DEVICE', 'cuda')
 
 
 def time_model(model, x, y):
@@ -22,7 +22,7 @@ def time_model(model, x, y):
     backward_time = []
     model.to(device)
     for j in range(10):  # tqdm(range(10), desc="Pruned test"):
-        if device == torch.device("cuda"):
+        if device == "cuda":
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
         else:
@@ -30,17 +30,17 @@ def time_model(model, x, y):
         
         output = model(x)  # FORWARD PASS
         
-        if device == torch.device("cuda"):
+        if device == "cuda":
             ender.record()
             torch.cuda.synchronize()
         else:
             end = time.perf_counter()
         
-        forward_time.append(starter.elapsed_time(ender) if device == torch.device("cuda") else end - start)
+        forward_time.append(starter.elapsed_time(ender) if device == ("cuda") else end - start)
         
         loss = F.cross_entropy(output, y)
         
-        if device == torch.device("cuda"):
+        if device == "cuda":
             starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             starter.record()
         else:
@@ -48,13 +48,13 @@ def time_model(model, x, y):
         
         loss.backward()  # BACKWARD PASS
         
-        if device == torch.device("cuda"):
+        if device == "cuda":
             ender.record()
             torch.cuda.synchronize()
         else:
             end = time.perf_counter()
         
-        backward_time.append(starter.elapsed_time(ender) if device == torch.device("cuda") else end - start)
+        backward_time.append(starter.elapsed_time(ender) if device == "cuda" else end - start)
     
     forward_time = forward_time[1:]
     backward_time = backward_time[1:]
