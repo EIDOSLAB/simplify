@@ -18,10 +18,17 @@ models = [
     # wide_resnet50_2, wide_resnet101_2,
     # mnasnet0_5, mnasnet0_75, mnasnet1_0, nascent1_3,
     # densenet121,
-    # alexnet, densenet121, googlenet, inception_v3,
-    # mnasnet1_0, mobilenet_v3_large, resnet50, 
+    
+    alexnet,
+    densenet121,
+    googlenet,
+    inception_v3,
+    mnasnet1_0,
+    mobilenet_v3_large,
+    resnet50,
     resnext101_32x8d,
-    # shufflenet_v2_x2_0, 
+    shufflenet_v2_x2_0,
     squeezenet1_1,
-    # vgg19_bn, wide_resnet101_2
+    vgg19_bn,
+    wide_resnet101_2
 ]
