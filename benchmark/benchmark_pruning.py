@@ -34,7 +34,7 @@ def run_pruning(architecture, amount, mode):
     
     dense_time, pruned_time, simplified_time = [], [], []
     print(architecture.__name__)
-    if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
+    if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3", "inception_v3", "googlenet"]:
         pretrained = False
     else:
         pretrained = True
