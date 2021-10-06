@@ -36,6 +36,6 @@ models = [
 ]
 
 if __name__ == '__main__':
-    model = resnext101_32x8d()
+    model = mnasnet1_0()
     pinned = get_pinned(model)
     print()

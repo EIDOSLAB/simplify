@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import fx
+from torchvision.models import MNASNet, MobileNetV3
 from torchvision.models.densenet import _DenseLayer
 
 
@@ -145,8 +146,11 @@ def get_pinned(model):
     
     same_next = set([item for sublist in same_next for item in sublist])
     
-    # Add input node of CONV with grouping
+    # Add input node of CONV with grouping, layer.6 for MNASNet and fc2 for MobileNetV3
     for i, node in enumerate(fx_model.graph.nodes):
+        if (isinstance(model, MNASNet) and node.name == "layers_6") or \
+                (isinstance(model, MobileNetV3) and "fc2" in node.name):
+            same_next.add(str(node.name))
         name = node.name.replace("_", ".")
         if name in modules:
             module = modules[name]
