@@ -57,7 +57,7 @@ def get_pinned_out(model):
         last_module = None
         
         for i, node in enumerate(fx_model.graph.nodes):
-            print(node.name)
+            # print(node.name)
             if node.target in modules and isinstance(modules[node.target], nn.Conv2d):
                 if modules[node.target].groups > 1 and last_module is not None:
                     if last_module.target is not None and last_module.target not in pinned_out:
