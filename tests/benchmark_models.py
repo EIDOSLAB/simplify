@@ -1,6 +1,7 @@
+from torch import nn
 from torchvision.models import wide_resnet101_2, resnet50, resnext101_32x8d, mobilenet_v3_large, mnasnet1_0, alexnet, \
     densenet121, googlenet, inception_v3
-from torchvision.models.shufflenetv2 import shufflenet_v2_x2_0
+from torchvision.models.shufflenetv2 import shufflenet_v2_x2_0, InvertedResidual
 from torchvision.models.squeezenet import squeezenet1_1
 from torchvision.models.vgg import vgg19_bn
 
@@ -36,6 +37,26 @@ models = [
 ]
 
 if __name__ == '__main__':
-    model = mnasnet1_0()
+    model = shufflenet_v2_x2_0()
     pinned = get_pinned(model)
+    print()
+    
+    pinned_out = ['conv1.0']
+
+    last_module = None
+    for name, module in model.named_modules():
+        # print(name)
+        # works for modules within same branch
+        if isinstance(module, nn.Conv2d):
+            if module.groups > 1 and last_module is not None:
+                pinned_out.append(last_module)
+            last_module = name
+
+        if isinstance(module, InvertedResidual):
+            if len(module.branch1) > 0:
+                pinned_out.append(f'{name}.branch1.{len(module.branch1) - 3}')
+
+            if len(module.branch2) > 0:
+                pinned_out.append(f'{name}.branch2.{len(module.branch2) - 3}')
+                
     print()

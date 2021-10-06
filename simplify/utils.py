@@ -150,7 +150,10 @@ def get_pinned(model):
     for i, node in enumerate(fx_model.graph.nodes):
         if (isinstance(model, MNASNet) and node.name == "layers_6") or \
                 (isinstance(model, MobileNetV3) and "fc2" in node.name) or \
-                (isinstance(model, ShuffleNetV2) and node.name == "conv1_0"):
+                (isinstance(model, ShuffleNetV2) and (node.name == "conv1_1" or
+                                                      "branch1_3" in node.name or
+                                                      "branch2_1" in node.name or
+                                                      "branch2_6" in node.name)):
             same_next.add(str(node.name))
         name = node.name.replace("_", ".")
         if name in modules:
