@@ -44,7 +44,7 @@ def run_pruning(architecture, amount):
         model = architecture(pretrained, transform_input=False, aux_logits=False)
     else:
         model = architecture(pretrained)
-        
+    
     model.to(device)
     model.eval()
     
@@ -68,12 +68,14 @@ def run_pruning(architecture, amount):
             y_src = model(x)
         pruned_time.append(time.perf_counter() - start)
     
-    profiled = profile_model(
-        model, torch.randn(
-            (1, 3, 224, 224)), rows=1000)
-    with open(f'profile/{architecture.__name__}.txt', 'w') as f:
-        f.write('-- THRESHOLDED --\n')
-        f.write(profiled)
+    profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
+    
+    try:
+        with open(f'profile/{architecture.__name__}.txt', 'w') as f:
+            f.write('-- THRESHOLDED --\n')
+            f.write(profiled)
+    except:
+        pass
     
     print(
         '=> Full model inference time:',
@@ -81,9 +83,7 @@ def run_pruning(architecture, amount):
         np.std(pruned_time))
     
     model = model.to('cpu')
-    bn_folding = get_bn_folding(model)
-    model = fuse(model, bn_folding)
-    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), bn_folding=bn_folding)
+    model = simplify.simplify(model, torch.zeros((1, 3, 224, 224)), training=True)
     model = model.to(device)
     
     for i in range(100):
@@ -92,9 +92,7 @@ def run_pruning(architecture, amount):
             y_simplified = model(x)
         simplified_time.append(time.perf_counter() - start)
     
-    profiled = profile_model(
-        model, torch.randn(
-            (1, 3, 224, 224)), rows=1000)
+    profiled = profile_model(model, torch.randn((1, 3, 224, 224)), rows=1000)
     with open(f'profile/{architecture.__name__}.txt', 'a') as f:
         f.write('\n\n -- SIMPLIFIED --\n')
         f.write(profiled)
