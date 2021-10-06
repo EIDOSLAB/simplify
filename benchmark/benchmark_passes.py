@@ -152,7 +152,7 @@ def main(network):
         # SIMPLIFIED
         model.eval()
         pinned_out = None
-        if 'densenet' in network.__name__:
+        if 'densenet' in network.__name__ or 'squeezenet' in network.__name__:
             pinned_out = [] 
         simplify.simplify(model, torch.zeros(1, 3, h, w).to(device), 
                           fuse_bn=False, training=True, pinned_out=pinned_out)
