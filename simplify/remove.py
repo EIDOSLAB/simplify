@@ -59,8 +59,8 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
         if isinstance(module, nn.Conv2d) and module.groups > 1:
             return output
         
-        if training and name in pinned_out:
-            return output
+        # if training and name in pinned_out:
+        #     return output
         
         shape = module.weight.shape
         
