@@ -67,7 +67,7 @@ def main(network):
         if network.__name__ in ["inception_v3", "googlenet"]:
             model = network(False, aux_logits=False)
         else:
-            model = network(True)
+            model = network('shufflenet' not in network.__name__)
 
         if amount > 0:
             for name, module in model.named_modules():
