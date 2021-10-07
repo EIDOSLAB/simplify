@@ -34,7 +34,8 @@ def run_pruning(architecture, amount, mode):
     
     dense_time, pruned_time, simplified_time = [], [], []
     print(architecture.__name__)
-    if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3", "inception_v3", "googlenet"]:
+    if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3",
+                                 "inception_v3", "googlenet"]:
         pretrained = False
     else:
         pretrained = True
@@ -139,8 +140,8 @@ if __name__ == '__main__':
             
             table.append([architecture.__name__,
                           f'{np.mean(d_time):.4f}s ± {np.std(d_time):.4f}',
-                          f'{np.mean(p_time):.4f}s ± {np.std(p_time):.4f} ({np.mean(p_time) / np.mean(d_time):.2f})',
-                          f'{np.mean(s_time):.4f}s ± {np.std(s_time):.4f} ({np.mean(s_time) / np.mean(d_time):.2f})'])
+                          f'{np.mean(p_time):.4f}s ± {np.std(p_time):.4f} ({100 * (np.mean(p_time) / np.mean(d_time)):.2f})',
+                          f'{np.mean(s_time):.4f}s ± {np.std(s_time):.4f} ({100 * (np.mean(s_time) / np.mean(d_time)):.2f})'])
         table = tabulate(
             table,
             headers=[
