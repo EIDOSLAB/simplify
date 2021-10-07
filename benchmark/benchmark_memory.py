@@ -74,7 +74,7 @@ def main(network):
                 if isinstance(model, SqueezeNet) and 'classifier.1' in name:
                     continue
                 if isinstance(module, nn.Conv2d):
-                    prune.random_structured(module, 'weight', amount=amount, dim=0)
+                    prune.ln_structured(module, 'weight', amount=amount, n=2, dim=0)
                     prune.remove(module, 'weight')
 
             model.eval()
