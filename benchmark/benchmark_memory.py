@@ -56,7 +56,8 @@ def main(network):
     
     wandb.init(
         config={'arch': network.__name__, 'device': os.environ.get('DEVICE', 'cuda')},
-        group="benchmark_memory"
+        group="benchmark_memory",
+        tags=['memory']
     )
     
     for _ in tqdm(range(iterations), desc="Benchmark"):
