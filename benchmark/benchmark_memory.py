@@ -78,8 +78,7 @@ def main(network):
                     prune.remove(module, 'weight')
 
             model.eval()
-            simplify.simplify(model, torch.zeros(1, 3, h, w).to(device), 
-                              fuse_bn=False, training=True)
+            simplify.simplify(model, torch.zeros(1, 3, h, w), fuse_bn=False, training=True)
             model.train()
         
 
