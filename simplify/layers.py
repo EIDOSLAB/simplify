@@ -93,3 +93,6 @@ class BatchNormExpand(nn.BatchNorm2d):
         
         expanded = torch.scatter(zeros, 1, index, x)
         return expanded + self.bf[:, None, None].expand_as(expanded)
+    
+    def __repr__(self):
+        return f'BatchNormExpand({self.num_features}, eps={self.eps}, momentum={self.momentum}, affine={self.affine}, track_running_stats={self.track_running_stats})'

@@ -115,6 +115,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training:
             
             if isinstance(module, BatchNormB):
                 module = BatchNormExpand.from_bn(module, idxs, module.bf, output.shape)
+                
             elif isinstance(module, nn.BatchNorm2d):
                 module = BatchNormExpand.from_bn(module, idxs, module.bias, output.shape)
                 module.register_parameter("bias", None)
