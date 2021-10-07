@@ -18,3 +18,5 @@ class PinnedTest(unittest.TestCase):
         pinned_subtest(torchvision.models.resnet18)
         pinned_subtest(torchvision.models.resnext101_32x8d)
         pinned_subtest(torchvision.models.mnasnet1_0)
+        pinned_subtest(torchvision.models.densenet121)
+        pinned_subtest(torchvision.models.squeezenet1_0)
