@@ -108,7 +108,7 @@ Tests
 
 Evaluation mode (fuses BatchNorm)
 
-<!-- benchmark starts -->
+<!-- benchmark eval starts -->
 Update timestamp 06/10/2021 09:27:38
 
 Random structured pruning amount = 50.0%
@@ -128,11 +128,11 @@ Random structured pruning amount = 50.0%
 | vgg19_bn           | 0.1141s ± 0.0046 | 0.1110s ± 0.0066 | 0.0487s ± 0.0023  |
 | wide_resnet101_2   | 0.7690s ± 0.0133 | 0.7474s ± 0.0149 | 0.2902s ± 0.0109  |
 
-<!-- benchmark ends -->
+<!-- benchmark eval ends -->
 
 Training mode (keeps BatchNorm)
 
-<!-- benchmark starts -->
+<!-- benchmark train starts -->
 Update timestamp 06/10/2021 09:17:52
 
 Random structured pruning amount = 50.0%
@@ -152,7 +152,7 @@ Random structured pruning amount = 50.0%
 | vgg19_bn           | 0.1137s ± 0.0022 | 0.1004s ± 0.0017 | 0.0469s ± 0.0021  |
 | wide_resnet101_2   | 0.7587s ± 0.0107 | 0.8054s ± 0.0613 | 0.3695s ± 0.0168  |
 
-<!-- benchmark ends -->
+<!-- benchmark train ends -->
 
 #### Status of torchvision.models
 
