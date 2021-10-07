@@ -170,7 +170,8 @@ def main(network):
             'simplified.forward_std':  np.std(forward_time),
             'simplified.backward':     np.mean(backward_time),
             'simplified.backward_std': np.std(backward_time),
-            'remaining_neurons':       100. - x[-1]
+            'remaining_neurons':       100. - x[-1],
+            'amount': amount
         })
         
         amount += prune_step
