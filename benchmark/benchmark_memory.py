@@ -1,3 +1,4 @@
+from re import X
 import time
 
 import numpy as np
@@ -22,6 +23,7 @@ def measure_memory(model, x, y):
     mem_reserved = [torch.cuda.memory_reserved(0)]
     mem_allocated = [torch.cuda.memory_allocated(0)]
 
+    x, y = x.to(device), y.to(device)
     model = model.to(device)
     with torch.enable_grad():
         output = model(x)
@@ -45,10 +47,8 @@ def main(network):
     if network.__name__ == "inception_v3":
         h, w = 299, 299
         
-    fake_input = torch.randint(0, 256, (batch_size, 3, h, w))
-    fake_input = fake_input.float() / 255.
-    fake_target = torch.randint(0, 1000, (batch_size,)).long()
-    criterion = CrossEntropyLoss()
+    x = torch.randint(0, 256, (batch_size, 3, h, w)).float() / 255.
+    y = torch.randint(0, 1000, (batch_size,)).long()
     
     prune_step = 0.05
     iterations = int(1. / prune_step)
@@ -62,7 +62,7 @@ def main(network):
     for _ in tqdm(range(iterations), desc="Benchmark"):
         if amount > 1.:
             break
-        
+
         if network.__name__ in ["inception_v3", "googlenet"]:
             model = network(False, aux_logits=False)
         else:
@@ -82,7 +82,7 @@ def main(network):
             model.train()
         
 
-        mem_total, mem_reserved, mem_allocated = measure_memory(model)
+        mem_total, mem_reserved, mem_allocated = measure_memory(model, x, y)
 
         wandb.log({
             'amount': amount,
