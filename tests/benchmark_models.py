@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 from torchvision.models import wide_resnet101_2, resnet50, resnext101_32x8d, mobilenet_v3_large, mnasnet1_0, alexnet, \
     densenet121, googlenet, inception_v3
@@ -22,22 +23,23 @@ models = [
     # mnasnet0_5, mnasnet0_75, mnasnet1_0, nascent1_3,
     # densenet121,
     
-    # alexnet,
-    # densenet121,
-    # googlenet,
-    # inception_v3,
+    alexnet,
+    densenet121,
+    googlenet,
+    inception_v3,
     mnasnet1_0,
-    # mobilenet_v3_large,
-    # resnet50,
-    # resnext101_32x8d,
-    # shufflenet_v2_x2_0,
-    # squeezenet1_1,
-    # vgg19_bn,
-    # wide_resnet101_2
+    mobilenet_v3_large,
+    resnet50,
+    resnext101_32x8d,
+    shufflenet_v2_x2_0,
+    squeezenet1_1,
+    vgg19_bn,
+    wide_resnet101_2
 ]
 
 if __name__ == '__main__':
-    model = alexnet()
+    model = mnasnet1_0()
+    torch.onnx.export(model, torch.randn(1, 3, 224, 224), "model.onnx", verbose=False)
     pinned = get_pinned(model)
     print()
     
