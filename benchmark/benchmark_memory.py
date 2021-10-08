@@ -42,7 +42,7 @@ def measure_memory(model, x, y):
 def main(network):
     print('=> Benchmarking', network.__name__)
 
-    batch_size = 128
+    batch_size = 32
     h, w = 224, 224
     if network.__name__ == "inception_v3":
         h, w = 299, 299
