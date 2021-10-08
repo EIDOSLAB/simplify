@@ -127,7 +127,7 @@ def run_pruning(architecture, amount, mode):
 if __name__ == '__main__':
     amount = 0.5
     
-    for mode in ["eval", "train"]:
+    for mode in ["eval"]:
         print(f"\nMODE: {mode}\n")
         table = []
         for architecture in models:
