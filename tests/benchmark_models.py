@@ -31,9 +31,9 @@ models = [
     # mobilenet_v3_large,
     # resnet50,
     # resnext101_32x8d,
-    shufflenet_v2_x2_0,
-    squeezenet1_1,
-    vgg19_bn,
+    # shufflenet_v2_x2_0,
+    # squeezenet1_1,
+    # vgg19_bn,
     wide_resnet101_2
 ]
 
