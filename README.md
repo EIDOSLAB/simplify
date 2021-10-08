@@ -109,24 +109,24 @@ Tests
 ###### Evaluation mode (fuses BatchNorm)
 
 <!-- benchmark eval starts -->
-Update timestamp 08/10/2021 12:09:53
+Update timestamp 08/10/2021 14:26:25
 
 Random structured pruning amount = 50.0%
 
-| Architecture       | Dense time       | Pruned time      | Simplified time   |
-|--------------------|------------------|------------------|-------------------|
-| alexnet            | 0.0062s ± 0.0004 | 0.0069s ± 0.0006 | 0.0030s ± 0.0000  |
-| densenet121        | 0.0318s ± 0.0019 | 0.0336s ± 0.0039 | 0.0253s ± 0.0115  |
-| googlenet          | 0.0159s ± 0.0029 | 0.0155s ± 0.0028 | 0.0106s ± 0.0023  |
-| inception_v3       | 0.0294s ± 0.0138 | 0.0219s ± 0.0032 | 0.0116s ± 0.0001  |
-| mnasnet1_0         | 0.0150s ± 0.0010 | 0.0130s ± 0.0007 | 0.0191s ± 0.0116  |
-| mobilenet_v3_large | 0.0155s ± 0.0017 | 0.0122s ± 0.0010 | 0.0122s ± 0.0007  |
-| resnet50           | 0.0255s ± 0.0115 | 0.0261s ± 0.0096 | 0.0167s ± 0.0015  |
-| resnext101_32x8d   | 0.0809s ± 0.0211 | 0.0893s ± 0.0268 | 0.0729s ± 0.0155  |
-| shufflenet_v2_x2_0 | 0.0201s ± 0.0013 | 0.0196s ± 0.0082 | 0.0144s ± 0.0008  |
-| squeezenet1_1      | 0.0050s ± 0.0009 | 0.0050s ± 0.0006 | 0.0038s ± 0.0002  |
-| vgg19_bn           | 0.0381s ± 0.0079 | 0.0357s ± 0.0004 | 0.0137s ± 0.0038  |
-| wide_resnet101_2   | 0.0795s ± 0.0226 | 0.0732s ± 0.0139 | 0.0599s ± 0.0115  |
+| Architecture       | Dense time      | Pruned time     | Simplified time   |
+|--------------------|-----------------|-----------------|-------------------|
+| alexnet            | 7.58ms ± 0.29   | 7.55ms ± 0.28   | 2.95ms ± 0.02     |
+| densenet121        | 36.41ms ± 4.88  | 34.31ms ± 3.85  | 21.87ms ± 1.45    |
+| googlenet          | 15.44ms ± 3.19  | 13.68ms ± 0.09  | 10.31ms ± 0.82    |
+| inception_v3       | 25.29ms ± 7.31  | 21.68ms ± 2.90  | 13.22ms ± 2.23    |
+| mnasnet1_0         | 17.66ms ± 0.57  | 13.64ms ± 0.13  | 11.59ms ± 0.07    |
+| mobilenet_v3_large | 13.74ms ± 0.67  | 12.18ms ± 0.46  | 11.95ms ± 0.21    |
+| resnet50           | 24.39ms ± 4.48  | 26.19ms ± 5.84  | 18.21ms ± 1.98    |
+| resnext101_32x8d   | 76.11ms ± 15.79 | 77.35ms ± 20.04 | 65.68ms ± 16.41   |
+| shufflenet_v2_x2_0 | 18.07ms ± 2.23  | 14.32ms ± 0.21  | 13.06ms ± 0.08    |
+| squeezenet1_1      | 4.50ms ± 0.06   | 4.39ms ± 0.05   | 4.09ms ± 0.50     |
+| vgg19_bn           | 40.41ms ± 12.13 | 38.56ms ± 10.72 | 12.39ms ± 0.19    |
+| wide_resnet101_2   | 79.40ms ± 25.57 | 82.86ms ± 22.47 | 60.16ms ± 10.77   |
 <!-- benchmark eval ends -->
 
 #### Status of torchvision.models
