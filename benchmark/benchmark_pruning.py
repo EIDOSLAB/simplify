@@ -138,10 +138,13 @@ if __name__ == '__main__':
             #     raise e
             #     d_time, p_time, s_time = [0.], [0.], [0.]
             
+            d_time = [t * 1000 for t in d_time]
+            p_time = [t * 1000 for t in p_time]
+            s_time = [t * 1000 for t in s_time]
             table.append([architecture.__name__,
-                          f'{np.mean(d_time) * 1000:.2f}ms ± {np.std(d_time) * 1000:.2f}',
-                          f'{np.mean(p_time) * 1000:.2f}ms ± {np.std(p_time) * 1000:.2f}',
-                          f'{np.mean(s_time) * 1000:.2f}ms ± {np.std(s_time) * 1000:.2f}'])
+                          f'{np.mean(d_time):.2f}ms ± {np.std(d_time):.2f}',
+                          f'{np.mean(p_time):.2f}ms ± {np.std(p_time):.2f}',
+                          f'{np.mean(s_time):.2f}ms ± {np.std(s_time):.2f}'])
         table = tabulate(
             table,
             headers=[
