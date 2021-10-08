@@ -69,7 +69,7 @@ def main(network):
     else:
         model = network(False)
     
-    batch_size = 128
+    batch_size = 64
     h, w = 224, 224
     if network.__name__ == "inception_v3":
         h, w = 299, 299
