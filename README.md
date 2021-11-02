@@ -106,51 +106,28 @@ Tests
 
 #### Inference time benchmarks
 
-Evaluation mode (fuses BatchNorm)
+###### Evaluation mode (fuses BatchNorm)
 
 <!-- benchmark eval starts -->
-Update timestamp 07/10/2021 10:49:31
+Update timestamp 08/10/2021 14:26:25
 
 Random structured pruning amount = 50.0%
 
-| Architecture       | Dense time       | Pruned time      | Simplified time   |
-|--------------------|------------------|------------------|-------------------|
-| alexnet            | 0.0140s ± 0.0039 | 0.0188s ± 0.0049 | 0.0127s ± 0.0074  |
-| densenet121        | 0.0691s ± 0.0073 | 0.0739s ± 0.0062 | 0.0472s ± 0.0067  |
-| googlenet          | 0.0287s ± 0.0009 | 0.0286s ± 0.0011 | 0.0189s ± 0.0013  |
-| inception_v3       | 0.0486s ± 0.0141 | 0.0520s ± 0.0018 | 0.0257s ± 0.0008  |
-| mnasnet1_0         | 0.0295s ± 0.0037 | 0.0285s ± 0.0034 | 0.0309s ± 0.0017  |
-| mobilenet_v3_large | 0.0275s ± 0.0025 | 0.0272s ± 0.0023 | 0.0275s ± 0.0014  |
-| resnet50           | 0.0646s ± 0.0100 | 0.0597s ± 0.0022 | 0.0384s ± 0.0020  |
-| resnext101_32x8d   | 0.2048s ± 0.0082 | 0.2047s ± 0.0106 | 0.1743s ± 0.0132  |
-| shufflenet_v2_x2_0 | 0.0481s ± 0.0051 | 0.0470s ± 0.0041 | 0.0346s ± 0.0044  |
-| squeezenet1_1      | 0.0159s ± 0.0025 | 0.0167s ± 0.0017 | 0.0102s ± 0.0012  |
-| vgg19_bn           | 0.0961s ± 0.0041 | 0.0948s ± 0.0015 | 0.0377s ± 0.0007  |
-| wide_resnet101_2   | 0.1722s ± 0.0368 | 0.1410s ± 0.0117 | 0.1037s ± 0.0067  |
+| Architecture       | Dense time      | Pruned time     | Simplified time   |
+|--------------------|-----------------|-----------------|-------------------|
+| alexnet            | 7.58ms ± 0.29   | 7.55ms ± 0.28   | 2.95ms ± 0.02     |
+| densenet121        | 36.41ms ± 4.88  | 34.31ms ± 3.85  | 21.87ms ± 1.45    |
+| googlenet          | 15.44ms ± 3.19  | 13.68ms ± 0.09  | 10.31ms ± 0.82    |
+| inception_v3       | 25.29ms ± 7.31  | 21.68ms ± 2.90  | 13.22ms ± 2.23    |
+| mnasnet1_0         | 17.66ms ± 0.57  | 13.64ms ± 0.13  | 11.59ms ± 0.07    |
+| mobilenet_v3_large | 13.74ms ± 0.67  | 12.18ms ± 0.46  | 11.95ms ± 0.21    |
+| resnet50           | 24.39ms ± 4.48  | 26.19ms ± 5.84  | 18.21ms ± 1.98    |
+| resnext101_32x8d   | 76.11ms ± 15.79 | 77.35ms ± 20.04 | 65.68ms ± 16.41   |
+| shufflenet_v2_x2_0 | 18.07ms ± 2.23  | 14.32ms ± 0.21  | 13.06ms ± 0.08    |
+| squeezenet1_1      | 4.50ms ± 0.06   | 4.39ms ± 0.05   | 4.09ms ± 0.50     |
+| vgg19_bn           | 40.41ms ± 12.13 | 38.56ms ± 10.72 | 12.39ms ± 0.19    |
+| wide_resnet101_2   | 79.40ms ± 25.57 | 82.86ms ± 22.47 | 60.16ms ± 10.77   |
 <!-- benchmark eval ends -->
-
-Training mode (keeps BatchNorm)
-
-<!-- benchmark train starts -->
-Update timestamp 07/10/2021 10:54:36
-
-Random structured pruning amount = 50.0%
-
-| Architecture       | Dense time       | Pruned time      | Simplified time   |
-|--------------------|------------------|------------------|-------------------|
-| alexnet            | 0.0154s ± 0.0004 | 0.0156s ± 0.0004 | 0.0121s ± 0.0005  |
-| densenet121        | 0.1163s ± 0.0058 | 0.1029s ± 0.0063 | 0.0795s ± 0.0043  |
-| googlenet          | 0.0368s ± 0.0014 | 0.0367s ± 0.0013 | 0.0269s ± 0.0019  |
-| inception_v3       | 0.0759s ± 0.0023 | 0.0763s ± 0.0021 | 0.0410s ± 0.0007  |
-| mnasnet1_0         | 0.0576s ± 0.0047 | 0.0577s ± 0.0048 | 0.0539s ± 0.0048  |
-| mobilenet_v3_large | 0.0511s ± 0.0035 | 0.0491s ± 0.0024 | 0.0382s ± 0.0020  |
-| resnet50           | 0.0753s ± 0.0015 | 0.0874s ± 0.0036 | 0.0594s ± 0.0026  |
-| resnext101_32x8d   | 0.2540s ± 0.0095 | 0.2507s ± 0.0062 | 0.1993s ± 0.0042  |
-| shufflenet_v2_x2_0 | 0.0559s ± 0.0044 | 0.0568s ± 0.0035 | 0.0611s ± 0.0058  |
-| squeezenet1_1      | 0.0113s ± 0.0013 | 0.0103s ± 0.0004 | 0.0077s ± 0.0002  |
-| vgg19_bn           | 0.0617s ± 0.0012 | 0.0658s ± 0.0018 | 0.0417s ± 0.0031  |
-| wide_resnet101_2   | 0.1803s ± 0.0077 | 0.1856s ± 0.0142 | 0.1318s ± 0.0053  |
-<!-- benchmark train ends -->
 
 #### Status of torchvision.models
 
