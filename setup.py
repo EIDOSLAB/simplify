@@ -7,7 +7,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='torch-simplify',
-    version='1.0.1',
+    version='1.1.0',
     description='Simplification of pruned models for accelerated inference',
     long_description=README,
     long_description_content_type='text/markdown',
