@@ -44,11 +44,22 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
                 if getattr(module, 'bias', None) is not None:
                     module.register_parameter('bias', None)
                 
-                if not isinstance(module, ConvExpand):
-                    module = ConvB.from_conv(module, bias_feature_maps)
-                else:  # if it is already ConvExpand, just update bf
-                    module.register_parameter(
-                        'bf', nn.Parameter(bias_feature_maps))
+                all_unique = True
+                
+                for i in range(bias_feature_maps.shape[0]):
+                    uniq = torch.unique(bias_feature_maps[i])
+                    if uniq.shape[0] > 1:
+                        all_unique = False
+                        break
+                
+                if not all_unique:
+                    if not isinstance(module, ConvExpand):
+                        module = ConvB.from_conv(module, bias_feature_maps)
+                    else:  # if it is already ConvExpand, just update bf
+                        module.register_parameter(
+                            'bf', nn.Parameter(bias_feature_maps))
+                else:
+                    module.register_parameter("bias", nn.Parameter(bias_feature_maps[:, 0, 0]))
         
         elif isinstance(module, nn.BatchNorm2d):
             pruned_input = module.pruned_input
