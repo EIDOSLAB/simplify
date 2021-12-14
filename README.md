@@ -183,3 +183,22 @@ Update timestamp 06/10/2021 20:36:11
 
 <!-- table no fuse ends -->
 </details>
+
+
+## Citing
+
+If you use this software for research or application purposes, please use the following citation:
+
+```bibtex
+@article{bragagnolo2021simplify,
+  title = {Simplify: A Python library for optimizing pruned neural networks},
+  journal = {SoftwareX},
+  volume = {17},
+  pages = {100907},
+  year = {2022},
+  issn = {2352-7110},
+  doi = {https://doi.org/10.1016/j.softx.2021.100907},
+  url = {https://www.sciencedirect.com/science/article/pii/S2352711021001576},
+  author = {Andrea Bragagnolo and Carlo Alberto Barbano},
+}
+```
