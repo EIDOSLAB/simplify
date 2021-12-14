@@ -46,6 +46,8 @@ pip3 install -r requirements.txt
 
 ## Example usage
 
+The library can be used by simply calling the ``fuse`` method:
+
 ```python
 from torchvision.models import resnet18
 from simplify import fuse
@@ -56,7 +58,9 @@ bn_folding = ...  # List of pairs (conv, bn) to fuse in a single layer
 model = fuse(model, bn_folding)
 ```
 
-### Propagate
+Also, the three main modules can be used independelty as needed:
+
+#### Propagate
 
 The *propagate* module is used to remove the non-zero bias from zeroed-out neurons in order to be able to remove them.
 
@@ -71,7 +75,7 @@ pinned_out = ...  # List of layers for which the bias should not be propagated
 propagate_bias(model, zeros, pinned_out)
 ````
 
-### Remove
+#### Remove
 
 The *remove* module is used to remove actually remove the zeroed neurons from the model architecture.
 
@@ -86,7 +90,7 @@ pinned_out = ...  # List of layers in which the output should not change shape
 remove_zeroed(model, zeros, pinned_out)
 ````
 
-### Utilities
+#### Utilities
 
 We also provide a set of utilities used to define `bn_folding` and `pinned_out` for standard PyTorch models.
 
