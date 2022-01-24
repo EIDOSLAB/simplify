@@ -1,12 +1,24 @@
 #  Copyright (c) 2022 EIDOSLab. All rights reserved.
 #  See the LICENSE file for licensing terms (BSD-style).
+from typing import List, Tuple
 
 import torch
 import torch.nn as nn
 
 
 @torch.no_grad()
-def get_module(model, name):
+def get_module(model: torch.nn.Module, name: List[str]) -> torch.nn.Module:
+    """
+    Get a module inside `model` based on its name.
+
+    Args:
+        model (torch.nn.Module): Model in which to perform the research.
+        name (str): List of string representing the old module name. i.e if the module name is layer1.0.conv1 `name` should be ["layer1", "0", "conv1"]
+
+    Returns:
+        torch.nn.Module: Found module.
+
+    """
     module = model
     for idx, sub in enumerate(name):
         if idx < len(name):
@@ -16,13 +28,15 @@ def get_module(model, name):
 
 
 @torch.no_grad()
-def substitute_module(model, new_module, sub_module_names):
+def substitute_module(model: torch.nn.Module, new_module: torch.nn.Module, sub_module_names: List[str]) -> None:
     """
-    Substitute a nn.module in a given PyTorch model with another.
-    :param model: PyTorch model on which the substitution occurs.
-    :param new_module: New module to insert in the model.
-    :param sub_module_names: List of string representing the old module name.
-    i.e if the module name is layer1.0.conv1 `sub_module_names` should be ["layer1", "0", "conv1"]
+    Substitute a `torch.nn.Module` with another based on the module's name.
+    
+    Args:
+        model: PyTorch model on which the substitution occurs.
+        new_module: New module to insert in the model.
+        sub_module_names: List of string representing the old module name. i.e if the module name is layer1.0.conv1 `sub_module_names` should be ["layer1", "0", "conv1"]
+
     """
     if new_module is not None:
         attr = model
@@ -34,7 +48,18 @@ def substitute_module(model, new_module, sub_module_names):
 
 
 @torch.no_grad()
-def fuse(model, bn_folding):
+def fuse(model: torch.nn.Module, bn_folding: List[Tuple[str, str]]) -> torch.nn.Module:
+    """
+    Fuse a model's `torch.nn.Conv2d`-`torch.nn.BatchNorm2d` or `torch.nn.Linear`-`torch.nn.BatchNorm2d` couples.
+
+    Args:
+        model (torch.nn.Module): Model to fuse.
+        bn_folding (List[Tuple[str, str]]): List of tuples containing the names of the modules to fuse.
+
+    Returns:
+        torch.nn.Module: Fused model.
+
+    """
     for module_pair in bn_folding:
         fused_module = None
         
@@ -57,12 +82,16 @@ def fuse(model, bn_folding):
 
 
 @torch.no_grad()
-def fuse_conv_and_bn(conv, bn):
+def fuse_conv_and_bn(conv: torch.nn.Conv2d, bn: torch.nn.BatchNorm2d) -> torch.nn.Conv2d:
     """
     Perform modules fusion.
-    :param conv: nn.Conv2d module.
-    :param bn: nn.BatchNorm2d module.
-    :return: nn.Conv2d originated from $conv$ and $bn$ fusion.
+
+    Args:
+        conv (torch.nn.Conv2d): nn.Conv2d module.
+        bn (torch.nn.BatchNorm2d): nn.BatchNorm2d module.
+
+    Returns:
+        torch.nn.Conv2d: nn.Conv2d originated from $conv$ and $bn$ fusion.
     """
     # https://tehnokv.com/posts/fusing-batchnorm-and-conv/
     # init
@@ -110,7 +139,17 @@ def fuse_conv_and_bn(conv, bn):
 
 
 @torch.no_grad()
-def fuse_fc_and_bn(fc, bn):
+def fuse_fc_and_bn(fc: torch.nn.Linear, bn: torch.nn.BatchNorm2d) -> torch.nn.Linear:
+    """
+    Perform modules fusion.
+
+    Args:
+        fc (torch.nn.Linear): nn.Linear module.
+        bn (torch.nn.BatchNorm2d): nn.BatchNorm2d module.
+
+    Returns:
+        torch.nn.Linear: nn.Linear originated from `fc` and `bn` fusion.
+    """
     device = fc.weight.device
     
     fusedlinear = nn.Linear(

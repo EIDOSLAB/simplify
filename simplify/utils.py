@@ -33,7 +33,7 @@ def matches_module_pattern(pattern: Iterable[Type], node: fx.Node, modules: Dict
     return True
 
 
-def get_conv_bn(model: nn.Module) -> List[Tuple[str, str]]:
+def get_bn_folding(model: nn.Module) -> List[Tuple[str, str]]:
     """
     Search for tuples of adjacent `nn.Conv2d` and `nn.BatchNorm2d` modules.
 
@@ -91,7 +91,7 @@ def get_previous_layer(connections: Dict, module: fx.Node) -> fx.Node:
                 return k
 
 
-def get_pinned(model: torch.nn.Module) -> Dict[str]:
+def get_pinned(model: torch.nn.Module) -> List[str]:
     """
     Try to find all the modules for which the output shape needs to stay fixed, (e.g. modules involved in residual connections with a sum).
 

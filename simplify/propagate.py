@@ -11,32 +11,40 @@ from .layers import BatchNormB, BatchNormExpand, ConvB, ConvExpand
 
 
 @torch.no_grad()
-def propagate_bias(model: nn.Module, x: torch.Tensor,
-                   pinned_out: List) -> nn.Module:
+def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
+    """
+    Propagate a pruned neuron non-zero bias to the next layers non-pruned neurons.
+
+    Args:
+        model (nn.Module):
+        x (torch.Tensor): `model`'s input of shape [1, C, N, M], same as the model usual input.
+        pinned_out (List): List of `nn.Modules` which output needs to remain of the original shape (e.g. layers related to a residual connection with a sum operation).
+
+    Returns:
+        nn.Module: Model with propagated bias.
+
+    """
+    
     @torch.no_grad()
     def __remove_nan(module, input):
-        module.register_buffer("pruned_input", ~torch.isnan(
-            input[0][0].view(input[0][0].shape[0], -1).sum(dim=1)))
+        """
+        PyTorch hook that removes nans from input.
+        """
+        module.register_buffer("pruned_input", ~torch.isnan(input[0][0].view(input[0][0].shape[0], -1).sum(dim=1)))
         if torch.isnan(input[0]).sum() > 0:
             input[0][torch.isnan(input[0])] = 0
         return input
     
     @torch.no_grad()
-    def __propagate_biases_hook(module, input, output, name=None):
-        # print('\n', name, module)
+    def __propagate_biases_hook(module, input, output):
         """
-        Parameters:
-            - module: nn.module
-            - input: torch.Tensor; non-zero channels correspond to remaining biases pruned channels in the previos module,
-                    and thus should be used to update the current biases
-            - output: torch.Tensor
+        PyTorch hook used to propagate the biases of pruned neurons to following non-pruned layers.
         """
         
         ###########################################################################################
         ## STEP 1. Fuse biases of pruned channels in the previous module into the current module ##
         ###########################################################################################
         
-        input = input[0]
         bias_feature_maps = output[0].clone()
         
         if isinstance(module, nn.Conv2d):
@@ -59,8 +67,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
                     if not isinstance(module, ConvExpand):
                         module = ConvB.from_conv(module, bias_feature_maps)
                     else:  # if it is already ConvExpand, just update bf
-                        module.register_parameter(
-                            'bf', nn.Parameter(bias_feature_maps))
+                        module.register_parameter('bf', nn.Parameter(bias_feature_maps))
                 else:
                     module.register_parameter("bias", nn.Parameter(bias_feature_maps[:, 0, 0]))
         
@@ -68,8 +75,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
             pruned_input = module.pruned_input
             if isinstance(module, BatchNormExpand):
                 ones = torch.ones(1, device=module.weight.device).bool()
-                expanded_pruned_input = torch.cat(
-                    (module.pruned_input, ones), dim=0)
+                expanded_pruned_input = torch.cat((module.pruned_input, ones), dim=0)
                 expanded_pruned_input = expanded_pruned_input[module.idxs]
                 module.pruned_input = expanded_pruned_input
             
@@ -158,8 +164,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
         if isinstance(module, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
             handle = module.register_forward_pre_hook(__remove_nan)
             handles.append(handle)
-            handle = module.register_forward_hook(
-                lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
+            handle = module.register_forward_hook(lambda m, i, o: __propagate_biases_hook(m, i, o))
             handles.append(handle)
     
     # Propagate biases

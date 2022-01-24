@@ -15,7 +15,7 @@ from .remove import remove_zeroed
 __version__ = "1.1.0"
 
 
-def simplify(model: nn.Module, x: torch.Tensor, conv_bn: List = None, fuse_bn: bool = True,
+def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn: bool = True,
              pinned_out: List = None) -> nn.Module:
     """
     Main method. Is the standard simplification procedure that automatically calls all the necessary sub-procedures.
@@ -24,7 +24,7 @@ def simplify(model: nn.Module, x: torch.Tensor, conv_bn: List = None, fuse_bn: b
     Args:
         model (torch.nn.Module): Module to be simplified.
         x (torch.Tensor): `model`'s input of shape [1, C, N, M], same as the model usual input.
-        conv_bn (List): List of tuple (`nn.Conv2d`, `nn.BatchNorm2d`) to be fused. If None it tries to evaluate them given the model. Default `None`.
+        bn_folding (List): List of tuple (`nn.Conv2d`, `nn.BatchNorm2d`) to be fused. If None it tries to evaluate them given the model. Default `None`.
         fuse_bn (bool): If True, fuse the conv-bn tuple.
         pinned_out (List): List of `nn.Modules` which output needs to remain of the original shape (e.g. layers related to a residual connection with a sum operation).
 
@@ -34,9 +34,9 @@ def simplify(model: nn.Module, x: torch.Tensor, conv_bn: List = None, fuse_bn: b
     """
     
     if fuse_bn:
-        if conv_bn is None:
-            conv_bn = utils.get_conv_bn(model)
-        fuse(model, conv_bn)
+        if bn_folding is None:
+            bn_folding = utils.get_bn_folding(model)
+        fuse(model, bn_folding)
 
     if pinned_out is None:    
         pinned_out = utils.get_pinned(model)
