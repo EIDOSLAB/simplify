@@ -29,9 +29,9 @@ def propagate_bias(model: nn.Module, x: torch.Tensor,
             - output: torch.Tensor
         """
         
-        #######################################################################
+        ###########################################################################################
         ## STEP 1. Fuse biases of pruned channels in the previous module into the current module ##
-        #######################################################################
+        ###########################################################################################
         
         input = input[0]
         bias_feature_maps = output[0].clone()

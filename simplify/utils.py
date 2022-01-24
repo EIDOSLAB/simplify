@@ -1,12 +1,9 @@
 import copy
-import os
-import random
 
-import numpy as np
 import torch
 import torch.nn as nn
 from torch import fx
-from torchvision.models import MNASNet, MobileNetV3, ShuffleNetV2
+from torchvision.models import MobileNetV3, ShuffleNetV2
 from torchvision.models.densenet import _DenseLayer
 
 
@@ -26,59 +23,6 @@ def matches_module_pattern(pattern, node, modules):
         if type(modules[current_node.target]) is not expected_type:
             return False
     return True
-
-
-def set_seed(seed):
-    random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    np.random.seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    torch.manual_seed(seed)
-
-
-def get_previous_layer(node, modules):
-    # print("get_previous_layer")
-    for input_node in node.all_input_nodes:
-        # print(input_node.name)
-        if input_node.target in modules and isinstance(modules[input_node.target], (nn.Conv2d, nn.BatchNorm2d)):
-            return input_node.target
-        else:
-            return get_previous_layer(input_node, modules)
-
-
-def get_pinned_out(model):
-    pinned_out = []
-    try:
-        fx_model = fx.symbolic_trace(copy.deepcopy(model))
-        modules = dict(fx_model.named_modules())
-        
-        last_module = None
-        
-        for i, node in enumerate(fx_model.graph.nodes):
-            # print(node.name)
-            if node.target in modules and isinstance(modules[node.target], nn.Conv2d):
-                if modules[node.target].groups > 1 and last_module is not None:
-                    if last_module.target is not None and last_module.target not in pinned_out:
-                        pinned_out.append(last_module.target)
-                last_module = node
-            
-            if i > 0 and (len(node.all_input_nodes) > 1 or len(node.users) > 1):
-                for input_node in node.all_input_nodes:
-                    if input_node.target in modules and isinstance(modules[input_node.target],
-                                                                   (nn.Conv2d, nn.BatchNorm2d)):
-                        if input_node.target is not None and input_node.target not in pinned_out:
-                            pinned_out.append(input_node.target)
-                    else:
-                        previous_layer = get_previous_layer(input_node, modules)
-                        if previous_layer is not None and previous_layer not in pinned_out:
-                            pinned_out.append(previous_layer)
-    except Exception as e:
-        pass
-    
-    return pinned_out
 
 
 def get_bn_folding(model):
@@ -111,15 +55,6 @@ def get_bn_folding(model):
     return bn_folding
 
 
-def get_previous_layer_2(connections, module):
-    for k in connections:
-        if any([c == module for c in connections[k]["next"]]):
-            if not isinstance(connections[k]["class"], (nn.Conv2d, nn.BatchNorm2d)):
-                return get_previous_layer_2(connections, k)
-            else:
-                return k
-
-
 def get_pinned(model):
     fx_model = fx.symbolic_trace(copy.deepcopy(model))
     modules = dict(fx_model.named_modules())
@@ -148,11 +83,11 @@ def get_pinned(model):
     
     # Add input node of CONV with grouping, layer.6 for MNASNet and fc2 for MobileNetV3
     for i, node in enumerate(fx_model.graph.nodes):
-        if  (isinstance(model, MobileNetV3) and "fc2" in node.name) or \
-            (isinstance(model, ShuffleNetV2) and (node.name == "conv1_1" or
-                                                    "branch1_3" in node.name or
-                                                    "branch2_1" in node.name or
-                                                    "branch2_6" in node.name)):
+        if (isinstance(model, MobileNetV3) and "fc2" in node.name) or \
+                (isinstance(model, ShuffleNetV2) and (node.name == "conv1_1" or
+                                                      "branch1_3" in node.name or
+                                                      "branch2_1" in node.name or
+                                                      "branch2_6" in node.name)):
             same_next.add(str(node.name))
         name = node.name.replace("_", ".")
         if name in modules:

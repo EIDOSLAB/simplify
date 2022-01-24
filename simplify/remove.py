@@ -7,7 +7,7 @@ from .layers import BatchNormB, ConvExpand, BatchNormExpand
 
 
 @torch.no_grad()
-def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List, training: bool = False) -> nn.Module:
+def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
     def __remove_nan(module, input):
         nan_idx = torch.isnan(input[0])
