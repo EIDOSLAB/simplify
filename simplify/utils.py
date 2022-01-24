@@ -2,6 +2,7 @@
 #  See the LICENSE file for licensing terms (BSD-style).
 
 import copy
+from typing import Any, Dict, Type, Iterable, Tuple, List
 
 import torch
 import torch.nn as nn
@@ -10,7 +11,11 @@ from torchvision.models import MobileNetV3, ShuffleNetV2
 from torchvision.models.densenet import _DenseLayer
 
 
-def matches_module_pattern(pattern, node, modules):
+def matches_module_pattern(pattern: Iterable[Type], node: fx.Node, modules: Dict[str, Any]) -> bool:
+    """
+    Reimplementation of PyTorch experimental function `matches_module_pattern`.
+    See https://github.com/pytorch/pytorch/blob/master/torch/fx/experimental/optimization.py#L26
+    """
     if len(node.args) == 0:
         return False
     nodes = (node.args[0], node)
@@ -28,7 +33,16 @@ def matches_module_pattern(pattern, node, modules):
     return True
 
 
-def get_conv_bn(model):
+def get_conv_bn(model: nn.Module) -> List[Tuple[str, str]]:
+    """
+    Search for tuples of adjacent `nn.Conv2d` and `nn.BatchNorm2d` modules.
+
+    Args:
+        model (nn.Module): Model on which to perform the conv-bn search.
+
+    Returns:
+        List[Tuple[str, str]]: List of the found modules.
+    """
     bn_folding = []
     
     try:
@@ -41,7 +55,7 @@ def get_conv_bn(model):
                 if matches_module_pattern(pattern, node, modules):
                     if len(node.args[0].users) > 1:
                         continue
-                    bn_folding.append([node.args[0].target, node.target])
+                    bn_folding.append((node.args[0].target, node.target))
     
     except Exception as e:
         last_module = None
@@ -53,12 +67,40 @@ def get_conv_bn(model):
                 last_module = (name, module)
             if isinstance(module, nn.BatchNorm2d):
                 if last_module is not None and last_module[1].weight.shape[0] == module.weight.shape[0]:
-                    bn_folding.append([last_module[0], name])
+                    bn_folding.append((last_module[0], name))
     
     return bn_folding
 
 
-def get_pinned(model):
+def get_previous_layer(connections: Dict, module: fx.Node) -> fx.Node:
+    """
+    Recursively find the node the precedes `module` in the dictionary of nodes `connections`.
+
+    Args:
+        connections (Dict): Dictionary of nodes.
+        module (fx.Node): target node.
+
+    Returns:
+        fx.Node: Found node.
+    """
+    for k in connections:
+        if any([c == module for c in connections[k]["next"]]):
+            if not isinstance(connections[k]["class"], (nn.Conv2d, nn.BatchNorm2d)):
+                return get_previous_layer(connections, k)
+            else:
+                return k
+
+
+def get_pinned(model: torch.nn.Module) -> Dict[str]:
+    """
+    Try to find all the modules for which the output shape needs to stay fixed, (e.g. modules involved in residual connections with a sum).
+
+    Args:
+        model (torch.nn.Module): The model on which to perform the research.
+
+    Returns:
+        Dict[str]: Dictionary of all the found modules.
+    """
     fx_model = fx.symbolic_trace(copy.deepcopy(model))
     modules = dict(fx_model.named_modules())
     
@@ -66,7 +108,6 @@ def get_pinned(model):
     
     # Build dictionary node -> list of connected nodes
     for i, node in enumerate(fx_model.graph.nodes):
-        # print(f"{node.name}->{[str(user) for user in node.users]}")
         if node.target in modules:
             module = modules[node.target]
         else:
@@ -102,7 +143,7 @@ def get_pinned(model):
     to_pin = []
     for m in same_next:
         if not isinstance(connections[m]["class"], (nn.Conv2d, nn.BatchNorm2d)):
-            to_pin.append(get_previous_layer_2(connections, m))
+            to_pin.append(get_previous_layer(connections, m))
         else:
             to_pin.append(m)
     

@@ -16,7 +16,7 @@ __version__ = "1.1.0"
 
 
 def simplify(model: nn.Module, x: torch.Tensor, conv_bn: List = None, fuse_bn: bool = True,
-             training: bool = False, pinned_out: List = None) -> nn.Module:
+             pinned_out: List = None) -> nn.Module:
     """
     Main method. Is the standard simplification procedure that automatically calls all the necessary sub-procedures.
     It currently supports all the existing PyTorch classification models.
@@ -25,17 +25,13 @@ def simplify(model: nn.Module, x: torch.Tensor, conv_bn: List = None, fuse_bn: b
         model (torch.nn.Module): Module to be simplified.
         x (torch.Tensor): `model`'s input of shape [1, C, N, M], same as the model usual input.
         conv_bn (List): List of tuple (`nn.Conv2d`, `nn.BatchNorm2d`) to be fused. If None it tries to evaluate them given the model. Default `None`.
-        fuse_bn (bool): If True fuse the conv-bn tuple.
-        training (bool): If True operates in training mode.
+        fuse_bn (bool): If True, fuse the conv-bn tuple.
         pinned_out (List): List of `nn.Modules` which output needs to remain of the original shape (e.g. layers related to a residual connection with a sum operation).
 
     Returns:
         torch.nn.Module: Simplified model.
 
     """
-    if training and fuse_bn:
-        print("Cannot fuse BatchNorm in training mode")
-        fuse_bn = False
     
     if fuse_bn:
         if conv_bn is None:
