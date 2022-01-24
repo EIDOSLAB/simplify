@@ -35,7 +35,7 @@ class BiasPropagationTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             if fuse_bn:
-                bn_folding = utils.get_bn_folding(model)
+                bn_folding = utils.get_conv_bn(model)
                 model = simplify.fuse(model, bn_folding)
             y_src = model(x)
             

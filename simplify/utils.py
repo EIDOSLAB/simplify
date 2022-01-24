@@ -28,7 +28,7 @@ def matches_module_pattern(pattern, node, modules):
     return True
 
 
-def get_bn_folding(model):
+def get_conv_bn(model):
     bn_folding = []
     
     try:

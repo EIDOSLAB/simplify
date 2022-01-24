@@ -20,7 +20,7 @@ if __name__ == '__main__':
     
     optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
     
-    bn_folding = utils.get_bn_folding(model)
+    bn_folding = utils.get_conv_bn(model)
     model = fuse(model, bn_folding)
     model.eval()
     pinned_out = utils.get_pinned_out(model)

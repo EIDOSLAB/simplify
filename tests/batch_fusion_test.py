@@ -35,7 +35,7 @@ class BatchNormFusionTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             y_src = model(x)
-            bn_folding = utils.get_bn_folding(model)
+            bn_folding = utils.get_conv_bn(model)
             model = simplify.fuse(model, bn_folding)
             y_prop = model(x)
             

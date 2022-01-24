@@ -7,7 +7,7 @@ from torch.nn.utils import prune
 from torchvision.models import SqueezeNet
 
 import simplify
-from simplify.utils import get_bn_folding, get_pinned_out
+from simplify.utils import get_conv_bn, get_pinned_out
 from tests import models
 import pathlib
 import re
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                 
                 print("BatchNorm Folding")
                 try:
-                    bn_folding = get_bn_folding(model)
+                    bn_folding = get_conv_bn(model)
                     if fuse:
                         model = simplify.fuse(model, bn_folding)
                     model.eval()

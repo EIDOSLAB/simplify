@@ -35,7 +35,7 @@ class ChannelsRemovalTest(unittest.TestCase):
                     prune.remove(module, 'weight')
             
             if fuse_bn:
-                bn_folding = utils.get_bn_folding(model)
+                bn_folding = utils.get_conv_bn(model)
                 model = simplify.fuse(model, bn_folding)
             
             pinned_out = utils.get_pinned_out(model)
