@@ -20,9 +20,59 @@ cd simplify
 pip3 install -r requirements.txt
 ```
 
-## Usage
-⚠️ work in progress in the meantime you can find a minimal working example in the paper ⚠️
+****
 
+## Usage
+
+### Main function
+
+For most scenarios the main `simplify` function will suffice. This function returns the simplified model.
+
+#### Arguments
+
+The expected arguments are:
+
+- `model (torch.nn.Module)`: Module to be simplified i.e. the PyTorch's model.
+- `x (torch.Tensor)`: zero-tensor of shape `[1, C, N, M]`, same as the model usual input.
+- `bn_folding (List)`: List of tuple (`nn.Conv2d`, `nn.BatchNorm2d`) to be fused. If None it tries to evaluate them
+  given the model. Default `None`.
+- `fuse_bn (bool)`: If True, fuse the conv-bn tuple.
+- `pinned_out (List)`: List of `nn.Modules` which output needs to remain of the original shape (e.g. layers related to a
+  residual connection with a sum operation).
+
+#### Minimal working example
+
+```python
+import torch
+from torchvision import models
+from simplify import simplify
+
+model = models.resnet18()
+
+# Apply some pruning strategy or load a pruned checkpoint
+
+dummy_input = torch.zeros(1, 3, 224, 224)  # Tensor shape is that of a standard input for the given model
+simplified_model = simplify(model, dummy_input)
+```
+
+### Submodules
+
+The `simplify` function is composed of three different submodules: `fuse`, `propagate` and `remove`. Each module can be
+used independently as needed.
+
+#### fuse
+
+Fuses adjacent Conv (or Linear) and BatchNorm layers.
+
+#### propagate
+
+Propagates non-zero bias of pruned neurons to remaining neurons of the next layers.
+
+#### remove
+
+Removes zeroed neurons from the architecture.
+
+****
 
 ## Citing
 
