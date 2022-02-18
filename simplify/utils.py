@@ -2,6 +2,7 @@
 #  See the LICENSE file for licensing terms (BSD-style).
 
 import copy
+import re
 from typing import Any, Dict, Type, Iterable, Tuple, List
 
 import torch
@@ -104,6 +105,8 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
     fx_model = fx.symbolic_trace(copy.deepcopy(model))
     modules = dict(fx_model.named_modules())
     
+    names = {re.sub('[_.]', '', n): n for n in modules}
+    
     connections = {}
     
     # Build dictionary node -> list of connected nodes
@@ -134,8 +137,8 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
                                                       "branch2_6" in node.name)):
             same_next.add(str(node.name))
         name = node.name.replace("_", ".")
-        if name in modules:
-            module = modules[name]
+        if re.sub('[_.]', '', name) in names:
+            module = modules[names[re.sub('[_.]', '', name)]]
             if isinstance(module, nn.Conv2d) and module.groups > 1:
                 same_next.add(str(node.prev))
     
@@ -147,4 +150,4 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
         else:
             to_pin.append(m)
     
-    return [n.replace("_", ".") for n in list(set(to_pin))]
+    return [names[re.sub('[_.]', '', n)] for n in list(set(to_pin))]
