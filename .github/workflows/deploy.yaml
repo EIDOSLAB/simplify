@@ -5,7 +5,9 @@ jobs:
     name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@pypi
+      - uses: actions/checkout@v2
+        with:
+          ref: pypi
       - name: Set up Python 3.9
         uses: actions/setup-python@v1
         with:
