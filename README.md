@@ -1,6 +1,6 @@
 # Simplify
 
-[![tests](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml/badge.svg)](https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml)
+[comment]: <> ([![tests]&#40;https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml/badge.svg&#41;]&#40;https://github.com/EIDOSlab/simplify/actions/workflows/test.yaml&#41;)
 
 Simplification of pruned models for accelerated inference.
 
