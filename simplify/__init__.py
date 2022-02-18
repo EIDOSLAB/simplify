@@ -33,6 +33,9 @@ def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn
 
     """
     
+    training = model.training
+    model.train(False)
+    
     if fuse_bn:
         if bn_folding is None:
             bn_folding = utils.get_bn_folding(model)
@@ -43,5 +46,7 @@ def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn
     
     propagate_bias(model, x, pinned_out)
     remove_zeroed(model, x, pinned_out)
+
+    model.train(training)
     
     return model
