@@ -163,3 +163,5 @@ wandb/
 benchmark/wandb/
 
 .idea/
+
+debug_env/
