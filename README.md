@@ -4,6 +4,8 @@
 
 Simplification of pruned models for accelerated inference.
 
+Fully supports torchvision classification models up to [version 0.11](https://pytorch.org/vision/0.11/models.html#classification).
+
 ## Installation
 
 Simplify can be installed using pip:
