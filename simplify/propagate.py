@@ -18,7 +18,8 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
     Args:
         model (nn.Module):
         x (torch.Tensor): `model`'s input of shape [1, C, N, M], same as the model usual input.
-        pinned_out (List): List of `nn.Modules` which output needs to remain of the original shape (e.g. layers related to a residual connection with a sum operation).
+        pinned_out (List): List of `nn.Modules` which output needs to remain of the original shape
+        (e.g. layers related to a residual connection with a sum operation).
 
     Returns:
         nn.Module: Model with propagated bias.
@@ -47,7 +48,14 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
 
         bias_feature_maps = output[0].clone()
 
-        if isinstance(module, nn.Conv2d):
+        if isinstance(module, nn.Linear):
+            # TODO: handle missing bias
+            # For a linear layer, we can just update the scalar bias values
+            # if getattr(module, 'bias', None) is not None:
+            #    module.bias.data = bias_feature_maps
+            module.register_parameter('bias', nn.Parameter(bias_feature_maps))
+
+        elif isinstance(module, nn.Conv2d):
             # For a conv layer, we remove the scalar biases
             # and use bias matrices (ConvB)
             if bias_feature_maps.abs().sum() != 0.:
@@ -107,13 +115,6 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         # if getattr(module, 'bias', None) is not None and module.bias.abs().sum() == 0:
         #     module.register_parameter('bias', None)
 
-        elif isinstance(module, nn.Linear):
-            # TODO: handle missing bias
-            # For a linear layer, we can just update the scalar bias values
-            # if getattr(module, 'bias', None) is not None:
-            #    module.bias.data = bias_feature_maps
-            module.register_parameter('bias', nn.Parameter(bias_feature_maps))
-
         else:
             error('Unsupported module type:', module)
 
@@ -136,8 +137,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
                 module.bias.data.mul_(~pruned_channels)
 
         elif isinstance(module, nn.Conv2d):
-            output[~pruned_channels[None, :, None,
-                    None].expand_as(output)] *= float('nan')
+            output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
             if isinstance(module, (ConvB, ConvExpand)):
                 if getattr(module, 'bf', None) is not None:
                     module.bf.data.mul_(~pruned_channels[:, None, None])
@@ -146,8 +146,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
                     module.bias.data.mul_(~pruned_channels)
 
         if isinstance(module, nn.BatchNorm2d):
-            output[~pruned_channels[None, :, None,
-                    None].expand_as(output)] *= float('nan')
+            output[~pruned_channels[None, :, None, None].expand_as(output)] *= float('nan')
             if isinstance(module, (BatchNormB, BatchNormExpand)):
                 module.bf.data.mul_(~pruned_channels)
             else:

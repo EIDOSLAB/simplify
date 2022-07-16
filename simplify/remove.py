@@ -6,7 +6,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from .layers import BatchNormB, ConvExpand, BatchNormExpand
+from .layers import BatchNormB, ConvExpand, BatchNormExpand, LinearExpand
 
 
 @torch.no_grad()
@@ -37,15 +37,15 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         nonzero_idx = ~(input.view(input.shape[0], -1).sum(dim=1) == 0)
         # print('input:', input.shape)
 
-        if isinstance(module, nn.Conv2d):
+        if isinstance(module, nn.Linear):
+            module.weight = nn.Parameter(module.weight[:, nonzero_idx])
+            module.in_features = module.weight.shape[1]
+
+        elif isinstance(module, nn.Conv2d):
             if module.groups == 1:
                 module.weight = nn.Parameter(module.weight[:, nonzero_idx])
                 module.in_channels = module.weight.shape[1]
             # TODO: handle when groups > 1 (if possible)
-
-        elif isinstance(module, nn.Linear):
-            module.weight = nn.Parameter(module.weight[:, nonzero_idx])
-            module.in_features = module.weight.shape[1]
 
         elif isinstance(module, nn.BatchNorm2d):
             module.weight.data.mul_(nonzero_idx)
@@ -104,24 +104,27 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
             module.running_mean = module.running_mean[nonzero_idx]
             module.running_var = module.running_var[nonzero_idx]
 
-        # 3. If it is a pinned layer, convert it into ConvExpand or BatchNormExpand
+        # 3. If it is a pinned layer, convert it into LinearExpand, ConvExpand or BatchNormExpand
         if name in pinned_out:
             idxs = torch.where(nonzero_idx)[0]
 
+            if isinstance(module, nn.Linear):
+                module = LinearExpand.from_linear(module, idxs, module.bias)
+
             # Keep bias (bf) full size
-            if isinstance(module, nn.Conv2d):
+            elif isinstance(module, nn.Conv2d):
                 module_bf = getattr(module, 'bf', None)
                 if module_bf is None:
                     module_bf = torch.zeros_like(output[0])
 
                 module = ConvExpand.from_conv(module, idxs, module_bf)
 
-            if isinstance(module, BatchNormB):
-                module = BatchNormExpand.from_bn(module, idxs, module.bf, output.shape)
-
             elif isinstance(module, nn.BatchNorm2d):
-                module = BatchNormExpand.from_bn(module, idxs, module.bias, output.shape)
-                module.register_parameter("bias", None)
+                bias = module.bf if isinstance(module, BatchNormB) else module.bias
+                module = BatchNormExpand.from_bn(module, idxs, bias, output.shape)
+
+                if not isinstance(module, BatchNormB):
+                    module.register_parameter("bias", None)
         else:
             if getattr(module, 'bf', None) is not None:
                 module.bf = nn.Parameter(module.bf[nonzero_idx])
