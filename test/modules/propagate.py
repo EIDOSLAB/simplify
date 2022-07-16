@@ -13,6 +13,8 @@ class Test(unittest.TestCase):
     def test(self):
         @torch.no_grad()
         def test_arch(arch, x, fuse_bn):
+            print(f"Fuse: {fuse_bn}")
+
             model = get_model(architecture, arch)
 
             if fuse_bn:
@@ -31,6 +33,8 @@ class Test(unittest.TestCase):
         x = im / 255.
 
         for architecture in models:
+            print(f"Testing with {architecture.__name__}")
+
             with self.subTest(arch=architecture, fuse_bn=True):
                 self.assertTrue(test_arch(architecture, x, fuse_bn=True))
 

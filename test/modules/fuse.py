@@ -26,5 +26,6 @@ class Test(unittest.TestCase):
         x = im / 255.
 
         for architecture in models:
+            print(f"Testing with {architecture.__name__}")
             with self.subTest(arch=architecture):
                 self.assertTrue(test_arch(architecture, x))
