@@ -5,9 +5,11 @@ from setuptools import setup, find_packages
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
+__version__ = "1.1.3"
+
 setup(
     name='torch-simplify',
-    version='1.1.2',
+    version=__version__,
     description='Simplification of pruned models for accelerated inference',
     long_description=README,
     long_description_content_type='text/markdown',

@@ -45,22 +45,22 @@ def get_bn_folding(model: nn.Module) -> List[Tuple[str, str]]:
         List[Tuple[str, str]]: List of the found modules.
     """
     bn_folding = []
-    
+
     try:
         patterns = [(torch.nn.Conv2d, torch.nn.BatchNorm2d)]
         fx_model = fx.symbolic_trace(model)
         modules = dict(fx_model.named_modules())
-        
+
         for pattern in patterns:
             for node in fx_model.graph.nodes:
                 if matches_module_pattern(pattern, node, modules):
                     if len(node.args[0].users) > 1:
                         continue
                     bn_folding.append((node.args[0].target, node.target))
-    
+
     except Exception as e:
         last_module = None
-        
+
         for name, module in model.named_modules():
             if isinstance(module, _DenseLayer):
                 last_module = None
@@ -69,7 +69,7 @@ def get_bn_folding(model: nn.Module) -> List[Tuple[str, str]]:
             if isinstance(module, nn.BatchNorm2d):
                 if last_module is not None and last_module[1].weight.shape[0] == module.weight.shape[0]:
                     bn_folding.append((last_module[0], name))
-    
+
     return bn_folding
 
 
@@ -104,20 +104,20 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
     """
     fx_model = fx.symbolic_trace(copy.deepcopy(model))
     modules = dict(fx_model.named_modules())
-    
+
     names = {re.sub('[_.]', '', n): n for n in modules}
-    
+
     connections = {}
-    
+
     # Build dictionary node -> list of connected nodes
     for i, node in enumerate(fx_model.graph.nodes):
         if node.target in modules:
             module = modules[node.target]
         else:
             module = None
-        
+
         connections[node.name] = {"next": [str(user) for user in node.users], "class": module}
-    
+
     # Remove duplicates and build list of "to-pin" nodes (may contain nodes not CONV nor BN)
     same_next = []
     for k in connections:
@@ -125,9 +125,9 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
             if k != k2:
                 if "add" in str(set(connections[k]["next"]) & set(connections[k2]["next"])):
                     same_next.append([k, k2])
-    
+
     same_next = set([item for sublist in same_next for item in sublist])
-    
+
     # Add input node of CONV with grouping, layer.6 for MNASNet and fc2 for MobileNetV3
     for i, node in enumerate(fx_model.graph.nodes):
         if (isinstance(model, MobileNetV3) and "fc2" in node.name) or \
@@ -141,7 +141,7 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
             module = modules[names[re.sub('[_.]', '', name)]]
             if isinstance(module, nn.Conv2d) and module.groups > 1:
                 same_next.add(str(node.prev))
-    
+
     # For each node not CONV nor BN recover the closest previous CONV or BN
     to_pin = []
     for m in same_next:
@@ -149,5 +149,5 @@ def get_pinned(model: torch.nn.Module) -> List[str]:
             to_pin.append(get_previous_layer(connections, m))
         else:
             to_pin.append(m)
-    
+
     return [names[re.sub('[_.]', '', n)] for n in list(set(to_pin))]

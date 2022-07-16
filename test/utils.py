@@ -33,14 +33,14 @@ def get_model(architecture, arch):
         pretrained = False
     else:
         pretrained = True
-    
+
     model = arch(pretrained, progress=False)
     model.eval()
-    
+
     for name, module in model.named_modules():
         if isinstance(model, SqueezeNet) and 'classifier.1' in name:
             continue
-        
+
         if isinstance(module, nn.Conv2d):
             prune.random_structured(module, 'weight', amount=0.8, dim=0)
             prune.remove(module, 'weight')

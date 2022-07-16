@@ -12,8 +12,6 @@ from .fuse import fuse
 from .propagate import propagate_bias
 from .remove import remove_zeroed
 
-__version__ = "1.1.0"
-
 
 def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn: bool = True,
              pinned_out: List = None) -> nn.Module:
@@ -32,21 +30,21 @@ def simplify(model: nn.Module, x: torch.Tensor, bn_folding: List = None, fuse_bn
         torch.nn.Module: Simplified model.
 
     """
-    
+
     training = model.training
     model.train(False)
-    
+
     if fuse_bn:
         if bn_folding is None:
             bn_folding = utils.get_bn_folding(model)
         fuse(model, bn_folding)
 
-    if pinned_out is None:    
+    if pinned_out is None:
         pinned_out = utils.get_pinned(model)
-    
+
     propagate_bias(model, x, pinned_out)
     remove_zeroed(model, x, pinned_out)
 
     model.train(training)
-    
+
     return model
