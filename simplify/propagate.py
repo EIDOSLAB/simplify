@@ -37,7 +37,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         return input
 
     @torch.no_grad()
-    def __propagate_biases_hook(module, input, output):
+    def __propagate_biases_hook(module, input, output, name=None):
         """
         PyTorch hook used to propagate the biases of pruned neurons to following non-pruned layers.
         """
@@ -163,7 +163,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         if isinstance(module, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
             handle = module.register_forward_pre_hook(__remove_nan)
             handles.append(handle)
-            handle = module.register_forward_hook(lambda m, i, o: __propagate_biases_hook(m, i, o))
+            handle = module.register_forward_hook(lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
             handles.append(handle)
 
     # Propagate biases
