@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 
 setup(
     name='torch-simplify',
