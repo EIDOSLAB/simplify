@@ -5,6 +5,29 @@ import torch
 import torch.nn as nn
 
 
+class LinearExpand(nn.Linear):
+    @staticmethod
+    def from_linear(module: nn.Linear, idxs: torch.Tensor, bias):
+        module.__class__ = LinearExpand
+
+        module.register_parameter('bf', torch.nn.Parameter(bias.clone()))
+        module.bf[idxs] = 0
+
+        module.register_buffer('idxs', idxs.to(module.weight.device))
+        module.register_buffer('zeros', torch.zeros(bias.shape, dtype=bias.dtype, device=module.weight.device))
+
+        setattr(module, 'idxs_cache', module.idxs)
+        setattr(module, 'zero_cache', module.zeros)
+
+        return module
+
+    def forward(self, x):
+        x = super().forward(x)
+
+        expanded = torch.scatter(self.zeros, 0, self.idxs, x)
+        return expanded + self.bf
+
+
 class ConvB(nn.Conv2d):
     @staticmethod
     def from_conv(module: nn.Conv2d, bias):
@@ -98,4 +121,5 @@ class BatchNormExpand(nn.BatchNorm2d):
         return expanded + self.bf[:, None, None].expand_as(expanded)
 
     def __repr__(self):
-        return f'BatchNormExpand({self.num_features}, eps={self.eps}, momentum={self.momentum}, affine={self.affine}, track_running_stats={self.track_running_stats})'
+        return f'BatchNormExpand({self.num_features}, eps={self.eps}, momentum={self.momentum}, ' \
+               f'affine={self.affine}, track_running_stats={self.track_running_stats})'

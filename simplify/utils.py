@@ -94,7 +94,8 @@ def get_previous_layer(connections: Dict, module: fx.Node) -> fx.Node:
 
 def get_pinned(model: torch.nn.Module) -> List[str]:
     """
-    Try to find all the modules for which the output shape needs to stay fixed, (e.g. modules involved in residual connections with a sum).
+    Try to find all the modules for which the output shape needs to stay fixed,
+    (e.g. modules involved in residual connections with a sum).
 
     Args:
         model (torch.nn.Module): The model on which to perform the research.
