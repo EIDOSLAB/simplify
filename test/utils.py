@@ -12,20 +12,24 @@ from torchvision.models.squeezenet import squeezenet1_1, squeezenet1_0
 from torchvision.models.vgg import vgg19_bn, vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19
 
 models = [
-    alexnet,
-    vgg11, vgg11_bn,
-    resnet18, resnet50,
-    squeezenet1_0,
-    densenet121,
-    inception_v3,
-    googlenet,
-    shufflenet_v2_x0_5,
-    mobilenet_v2, mobilenet_v3_small,
-    resnext50_32x4d,
-    wide_resnet50_2,
-    mnasnet0_5, mnasnet1_0,
-    densenet121
+    alexnet
 ]
+
+# models = [
+#     alexnet,
+#     vgg11, vgg11_bn,
+#     resnet18, resnet50,
+#     squeezenet1_0,
+#     densenet121,
+#     inception_v3,
+#     googlenet,
+#     shufflenet_v2_x0_5,
+#     mobilenet_v2, mobilenet_v3_small,
+#     resnext50_32x4d,
+#     wide_resnet50_2,
+#     mnasnet0_5, mnasnet1_0,
+#     densenet121
+# ]
 
 
 def get_model(architecture, arch):
