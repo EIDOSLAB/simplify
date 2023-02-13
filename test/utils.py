@@ -12,7 +12,9 @@ from torchvision.models.squeezenet import squeezenet1_1, squeezenet1_0
 from torchvision.models.vgg import vgg19_bn, vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19
 
 models = [
-    alexnet
+    alexnet,
+    resnet18,
+    squeezenet1_0
 ]
 
 # models = [
