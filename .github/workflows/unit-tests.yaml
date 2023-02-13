@@ -36,8 +36,8 @@ jobs:
       matrix:
         os: [ ubuntu-18.04, ubuntu-22.04 ]
         python-version: [ 3.6, 3.7, 3.8, 3.9 ]
-        pytorch-version: [1.8.0, 1.9.0, 1.10.0, 1.11.0, 1.12.0]
-        torchvision-version: [0.8.0, 0.9.0, 0.10.0, 0.11.0, 0.12.0, 0.13.0]
+        pytorch-version: [1.8.0, 1.10.0, 1.12.0]
+        torchvision-version: [0.9.0, 0.11.0, 0.13.0]
         exclude:
           - python-version: 3.6
             pytorch-version: 1.11.0
