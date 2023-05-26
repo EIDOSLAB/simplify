@@ -12,7 +12,7 @@ from .layers import BatchNormB, ConvExpand, BatchNormExpand, LinearExpand
 @torch.no_grad()
 def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Module:
     @torch.no_grad()
-    def __remove_nan(module, input):
+    def __remove_nan(module, input, name):
         nan_idx = torch.isnan(input[0])
         new_input = input[0].clone()
         new_input[~nan_idx] = 0
@@ -151,10 +151,9 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         if not isinstance(module, (nn.Linear, nn.Conv2d, nn.BatchNorm2d)):
             continue
 
-        handle = module.register_forward_pre_hook(__remove_nan)
+        handle = module.register_forward_pre_hook(lambda m, i, n=name: __remove_nan(m, i, n))
         handles.append(handle)
-        handle = module.register_forward_hook(
-            lambda m, i, o, n=name: __remove_zeroed_channels_hook(m, i, o, n))
+        handle = module.register_forward_hook(lambda m, i, o, n=name: __remove_zeroed_channels_hook(m, i, o, n))
         handles.append(handle)
 
     x = torch.ones_like(x) * float("nan")

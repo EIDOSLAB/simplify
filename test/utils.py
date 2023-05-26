@@ -1,5 +1,9 @@
 #  Copyright (c) 2022 EIDOSLab. All rights reserved.
 #  See the LICENSE file for licensing terms (BSD-style).
+import os
+import random
+
+import numpy as np
 import torch.onnx
 from torch import nn
 from torch._C._onnx import TrainingMode
@@ -49,9 +53,9 @@ class ResidualNet(nn.Module):
         return x4
 
 
-models = [
-    ResidualNet
-]
+# models = [
+#     ResidualNet
+# ]
 
 # models = [
 #     alexnet,
@@ -60,24 +64,33 @@ models = [
 # ]
 
 
-# models = [
-#     alexnet,
-#     vgg11, vgg11_bn,
-#     resnet18, resnet50,
-#     squeezenet1_0,
-#     densenet121,
-#     inception_v3,
-#     googlenet,
-#     shufflenet_v2_x0_5,
-#     mobilenet_v2, mobilenet_v3_small,
-#     resnext50_32x4d,
-#     wide_resnet50_2,
-#     mnasnet0_5, mnasnet1_0,
-#     densenet121
-# ]
+models = [
+    alexnet,
+    vgg11, vgg11_bn,
+    resnet18, resnet50,
+    squeezenet1_0,
+    densenet121,
+    inception_v3,
+    googlenet,
+    shufflenet_v2_x0_5,
+    mobilenet_v2, mobilenet_v3_small,
+    resnext50_32x4d,
+    wide_resnet50_2,
+    mnasnet0_5, mnasnet1_0,
+    densenet121
+]
 
 
 def get_model(architecture, arch):
+    # random.seed(0)
+    # os.environ["PYTHONHASHSEED"] = str(0)
+    # np.random.seed(0)
+    # torch.cuda.manual_seed(0)
+    # torch.cuda.manual_seed_all(0)
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
+    # torch.manual_seed(0)
+
     if architecture.__name__ in ["shufflenet_v2_x1_5", "shufflenet_v2_x2_0", "mnasnet0_75", "mnasnet1_3"]:
         pretrained = False
     else:
@@ -94,6 +107,10 @@ def get_model(architecture, arch):
         if isinstance(module, nn.Conv2d):
             prune.random_structured(module, 'weight', amount=0.5, dim=0)
             prune.remove(module, 'weight')
+
+        # if isinstance(module, nn.BatchNorm2d):
+        #     prune.random_unstructured(module, 'weight', amount=0.5)
+        #     prune.remove(module, 'weight')
 
     return model
 

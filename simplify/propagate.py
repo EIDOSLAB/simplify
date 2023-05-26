@@ -27,9 +27,10 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
     """
 
     @torch.no_grad()
-    def __remove_nan(module, input):
+    def __remove_nan(module, input, name):
         """
         PyTorch hook that removes nans from input.
+        nans mark the NON-pruned inputs from the previous layer.
         """
         module.register_buffer("pruned_input", ~torch.isnan(input[0][0].view(input[0][0].shape[0], -1).sum(dim=1)))
         if torch.isnan(input[0]).sum() > 0:
@@ -123,9 +124,9 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
         #############################################
 
         shape = module.weight.shape  # Compute mask of zeroed (pruned) channels
-        pruned_channels = module.weight.view(shape[0], -1).sum(dim=1) == 0
+        pruned_channels = torch.abs(module.weight.view(shape[0], -1)).sum(dim=1) == 0
 
-        if name in pinned_out or (isinstance(module, nn.Conv2d) and module.groups > 1):
+        if isinstance(module, nn.Conv2d) and module.groups > 1:
             # No bias is propagated for pinned layers
             return output * float('nan')
 
@@ -161,7 +162,7 @@ def propagate_bias(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mo
     handles = []
     for name, module in model.named_modules():
         if isinstance(module, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
-            handle = module.register_forward_pre_hook(__remove_nan)
+            handle = module.register_forward_pre_hook(lambda m, i, n=name: __remove_nan(m, i, n))
             handles.append(handle)
             handle = module.register_forward_hook(lambda m, i, o, n=name: __propagate_biases_hook(m, i, o, n))
             handles.append(handle)

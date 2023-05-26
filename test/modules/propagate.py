@@ -27,7 +27,7 @@ class Test(unittest.TestCase):
             propagate_bias(model, zeros, pinned_out)
             y_prop = model(x)
 
-            return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
+            return torch.allclose(y_prop, y_src, atol=1e-5) & torch.equal(y_prop.argmax(dim=1), y_src.argmax(dim=1))
 
         im = torch.randint(0, 256, (256, 3, 224, 224))
         x = im / 255.

@@ -16,10 +16,12 @@ class Test(unittest.TestCase):
             print(f"Fuse: {fuse_bn}")
 
             model = get_model(architecture, arch)
+            y_check_0 = model(x)
 
             if fuse_bn:
                 bn_folding = get_bn_folding(model)
                 model = fuse(model, bn_folding)
+            y_check_1 = model(x)
 
             pinned_out = get_pinned(model)
             zeros = torch.zeros(1, *x.shape[1:])
@@ -29,7 +31,7 @@ class Test(unittest.TestCase):
             model = remove_zeroed(model, zeros, pinned_out)
             y_prop = model(x)
 
-            return torch.equal(y_src.argmax(dim=1), y_prop.argmax(dim=1))
+            return torch.allclose(y_prop, y_src, atol=1e-5) & torch.equal(y_prop.argmax(dim=1), y_src.argmax(dim=1))
 
         im = torch.randint(0, 256, (256, 3, 224, 224))
         x = im / 255.
