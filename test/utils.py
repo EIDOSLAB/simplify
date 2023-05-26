@@ -47,7 +47,7 @@ def get_model(architecture, arch):
         if isinstance(model, SqueezeNet) and 'classifier.1' in name:
             continue
 
-        if isinstance(module, (nn.Conv2d, nn.BatchNorm2d)):
+        if isinstance(module, nn.Conv2d):
             prune.random_structured(module, 'weight', amount=0.8, dim=0)
             prune.remove(module, 'weight')
 
