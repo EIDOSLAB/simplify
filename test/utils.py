@@ -1,21 +1,53 @@
 #  Copyright (c) 2022 EIDOSLab. All rights reserved.
 #  See the LICENSE file for licensing terms (BSD-style).
+import torch.onnx
 from torch import nn
+from torch._C._onnx import TrainingMode
 from torch.nn.utils import prune
 from torchvision.models import SqueezeNet
-from torchvision.models import wide_resnet101_2, resnet50, resnext101_32x8d, mobilenet_v3_large, mnasnet1_0, mnasnet1_3, \
-    alexnet, densenet121, googlenet, inception_v3, resnet18, resnet34, resnet101, resnet152, densenet161, densenet169, \
-    densenet201, mobilenet_v3_small, mobilenet_v2, resnext50_32x4d, wide_resnet50_2, mnasnet0_5, mnasnet0_75
-from torchvision.models.shufflenetv2 import shufflenet_v2_x2_0, shufflenet_v2_x0_5, shufflenet_v2_x1_0, \
-    shufflenet_v2_x1_5
-from torchvision.models.squeezenet import squeezenet1_1, squeezenet1_0
-from torchvision.models.vgg import vgg19_bn, vgg11, vgg11_bn, vgg13, vgg13_bn, vgg16, vgg16_bn, vgg19
+from torchvision.models import alexnet, resnet18
+from torchvision.models.squeezenet import squeezenet1_0
+
+
+class ResidualNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 2, kernel_size=7, stride=2, padding=3, bias=False)
+        self.bn1 = nn.BatchNorm2d(2)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        self.conv2 = nn.Conv2d(2, 2, kernel_size=3, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(2)
+
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(2, 10)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x2 = self.conv2(x)
+        x2 = self.bn2(x2)
+
+        x3 = x + x2
+        x3 = self.relu(x3)
+
+        x4 = self.avgpool(x3)
+        x4 = torch.flatten(x4, 1)
+        x4 = self.fc(x4)
+
+        return x4
+
 
 models = [
     alexnet,
     resnet18,
     squeezenet1_0
 ]
+
 
 # models = [
 #     alexnet,
@@ -52,3 +84,8 @@ def get_model(architecture, arch):
             prune.remove(module, 'weight')
 
     return model
+
+
+if __name__ == '__main__':
+    model = ResidualNet()
+    torch.onnx.export(model, torch.randn(1, 3, 224, 224), "resnet18.onnx", training=TrainingMode.TRAINING)
