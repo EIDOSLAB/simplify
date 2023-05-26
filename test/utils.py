@@ -1,15 +1,13 @@
 #  Copyright (c) 2022 EIDOSLab. All rights reserved.
 #  See the LICENSE file for licensing terms (BSD-style).
-import os
-import random
 
-import numpy as np
 import torch.onnx
 from torch import nn
 from torch._C._onnx import TrainingMode
 from torch.nn.utils import prune
 from torchvision.models import SqueezeNet
-from torchvision.models import alexnet, resnet18
+from torchvision.models import alexnet, resnet18, resnet50, vgg11, vgg11_bn, densenet121, inception_v3, googlenet, \
+    shufflenet_v2_x0_5, mobilenet_v2, mobilenet_v3_small, resnext50_32x4d, wide_resnet50_2, mnasnet0_5, mnasnet1_0
 from torchvision.models.squeezenet import squeezenet1_0
 
 
