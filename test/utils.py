@@ -10,7 +10,7 @@ from torchvision.models.squeezenet import squeezenet1_0
 
 
 class ResidualNet(nn.Module):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 2, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(2)
@@ -22,6 +22,13 @@ class ResidualNet(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(2, 10)
+
+        self.init_bn(self.bn1)
+        self.init_bn(self.bn2)
+
+    def init_bn(self, bn):
+        bn.weight.data = torch.randn_like(bn.weight.data)
+        bn.bias.data = torch.randn_like(bn.bias.data)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -43,10 +50,14 @@ class ResidualNet(nn.Module):
 
 
 models = [
-    alexnet,
-    resnet18,
-    squeezenet1_0
+    ResidualNet
 ]
+
+# models = [
+#     alexnet,
+#     resnet18,
+#     squeezenet1_0
+# ]
 
 
 # models = [
@@ -73,6 +84,7 @@ def get_model(architecture, arch):
         pretrained = True
 
     model = arch(pretrained, progress=False)
+    model(torch.randn(64, 3, 224, 224))
     model.eval()
 
     for name, module in model.named_modules():
@@ -80,7 +92,7 @@ def get_model(architecture, arch):
             continue
 
         if isinstance(module, nn.Conv2d):
-            prune.random_structured(module, 'weight', amount=0.8, dim=0)
+            prune.random_structured(module, 'weight', amount=0.5, dim=0)
             prune.remove(module, 'weight')
 
     return model
