@@ -68,7 +68,7 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
         shape = module.weight.shape
 
         # 1. Compute remaining channels indices
-        nonzero_idx = ~(module.weight.view(shape[0], -1).sum(dim=1) == 0)
+        nonzero_idx = ~(torch.abs(module.weight.view(shape[0], -1)).sum(dim=1) == 0)
 
         # If module is ConvExpand or BatchNormExpand, expand weights back to original
         # adding zero where channels were pruned so that new idxs are updated accordingly
