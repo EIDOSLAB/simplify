@@ -6,15 +6,14 @@ from torch import nn
 from torch._C._onnx import TrainingMode
 from torch.nn.utils import prune
 from torchvision.models import SqueezeNet
-from torchvision.models import alexnet, resnet18, resnet50, vgg11, vgg11_bn, densenet121, inception_v3, googlenet, \
-    shufflenet_v2_x0_5, mobilenet_v2, mobilenet_v3_small, resnext50_32x4d, wide_resnet50_2, mnasnet0_5, mnasnet1_0
+from torchvision.models import alexnet, resnet18
 from torchvision.models.squeezenet import squeezenet1_0
 
 
 class ResidualNet(nn.Module):
     def __init__(self, *args, **kwargs):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 2, kernel_size=7, stride=2, padding=3, bias=False)
+        self.conv1 = nn.Conv2d(3, 2, kernel_size=7, stride=2, padding=0, bias=False)
         self.bn1 = nn.BatchNorm2d(2)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -51,32 +50,29 @@ class ResidualNet(nn.Module):
         return x4
 
 
-# models = [
-#     ResidualNet
-# ]
+models = [
+    alexnet,
+    ResidualNet,
+    resnet18,
+    squeezenet1_0
+]
+
 
 # models = [
 #     alexnet,
-#     resnet18,
-#     squeezenet1_0
+#     vgg11, vgg11_bn,
+#     resnet18, resnet50,
+#     squeezenet1_0,
+#     densenet121,
+#     inception_v3,
+#     googlenet,
+#     shufflenet_v2_x0_5,
+#     mobilenet_v2, mobilenet_v3_small,
+#     resnext50_32x4d,
+#     wide_resnet50_2,
+#     mnasnet0_5, mnasnet1_0,
+#     densenet121
 # ]
-
-
-models = [
-    alexnet,
-    vgg11, vgg11_bn,
-    resnet18, resnet50,
-    squeezenet1_0,
-    densenet121,
-    inception_v3,
-    googlenet,
-    shufflenet_v2_x0_5,
-    mobilenet_v2, mobilenet_v3_small,
-    resnext50_32x4d,
-    wide_resnet50_2,
-    mnasnet0_5, mnasnet1_0,
-    densenet121
-]
 
 
 def get_model(architecture, arch):
@@ -95,7 +91,7 @@ def get_model(architecture, arch):
         pretrained = True
 
     model = arch(pretrained, progress=False)
-    model(torch.randn(64, 3, 224, 224))
+    model(torch.randn(16, 3, 224, 224))
     model.eval()
 
     for name, module in model.named_modules():
@@ -103,7 +99,7 @@ def get_model(architecture, arch):
             continue
 
         if isinstance(module, nn.Conv2d):
-            prune.random_structured(module, 'weight', amount=0.5, dim=0)
+            prune.random_structured(module, 'weight', amount=0.63, dim=0)
             prune.remove(module, 'weight')
 
         # if isinstance(module, nn.BatchNorm2d):
@@ -115,4 +111,4 @@ def get_model(architecture, arch):
 
 if __name__ == '__main__':
     model = ResidualNet()
-    torch.onnx.export(model, torch.randn(1, 3, 224, 224), "resnet18.onnx", training=TrainingMode.TRAINING)
+    torch.onnx.export(model, torch.randn(1, 3, 224, 224), "model.onnx", training=TrainingMode.TRAINING)

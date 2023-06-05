@@ -6,7 +6,7 @@ from typing import List
 import torch
 import torch.nn as nn
 
-from .layers import BatchNormB, ConvExpand, BatchNormExpand, LinearExpand
+from .layers import BatchNormB, ConvExpand, BatchNormExpand, LinearExpand, ConvB
 
 
 @torch.no_grad()
@@ -113,18 +113,15 @@ def remove_zeroed(model: nn.Module, x: torch.Tensor, pinned_out: List) -> nn.Mod
 
             # Keep bias (bf) full size
             elif isinstance(module, nn.Conv2d):
-                module_bf = getattr(module, 'bf', None)
-                if module_bf is None:
-                    module_bf = torch.zeros_like(output[0])
-
-                module = ConvExpand.from_conv(module, idxs, module_bf)
+                bias = module.bf if isinstance(module, ConvB) else module.bias
+                module = ConvExpand.from_conv(module, idxs, bias, isinstance(module, ConvB), output.shape)
 
             elif isinstance(module, nn.BatchNorm2d):
                 bias = module.bf if isinstance(module, BatchNormB) else module.bias
                 module = BatchNormExpand.from_bn(module, idxs, bias, output.shape)
 
-                if not isinstance(module, BatchNormB):
-                    module.register_parameter("bias", None)
+            if not isinstance(module, (ConvB, BatchNormB)):
+                module.register_parameter("bias", None)
         else:
             if getattr(module, 'bf', None) is not None:
                 module.bf = nn.Parameter(module.bf[nonzero_idx])
