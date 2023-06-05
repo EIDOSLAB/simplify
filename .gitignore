@@ -166,3 +166,5 @@ benchmark/wandb/
 
 debug_env/
 scratches
+
+test/external/
