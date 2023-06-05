@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
             self.assertTrue(torch.allclose(y_fuse, y_prop, atol=1e-4)
                             & torch.equal(y_fuse.argmax(dim=1), y_prop.argmax(dim=1)))
 
-        im = torch.randint(0, 256, (1, 3, 224, 224))
+        im = torch.randint(0, 256, (16, 3, 224, 224))
         x = im / 255.
 
         for architecture in models:

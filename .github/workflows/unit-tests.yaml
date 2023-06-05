@@ -34,23 +34,56 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
-        python-version: [ 3.7, 3.8, 3.9 ]
-        pytorch-version: [1.8.0, 1.10.0, 1.12.0]
-        torchvision-version: [0.9.0, 0.11.1, 0.13.0]
+        os: [ ubuntu-20.04, ubuntu-22.04 ]
+        python-version: [ 3.7, 3.8, 3.9, 3.10 ]
+        pytorch-version: [ 1.10.1, 1.11.0, 1.12.1, 1.13.1, 2.0.1]
+        torchvision-version: [ 0.11.2, 0.12.0, 0.13.1, 0.14.1, 0.15.2]
         exclude:
-          - pytorch-version: 1.8.0
-            torchvision-version: 0.11.1
-          - pytorch-version: 1.8.0
-            torchvision-version: 0.13.0
-          - pytorch-version: 1.10.0
-            torchvision-version: 0.9.0
-          - pytorch-version: 1.10.0
-            torchvision-version: 0.13.0
-          - pytorch-version: 1.12.0
-            torchvision-version: 0.9.0
-          - pytorch-version: 1.12.0
-            torchvision-version: 0.11.1
+          - pytorch-version: 1.10.1
+            torchvision-version: 0.12.0
+          - pytorch-version: 1.10.1
+            torchvision-version: 0.13.1
+          - pytorch-version: 1.10.1
+            torchvision-version: 0.14.1
+          - pytorch-version: 1.10.1
+            torchvision-version: 0.15.2
+
+          - pytorch-version: 1.11.0
+            torchvision-version: 0.11.2
+          - pytorch-version: 1.11.0
+            torchvision-version: 0.13.1
+          - pytorch-version: 1.11.0
+            torchvision-version: 0.14.1
+          - pytorch-version: 1.11.0
+            torchvision-version: 0.15.2
+
+          - pytorch-version: 1.12.1
+            torchvision-version: 0.11.2
+          - pytorch-version: 1.12.1
+            torchvision-version: 0.12.0
+          - pytorch-version: 1.12.1
+            torchvision-version: 0.14.1
+          - pytorch-version: 1.12.1
+            torchvision-version: 0.15.2
+
+          - pytorch-version: 1.13.1
+            torchvision-version: 0.11.2
+          - pytorch-version: 1.13.1
+            torchvision-version: 0.12.0
+          - pytorch-version: 1.13.1
+            torchvision-version: 0.13.1
+          - pytorch-version: 1.13.1
+            torchvision-version: 0.15.2
+
+          - pytorch-version: 2.0.1
+            torchvision-version: 0.11.2
+          - pytorch-version: 2.0.1
+            torchvision-version: 0.12.0
+          - pytorch-version: 2.0.1
+            torchvision-version: 0.13.1
+          - pytorch-version: 2.0.1
+            torchvision-version: 0.14.1
+
 
     steps:
       - uses: actions/checkout@v1

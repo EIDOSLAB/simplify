@@ -41,13 +41,13 @@ class Test(unittest.TestCase):
             self.assertTrue(torch.allclose(y_prop, y_final, atol=1e-4)
                             & torch.equal(y_prop.argmax(dim=1), y_final.argmax(dim=1)))
 
-        im = torch.randint(0, 256, (1, 3, 224, 224))
+        im = torch.randint(0, 256, (16, 3, 224, 224))
         x = im / 255.
 
         for architecture in models:
             print(f"Testing with {architecture.__name__}")
 
-            for i in range(10):
+            for i in range(100):
                 with self.subTest(arch=architecture, fuse_bn=True):
                     test_arch(architecture, x, fuse_bn=True)
 

@@ -5,8 +5,10 @@ import torch.onnx
 from torch import nn
 from torch._C._onnx import TrainingMode
 from torch.nn.utils import prune
-from torchvision.models import SqueezeNet
+from torchvision.models import SqueezeNet, vgg11_bn, vgg11, resnet50, densenet121, inception_v3, googlenet, \
+    mobilenet_v2, mobilenet_v3_small, resnext50_32x4d, wide_resnet50_2, mnasnet1_0, mnasnet0_5
 from torchvision.models import alexnet, resnet18
+from torchvision.models.quantization import shufflenet_v2_x0_5
 from torchvision.models.squeezenet import squeezenet1_0
 
 
@@ -50,29 +52,29 @@ class ResidualNet(nn.Module):
         return x4
 
 
-models = [
-    alexnet,
-    ResidualNet,
-    resnet18,
-    squeezenet1_0
-]
-
-
 # models = [
 #     alexnet,
-#     vgg11, vgg11_bn,
-#     resnet18, resnet50,
-#     squeezenet1_0,
-#     densenet121,
-#     inception_v3,
-#     googlenet,
-#     shufflenet_v2_x0_5,
-#     mobilenet_v2, mobilenet_v3_small,
-#     resnext50_32x4d,
-#     wide_resnet50_2,
-#     mnasnet0_5, mnasnet1_0,
-#     densenet121
+#     ResidualNet,
+#     resnet18,
+#     squeezenet1_0
 # ]
+
+
+models = [
+    alexnet,
+    vgg11, vgg11_bn,
+    resnet18, resnet50,
+    squeezenet1_0,
+    densenet121,
+    inception_v3,
+    googlenet,
+    shufflenet_v2_x0_5,
+    mobilenet_v2, mobilenet_v3_small,
+    resnext50_32x4d,
+    wide_resnet50_2,
+    mnasnet0_5, mnasnet1_0,
+    densenet121
+]
 
 
 def get_model(architecture, arch):
