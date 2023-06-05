@@ -39,50 +39,53 @@ jobs:
         pytorch-version: [ '1.10.1', '1.11.0', '1.12.1', '1.13.1', '2.0.1']
         torchvision-version: [ '0.11.2', '0.12.0', '0.13.1', '0.14.1', '0.15.2']
         exclude:
-          - pytorch-version: 1.10.1
-            torchvision-version: 0.12.0
-          - pytorch-version: 1.10.1
-            torchvision-version: 0.13.1
-          - pytorch-version: 1.10.1
-            torchvision-version: 0.14.1
-          - pytorch-version: 1.10.1
-            torchvision-version: 0.15.2
+          - python-version: '3.7'
+            pytorch-version: '2.0.1'
 
-          - pytorch-version: 1.11.0
-            torchvision-version: 0.11.2
-          - pytorch-version: 1.11.0
-            torchvision-version: 0.13.1
-          - pytorch-version: 1.11.0
-            torchvision-version: 0.14.1
-          - pytorch-version: 1.11.0
-            torchvision-version: 0.15.2
+          - pytorch-version: '1.10.1'
+            torchvision-version: '0.12.0'
+          - pytorch-version: '1.10.1'
+            torchvision-version: '0.13.1'
+          - pytorch-version: '1.10.1'
+            torchvision-version: '0.14.1'
+          - pytorch-version: '1.10.1'
+            torchvision-version: '0.15.2'
 
-          - pytorch-version: 1.12.1
-            torchvision-version: 0.11.2
-          - pytorch-version: 1.12.1
-            torchvision-version: 0.12.0
-          - pytorch-version: 1.12.1
-            torchvision-version: 0.14.1
-          - pytorch-version: 1.12.1
-            torchvision-version: 0.15.2
+          - pytorch-version: '1.11.0'
+            torchvision-version: '0.11.2'
+          - pytorch-version: '1.11.0'
+            torchvision-version: '0.13.1'
+          - pytorch-version: '1.11.0'
+            torchvision-version: '0.14.1'
+          - pytorch-version: '1.11.0'
+            torchvision-version: '0.15.2'
 
-          - pytorch-version: 1.13.1
-            torchvision-version: 0.11.2
-          - pytorch-version: 1.13.1
-            torchvision-version: 0.12.0
-          - pytorch-version: 1.13.1
-            torchvision-version: 0.13.1
-          - pytorch-version: 1.13.1
-            torchvision-version: 0.15.2
+          - pytorch-version: '1.12.1'
+            torchvision-version: '0.11.2'
+          - pytorch-version: '1.12.1'
+            torchvision-version: '0.12.0'
+          - pytorch-version: '1.12.1'
+            torchvision-version: '0.14.1'
+          - pytorch-version: '1.12.1'
+            torchvision-version: '0.15.2'
 
-          - pytorch-version: 2.0.1
-            torchvision-version: 0.11.2
-          - pytorch-version: 2.0.1
-            torchvision-version: 0.12.0
-          - pytorch-version: 2.0.1
-            torchvision-version: 0.13.1
-          - pytorch-version: 2.0.1
-            torchvision-version: 0.14.1
+          - pytorch-version: '1.13.1'
+            torchvision-version: '0.11.2'
+          - pytorch-version: '1.13.1'
+            torchvision-version: '0.12.0'
+          - pytorch-version: '1.13.1'
+            torchvision-version: '0.13.1'
+          - pytorch-version: '1.13.1'
+            torchvision-version: '0.15.2'
+
+          - pytorch-version: '2.0.1'
+            torchvision-version: '0.11.2'
+          - pytorch-version: '2.0.1'
+            torchvision-version: '0.12.0'
+          - pytorch-version: '2.0.1'
+            torchvision-version: '0.13.1'
+          - pytorch-version: '2.0.1'
+            torchvision-version: '0.14.1'
 
 
     steps:
