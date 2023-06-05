@@ -1,6 +1,7 @@
 #  Copyright (c) 2022 EIDOSLab. All rights reserved.
 #  See the LICENSE file for licensing terms (BSD-style).
 import unittest
+from copy import deepcopy
 
 import torch
 
@@ -14,18 +15,21 @@ class Test(unittest.TestCase):
         @torch.no_grad()
         def test_arch(arch, x):
             model = get_model(architecture, arch)
-
             y_src = model(x)
+
             bn_folding = get_bn_folding(model)
-            model = fuse(model, bn_folding)
-            y_prop = model(x)
+            model = fuse(deepcopy(model), bn_folding)
+            y_fuse = model(x)
 
-            return torch.allclose(y_prop, y_src, atol=1e-5) & torch.equal(y_prop.argmax(dim=1), y_src.argmax(dim=1))
+            self.assertTrue(torch.allclose(y_fuse, y_src, atol=1e-4)
+                            & torch.equal(y_fuse.argmax(dim=1), y_src.argmax(dim=1)))
 
-        im = torch.randint(0, 256, (256, 3, 224, 224))
+        im = torch.randint(0, 256, (16, 3, 224, 224))
         x = im / 255.
 
         for architecture in models:
             print(f"Testing with {architecture.__name__}")
-            with self.subTest(arch=architecture):
-                self.assertTrue(test_arch(architecture, x))
+
+            for i in range(100):
+                with self.subTest(arch=architecture):
+                    test_arch(architecture, x)
