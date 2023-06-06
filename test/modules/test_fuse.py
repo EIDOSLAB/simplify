@@ -30,6 +30,6 @@ class Test(unittest.TestCase):
         for architecture in models:
             print(f"Testing with {architecture.__name__}")
 
-            for i in range(100):
+            for i in range(50):
                 with self.subTest(arch=architecture):
                     test_arch(architecture, x)

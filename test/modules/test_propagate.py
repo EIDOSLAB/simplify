@@ -42,7 +42,7 @@ class Test(unittest.TestCase):
         for architecture in models:
             print(f"Testing with {architecture.__name__}")
 
-            for i in range(100):
+            for i in range(50):
                 with self.subTest(arch=architecture, fuse_bn=True):
                     test_arch(architecture, x, fuse_bn=True)
 

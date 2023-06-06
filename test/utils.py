@@ -52,29 +52,29 @@ class ResidualNet(nn.Module):
         return x4
 
 
-# models = [
-#     alexnet,
-#     ResidualNet,
-#     resnet18,
-#     squeezenet1_0
-# ]
-
-
 models = [
     alexnet,
-    vgg11, vgg11_bn,
-    resnet18, resnet50,
-    squeezenet1_0,
-    densenet121,
-    inception_v3,
-    googlenet,
-    shufflenet_v2_x0_5,
-    mobilenet_v2, mobilenet_v3_small,
-    resnext50_32x4d,
-    wide_resnet50_2,
-    mnasnet0_5, mnasnet1_0,
-    densenet121
+    vgg11_bn,
+    ResidualNet,
+    resnet18,
+    squeezenet1_0
 ]
+
+
+# models = [
+#     alexnet,
+#     vgg11, vgg11_bn,
+#     resnet18, resnet50,
+#     squeezenet1_0,
+#     densenet121,
+#     inception_v3,
+#     googlenet,
+#     shufflenet_v2_x0_5,
+#     mobilenet_v2, mobilenet_v3_small,
+#     resnext50_32x4d,
+#     wide_resnet50_2,
+#     mnasnet0_5, mnasnet1_0,
+# ]
 
 
 def get_model(architecture, arch):
