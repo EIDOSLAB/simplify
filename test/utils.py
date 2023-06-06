@@ -53,11 +53,10 @@ class ResidualNet(nn.Module):
 
 
 models = [
-    alexnet,
-    vgg11_bn,
-    ResidualNet,
+    # alexnet,
+    # vgg11_bn,
     resnet18,
-    squeezenet1_0
+    # squeezenet1_0
 ]
 
 
